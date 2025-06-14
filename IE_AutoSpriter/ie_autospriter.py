@@ -11,6 +11,7 @@ from bpy.types import PropertyGroup
 from bpy.types import Operator
 import bpy
 
+
 # --------
 # Purpose:
 # --------
@@ -19,7 +20,7 @@ import bpy
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 4, 0),
+    "version": (0, 5, 0),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -101,6 +102,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     # --- Step 5: Render
     # Reserved/None
 
+
 # --------
 # Purpose:
 # --------
@@ -113,7 +115,23 @@ class IEAS_OT_ShadingNodes(Operator):
     
     def execute(self, context):
         # Put your render property code here
-        print("Hello World")
+        print("Hello IEAS_OT_ShadingNodes")
+        return {'FINISHED'}
+
+
+# --------
+# Purpose:
+# --------
+# Starts the rendering which is used in "IEAS_PT_Final" class
+# -----------------------------------------------------------
+class IEAS_OT_Final(Operator):
+    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class."""
+    bl_idname = "ieas.final" # To be on the safe side, the follwoing naming "convention" is used <lower case>.<lower case>[_<lower case>]
+    bl_label = "RENDER"
+    
+    def execute(self, context):
+        # Put your render property code here
+        print("Hello IEAS_OT_Final")
         return {'FINISHED'}
 
 
@@ -319,6 +337,29 @@ class IEAS_PT_Animation(Panel):
         row.prop(context.scene.IEAS_properties, "Walk")
         row.prop(context.scene.IEAS_properties, "Activate_WK")
 
+
+# --------
+# Purpose:
+# --------
+# Starts the rendering which is used in "IEAS_PT_Final" class
+# -----------------------------------------------------------
+class IEAS_PT_Final(Panel):
+    """This step defines general settings that apply across the entire sprite rendering process."""
+    
+    # --- Blender specific class variables
+    bl_label        = "Step 5: Final" 
+    bl_idname       = 'IEAS_PT_Final'
+    bl_space_type   = 'VIEW_3D'
+    bl_region_type  = 'UI'
+    bl_category     = "IE AutoSpriter"
+    bl_parent_id    = 'IEAS_PT_Core'
+    bl_options      = {'DEFAULT_CLOSED'}
+    
+    # --- Blender specific function which places elements into GUI
+    def draw(self, context):
+        col = self.layout.column(align=True)
+        col.operator("ieas.final") # selfdefined button functionality
+ 
                
 # --------
 # Purpose:
@@ -327,12 +368,14 @@ class IEAS_PT_Animation(Panel):
 # This is also needed for regitering the code as add-on.
 def register():
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
+    bpy.utils.register_class(IEAS_OT_Final)
     bpy.utils.register_class(IEAS_PGT_Inputs)
     bpy.utils.register_class(IEAS_PT_Core)
     bpy.utils.register_class(IEAS_PT_GlobalParameters)
     bpy.utils.register_class(IEAS_PT_ShadingNodes)
     bpy.utils.register_class(IEAS_PT_Camera)
     bpy.utils.register_class(IEAS_PT_Animation)
+    bpy.utils.register_class(IEAS_PT_Final)
     
     # Pointers
     bpy.types.Scene.IEAS_properties = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
@@ -344,12 +387,14 @@ def register():
 # Cleanup(When Addo-on is disabled)!
 def unregister():
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
+    bpy.utils.register_class(IEAS_OT_Final)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
     bpy.utils.unregister_class(IEAS_PT_Core)
     bpy.utils.unregister_class(IEAS_PT_GlobalParameters)
     bpy.utils.unregister_class(IEAS_PT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_PT_Camera)
     bpy.utils.unregister_class(IEAS_PT_Animation)
+    bpy.utils.unregister_class(IEAS_PT_Final)
     del bpy.types.Scene.IEAS_properties
     
 
