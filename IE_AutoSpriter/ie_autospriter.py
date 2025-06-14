@@ -19,7 +19,7 @@ import bpy
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 3, 0),
+    "version": (0, 4, 0),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -67,7 +67,39 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Activate_NE:    bpy.props.BoolProperty(name="Activate NE", default=True)
     Activate_E:     bpy.props.BoolProperty(name="Activate E", default=True)
     Activate_SE:    bpy.props.BoolProperty(name="Activate SE", default=True)
-
+    # --- Step 4: Animation
+    # Strings
+    Attack1:    bpy.props.StringProperty(name="A1", default="slash")
+    Attack2:    bpy.props.StringProperty(name="A2", default="stab")
+    Attack3:    bpy.props.StringProperty(name="A3", default="strike")
+    Attack4:    bpy.props.StringProperty(name="A4", default="throw")
+    Cast:       bpy.props.StringProperty(name="CA", default="cast")
+    Death:      bpy.props.StringProperty(name="DE", default="death")
+    Get_Hit:    bpy.props.StringProperty(name="GH", default="get hit")
+    Get_Up:     bpy.props.StringProperty(name="GU", default="Get up")
+    Ready:      bpy.props.StringProperty(name="SC", default="Ready")
+    Idle:       bpy.props.StringProperty(name="SD", default="idle")
+    Sleep:      bpy.props.StringProperty(name="SL", default="sleep")
+    Conjure:    bpy.props.StringProperty(name="SP", default="conjure")
+    Dead:       bpy.props.StringProperty(name="TW", default="dead")
+    Walk:       bpy.props.StringProperty(name="WK", default="walk")
+    # Bools
+    Activate_A1: bpy.props.BoolProperty(name="Activate A1", default=True)
+    Activate_A2: bpy.props.BoolProperty(name="Activate A2", default=True)
+    Activate_A3: bpy.props.BoolProperty(name="Activate A3", default=True)
+    Activate_A4: bpy.props.BoolProperty(name="Activate A4", default=True)
+    Activate_CA: bpy.props.BoolProperty(name="Activate CA", default=True)
+    Activate_DE: bpy.props.BoolProperty(name="Activate DE", default=True)
+    Activate_GH: bpy.props.BoolProperty(name="Activate GH", default=True)
+    Activate_GU: bpy.props.BoolProperty(name="Activate GU", default=True)
+    Activate_SC: bpy.props.BoolProperty(name="Activate SC", default=True)
+    Activate_SD: bpy.props.BoolProperty(name="Activate SD", default=True)
+    Activate_SL: bpy.props.BoolProperty(name="Activate SL", default=True)
+    Activate_SP: bpy.props.BoolProperty(name="Activate SP", default=True)
+    Activate_TW: bpy.props.BoolProperty(name="Activate TW", default=True)
+    Activate_WK: bpy.props.BoolProperty(name="Activate WK", default=True)
+    # --- Step 5: Render
+    # Reserved/None
 
 # --------
 # Purpose:
@@ -209,12 +241,90 @@ class IEAS_PT_Camera(Panel):
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "South_East")
         row.prop(context.scene.IEAS_properties, "Activate_SE")      
+
+
+# --------
+# Purpose:
+# --------
+# This step defines which animations (Blender Actions) should be rendered and how they are named in the output.
+# -------------------------------------------------------------------------------------------------------------
+class IEAS_PT_Animation(Panel):
+    """This step defines which animations (Blender Actions) should be rendered and how they are named in the output."""
+    
+    # --- Blender specific class variables
+    bl_label        = "Step 4: Animation" 
+    bl_idname       = 'IEAS_PT_Animation'
+    bl_space_type   = 'VIEW_3D'
+    bl_region_type  = 'UI'
+    bl_category     = "IE AutoSpriter"
+    bl_parent_id    = 'IEAS_PT_Core'
+    bl_options      = {'DEFAULT_CLOSED'}
+    # --- Blender specific function which places elements into GUI
+    def draw(self, context):      
+        pass
+          
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Attack1")
+        row.prop(context.scene.IEAS_properties, "Activate_A1")
         
-                
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Attack2")
+        row.prop(context.scene.IEAS_properties, "Activate_A2") 
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Attack3")
+        row.prop(context.scene.IEAS_properties, "Activate_A3")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Attack1")
+        row.prop(context.scene.IEAS_properties, "Activate_A4")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Cast")
+        row.prop(context.scene.IEAS_properties, "Activate_CA")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Death")
+        row.prop(context.scene.IEAS_properties, "Activate_DE")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Get_Hit")
+        row.prop(context.scene.IEAS_properties, "Activate_GH")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Get_Up")
+        row.prop(context.scene.IEAS_properties, "Activate_GU")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Ready")
+        row.prop(context.scene.IEAS_properties, "Activate_SC")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Idle")
+        row.prop(context.scene.IEAS_properties, "Activate_SD")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Sleep")
+        row.prop(context.scene.IEAS_properties, "Activate_SL")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Conjure")
+        row.prop(context.scene.IEAS_properties, "Activate_SP")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Dead")
+        row.prop(context.scene.IEAS_properties, "Activate_TW")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Walk")
+        row.prop(context.scene.IEAS_properties, "Activate_WK")
+
+               
 # --------
 # Purpose:
 # --------      
-#
+# This makes it possible to activate the classes for the concrete usage in blender's environment.
+# This is also needed for regitering the code as add-on.
 def register():
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
     bpy.utils.register_class(IEAS_PGT_Inputs)
@@ -222,6 +332,7 @@ def register():
     bpy.utils.register_class(IEAS_PT_GlobalParameters)
     bpy.utils.register_class(IEAS_PT_ShadingNodes)
     bpy.utils.register_class(IEAS_PT_Camera)
+    bpy.utils.register_class(IEAS_PT_Animation)
     
     # Pointers
     bpy.types.Scene.IEAS_properties = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
@@ -230,7 +341,7 @@ def register():
 # --------
 # Purpose:
 # --------
-#
+# Cleanup(When Addo-on is disabled)!
 def unregister():
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
@@ -238,12 +349,13 @@ def unregister():
     bpy.utils.unregister_class(IEAS_PT_GlobalParameters)
     bpy.utils.unregister_class(IEAS_PT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_PT_Camera)
+    bpy.utils.unregister_class(IEAS_PT_Animation)
     del bpy.types.Scene.IEAS_properties
     
 
 # --------
 # Purpose:
 # --------   
-#   
+# Code execution control!  
 if __name__ == "__main__":
     register()
