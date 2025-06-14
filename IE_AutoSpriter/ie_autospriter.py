@@ -9,7 +9,6 @@
 from bpy.types import Panel
 from bpy.types import PropertyGroup
 from bpy.types import Operator
-from bpy_extras.io_utils import ImportHelper
 import bpy
 
 # --------
@@ -20,7 +19,7 @@ import bpy
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 1, 2),
+    "version": (0, 3, 0),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -36,19 +35,38 @@ bl_info = {
 # --------
 # Purpose:
 # --------
-# Group of input types which will be added into the other panels
-# --------------------------------------------------------------
+# Group of input types which will be added into the other sub/child panels
+# ------------------------------------------------------------------------
 class IEAS_PGT_Inputs(PropertyGroup):
     """Group of input types which will be added into the other panels"""
     
     # --- Step 1: Global Parameters
-    Save_at: bpy.props.StringProperty(name="Save at",subtype='FILE_PATH') # File-opener
-    Prefix: bpy.props.StringProperty(name="Prefix")
-    Resref: bpy.props.StringProperty(name="Resref")
-    Every_X_Frame: bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
+    Save_at:        bpy.props.StringProperty(name="Save at",subtype='FILE_PATH') # File-opener
+    Prefix:         bpy.props.StringProperty(name="Prefix")
+    Resref:         bpy.props.StringProperty(name="Resref")
+    Every_X_Frame:  bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
     # --- Step 2: Shading Nodes
-    Principle_BSDF: bpy.props.StringProperty(name="Principle BSDF", default="Principled BSDF")
-    Material_Output: bpy.props.StringProperty(name="Material Output", default="Material Output")
+    Principle_BSDF:     bpy.props.StringProperty(name="Principle BSDF", default="Principled BSDF")
+    Material_Output:    bpy.props.StringProperty(name="Material Output", default="Material Output")
+    # --- Step 3: Camera
+    # Strings
+    South:      bpy.props.StringProperty(name="Subfolder S", default="south")
+    South_West: bpy.props.StringProperty(name="Subfolder SW", default="south_west")
+    West:       bpy.props.StringProperty(name="Subfolder W", default="west")
+    North_West: bpy.props.StringProperty(name="Subfolder NW", default="noth_west")
+    North:      bpy.props.StringProperty(name="Subfolder N", default="north")
+    North_East: bpy.props.StringProperty(name="Subfolder NE", default="north_east")
+    East:       bpy.props.StringProperty(name="Subfolder E", default="east")
+    South_East: bpy.props.StringProperty(name="Subfolder SE", default="south_east")
+    # Bools
+    Activate_S:     bpy.props.BoolProperty(name="Activate S", default=True)
+    Activate_SW:    bpy.props.BoolProperty(name="Activate SW", default=True)
+    Activate_W:     bpy.props.BoolProperty(name="Activate W", default=True)
+    Activate_NW:    bpy.props.BoolProperty(name="Activate NW", default=True)
+    Activate_N:     bpy.props.BoolProperty(name="Activate N", default=True)
+    Activate_NE:    bpy.props.BoolProperty(name="Activate NE", default=True)
+    Activate_E:     bpy.props.BoolProperty(name="Activate E", default=True)
+    Activate_SE:    bpy.props.BoolProperty(name="Activate SE", default=True)
 
 
 # --------
@@ -134,38 +152,98 @@ class IEAS_PT_ShadingNodes(Panel):
     
     # --- Blender specific function which places elements into GUI
     def draw(self, context):
+        layout = self.layout
         # Instances by pointers
-        self.layout.prop(context.scene.IEAS_properties, "Principle_BSDF")
-        self.layout.prop(context.scene.IEAS_properties, "Material_Output")
-        #TODO create button and execute buttons business logic.
-        #self.layout.operator("mesh.primitive_cone_add",text="Add")
-        col = self.layout.column(align=True)
-        col.operator("ieas.shading_nodes")
+        layout.prop(context.scene.IEAS_properties, "Principle_BSDF")
+        layout.prop(context.scene.IEAS_properties, "Material_Output")
+        col = layout.column(align=True)
+        col.operator("ieas.shading_nodes") # selfdefined button functionality
         
  
- 
+# --------
+# Purpose:
+# --------
+# This step manages the output folders and defines which camera orientations will be rendered.
+# --------------------------------------------------------------------------------------------
+class IEAS_PT_Camera(Panel):
+    """This step manages the output folders and defines which camera orientations will be rendered."""
+    
+    # --- Blender specific class variables
+    bl_label        = "Step 3: Camera" 
+    bl_idname       = 'IEAS_PT_Camera'
+    bl_space_type   = 'VIEW_3D'
+    bl_region_type  = 'UI'
+    bl_category     = "IE AutoSpriter"
+    bl_parent_id    = 'IEAS_PT_Core'
+    bl_options      = {'DEFAULT_CLOSED'}
+    # --- Blender specific function which places elements into GUI
+    def draw(self, context):        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "South")
+        row.prop(context.scene.IEAS_properties, "Activate_S")
         
-      
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "South_West")
+        row.prop(context.scene.IEAS_properties, "Activate_SW")
+               
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "West")
+        row.prop(context.scene.IEAS_properties, "Activate_W")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "North_West")
+        row.prop(context.scene.IEAS_properties, "Activate_NW")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "North")
+        row.prop(context.scene.IEAS_properties, "Activate_N")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "North_East")
+        row.prop(context.scene.IEAS_properties, "Activate_NE")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "East")
+        row.prop(context.scene.IEAS_properties, "Activate_E")
+        
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "South_East")
+        row.prop(context.scene.IEAS_properties, "Activate_SE")      
+        
+                
+# --------
+# Purpose:
+# --------      
+#
 def register():
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
     bpy.utils.register_class(IEAS_PGT_Inputs)
     bpy.utils.register_class(IEAS_PT_Core)
     bpy.utils.register_class(IEAS_PT_GlobalParameters)
     bpy.utils.register_class(IEAS_PT_ShadingNodes)
+    bpy.utils.register_class(IEAS_PT_Camera)
     
     # Pointers
     bpy.types.Scene.IEAS_properties = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
     
 
-
+# --------
+# Purpose:
+# --------
+#
 def unregister():
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
     bpy.utils.unregister_class(IEAS_PT_Core)
     bpy.utils.unregister_class(IEAS_PT_GlobalParameters)
     bpy.utils.unregister_class(IEAS_PT_ShadingNodes)
+    bpy.utils.unregister_class(IEAS_PT_Camera)
     del bpy.types.Scene.IEAS_properties
     
-    
+
+# --------
+# Purpose:
+# --------   
+#   
 if __name__ == "__main__":
     register()
