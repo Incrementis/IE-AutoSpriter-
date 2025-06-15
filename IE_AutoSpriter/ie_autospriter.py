@@ -20,7 +20,7 @@ import bpy
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 5, 0),
+    "version": (0, 5, 1),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -60,14 +60,14 @@ class IEAS_PGT_Inputs(PropertyGroup):
     East:       bpy.props.StringProperty(name="Subfolder E", default="east")
     South_East: bpy.props.StringProperty(name="Subfolder SE", default="south_east")
     # Bools
-    Activate_S:     bpy.props.BoolProperty(name="Activate S", default=True)
-    Activate_SW:    bpy.props.BoolProperty(name="Activate SW", default=True)
-    Activate_W:     bpy.props.BoolProperty(name="Activate W", default=True)
-    Activate_NW:    bpy.props.BoolProperty(name="Activate NW", default=True)
-    Activate_N:     bpy.props.BoolProperty(name="Activate N", default=True)
-    Activate_NE:    bpy.props.BoolProperty(name="Activate NE", default=True)
-    Activate_E:     bpy.props.BoolProperty(name="Activate E", default=True)
-    Activate_SE:    bpy.props.BoolProperty(name="Activate SE", default=True)
+    Use_S:     bpy.props.BoolProperty(name="Use S", default=True)
+    Use_SW:    bpy.props.BoolProperty(name="Use SW", default=True)
+    Use_W:     bpy.props.BoolProperty(name="Use W", default=True)
+    Use_NW:    bpy.props.BoolProperty(name="Use NW", default=True)
+    Use_N:     bpy.props.BoolProperty(name="Use N", default=True)
+    Use_NE:    bpy.props.BoolProperty(name="Use NE", default=True)
+    Use_E:     bpy.props.BoolProperty(name="Use E", default=True)
+    Use_SE:    bpy.props.BoolProperty(name="Use SE", default=True)
     # --- Step 4: Animation
     # Strings
     Attack1:    bpy.props.StringProperty(name="A1", default="slash")
@@ -85,20 +85,20 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Dead:       bpy.props.StringProperty(name="TW", default="dead")
     Walk:       bpy.props.StringProperty(name="WK", default="walk")
     # Bools
-    Activate_A1: bpy.props.BoolProperty(name="Activate A1", default=True)
-    Activate_A2: bpy.props.BoolProperty(name="Activate A2", default=True)
-    Activate_A3: bpy.props.BoolProperty(name="Activate A3", default=True)
-    Activate_A4: bpy.props.BoolProperty(name="Activate A4", default=True)
-    Activate_CA: bpy.props.BoolProperty(name="Activate CA", default=True)
-    Activate_DE: bpy.props.BoolProperty(name="Activate DE", default=True)
-    Activate_GH: bpy.props.BoolProperty(name="Activate GH", default=True)
-    Activate_GU: bpy.props.BoolProperty(name="Activate GU", default=True)
-    Activate_SC: bpy.props.BoolProperty(name="Activate SC", default=True)
-    Activate_SD: bpy.props.BoolProperty(name="Activate SD", default=True)
-    Activate_SL: bpy.props.BoolProperty(name="Activate SL", default=True)
-    Activate_SP: bpy.props.BoolProperty(name="Activate SP", default=True)
-    Activate_TW: bpy.props.BoolProperty(name="Activate TW", default=True)
-    Activate_WK: bpy.props.BoolProperty(name="Activate WK", default=True)
+    Use_A1: bpy.props.BoolProperty(name="Use A1", default=True)
+    Use_A2: bpy.props.BoolProperty(name="Use A2", default=True)
+    Use_A3: bpy.props.BoolProperty(name="Use A3", default=True)
+    Use_A4: bpy.props.BoolProperty(name="Use A4", default=True)
+    Use_CA: bpy.props.BoolProperty(name="Use CA", default=True)
+    Use_DE: bpy.props.BoolProperty(name="Use DE", default=True)
+    Use_GH: bpy.props.BoolProperty(name="Use GH", default=True)
+    Use_GU: bpy.props.BoolProperty(name="Use GU", default=True)
+    Use_SC: bpy.props.BoolProperty(name="Use SC", default=True)
+    Use_SD: bpy.props.BoolProperty(name="Use SD", default=True)
+    Use_SL: bpy.props.BoolProperty(name="Use SL", default=True)
+    Use_SP: bpy.props.BoolProperty(name="Use SP", default=True)
+    Use_TW: bpy.props.BoolProperty(name="Use TW", default=True)
+    Use_WK: bpy.props.BoolProperty(name="Use WK", default=True)
     # --- Step 5: Render
     # Reserved/None
 
@@ -230,35 +230,35 @@ class IEAS_PT_Camera(Panel):
     def draw(self, context):        
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "South")
-        row.prop(context.scene.IEAS_properties, "Activate_S")
+        row.prop(context.scene.IEAS_properties, "Use_S")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "South_West")
-        row.prop(context.scene.IEAS_properties, "Activate_SW")
+        row.prop(context.scene.IEAS_properties, "Use_SW")
                
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "West")
-        row.prop(context.scene.IEAS_properties, "Activate_W")
+        row.prop(context.scene.IEAS_properties, "Use_W")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "North_West")
-        row.prop(context.scene.IEAS_properties, "Activate_NW")
+        row.prop(context.scene.IEAS_properties, "Use_NW")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "North")
-        row.prop(context.scene.IEAS_properties, "Activate_N")
+        row.prop(context.scene.IEAS_properties, "Use_N")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "North_East")
-        row.prop(context.scene.IEAS_properties, "Activate_NE")
+        row.prop(context.scene.IEAS_properties, "Use_NE")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "East")
-        row.prop(context.scene.IEAS_properties, "Activate_E")
+        row.prop(context.scene.IEAS_properties, "Use_E")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "South_East")
-        row.prop(context.scene.IEAS_properties, "Activate_SE")      
+        row.prop(context.scene.IEAS_properties, "Use_SE")      
 
 
 # --------
@@ -283,59 +283,59 @@ class IEAS_PT_Animation(Panel):
           
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Attack1")
-        row.prop(context.scene.IEAS_properties, "Activate_A1")
+        row.prop(context.scene.IEAS_properties, "Use_A1")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Attack2")
-        row.prop(context.scene.IEAS_properties, "Activate_A2") 
+        row.prop(context.scene.IEAS_properties, "Use_A2") 
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Attack3")
-        row.prop(context.scene.IEAS_properties, "Activate_A3")
+        row.prop(context.scene.IEAS_properties, "Use_A3")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Attack1")
-        row.prop(context.scene.IEAS_properties, "Activate_A4")
+        row.prop(context.scene.IEAS_properties, "Use_A4")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Cast")
-        row.prop(context.scene.IEAS_properties, "Activate_CA")
+        row.prop(context.scene.IEAS_properties, "Use_CA")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Death")
-        row.prop(context.scene.IEAS_properties, "Activate_DE")
+        row.prop(context.scene.IEAS_properties, "Use_DE")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Get_Hit")
-        row.prop(context.scene.IEAS_properties, "Activate_GH")
+        row.prop(context.scene.IEAS_properties, "Use_GH")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Get_Up")
-        row.prop(context.scene.IEAS_properties, "Activate_GU")
+        row.prop(context.scene.IEAS_properties, "Use_GU")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Ready")
-        row.prop(context.scene.IEAS_properties, "Activate_SC")
+        row.prop(context.scene.IEAS_properties, "Use_SC")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Idle")
-        row.prop(context.scene.IEAS_properties, "Activate_SD")
+        row.prop(context.scene.IEAS_properties, "Use_SD")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Sleep")
-        row.prop(context.scene.IEAS_properties, "Activate_SL")
+        row.prop(context.scene.IEAS_properties, "Use_SL")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Conjure")
-        row.prop(context.scene.IEAS_properties, "Activate_SP")
+        row.prop(context.scene.IEAS_properties, "Use_SP")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Dead")
-        row.prop(context.scene.IEAS_properties, "Activate_TW")
+        row.prop(context.scene.IEAS_properties, "Use_TW")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Walk")
-        row.prop(context.scene.IEAS_properties, "Activate_WK")
+        row.prop(context.scene.IEAS_properties, "Use_WK")
 
 
 # --------
@@ -364,7 +364,7 @@ class IEAS_PT_Final(Panel):
 # --------
 # Purpose:
 # --------      
-# This makes it possible to activate the classes for the concrete usage in blender's environment.
+# This makes it possible to Use the classes for the concrete usage in blender's environment.
 # This is also needed for regitering the code as add-on.
 def register():
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
