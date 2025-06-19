@@ -3,6 +3,7 @@
 # https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html#your-first-add-onimport bpy
 # https://docs.blender.org/api/current/bpy.types.Operator.html
 # https://developer.blender.org/docs/release_notes/2.80/python_api/addons/#Naming
+# https://docs.blender.org/api/current/bpy.props.html#bpy.props.PointerProperty
 # (PT = Panel Type)
 # (OT = Operator Type)
 # (PGT = Property Group Type)
@@ -20,7 +21,7 @@ import bpy
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 5, 1),
+    "version": (0, 6, 0),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -47,8 +48,13 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Resref:         bpy.props.StringProperty(name="Resref")
     Every_X_Frame:  bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
     # --- Step 2: Shading Nodes
-    Principle_BSDF:     bpy.props.StringProperty(name="Principle BSDF", default="Principled BSDF")
+    Principled_BSDF:    bpy.props.StringProperty(name="Principle BSDF", default="Principled BSDF")
     Material_Output:    bpy.props.StringProperty(name="Material Output", default="Material Output")
+    Material_List:      bpy.props.PointerProperty(
+                                                    type=bpy.types.Material,# Crucially, specify the type of data block it points to
+                                                    name="Material List", # Label for the UI element
+                                                    description="Select the material to be used to apply shading nodes." # Tooltip
+                                                    )
     # --- Step 3: Camera
     # Strings
     South:      bpy.props.StringProperty(name="Subfolder S", default="south")
@@ -113,9 +119,63 @@ class IEAS_OT_ShadingNodes(Operator):
     bl_idname = "ieas.shading_nodes" # To be on the safe side, the follwoing naming "convention" is used <lower case>.<lower case>[_<lower case>]
     bl_label = "ADD"
     
+    # TODO: This function needs refactoring!!!!!!
     def execute(self, context):
         # Put your render property code here
-        print("Hello IEAS_OT_ShadingNodes")
+        print("----IEAS_OT_ShadingNodes----")
+        
+        # Get currently active mesh
+        active_obj = bpy.context.active_object
+        
+        # ---MONTIORING: Delete this!
+        if active_obj and active_obj.type == 'MESH':
+            print(f"\nCurrently active mesh object: {active_obj.name}")
+        else:
+            print("\nNo mesh object is currently active.")
+        
+        
+        print("active material:", bpy.data.objects['Ch25'].active_material)
+        
+        print("name:",context.scene.IEAS_properties.Material_List.name)
+        # ---
+        
+        myMaterialName = context.scene.IEAS_properties.Material_List.name
+        myActiveMaterial = bpy.data.materials[myMaterialName]
+        #Activate nodes for specific mesh material(See toggle button "Use Nodes" in "Shading" screen)
+        use_nodes = bpy.data.materials[myMaterialName].use_nodes
+        
+        if(use_nodes==False):
+            use_nodes = True
+            
+        Principled_BSDF_name = context.scene.IEAS_properties.Principled_BSDF
+        Material_Output_name = context.scene.IEAS_properties.Material_Output
+        
+        
+        Principled_BSDF = myActiveMaterial.node_tree.nodes.get(Principled_BSDF_name)
+        Material_Output = myActiveMaterial.node_tree.nodes.get(Material_Output_name)
+        
+        # ----MONITORING: DELETE IT!
+        print("Principled_BSDF:",Principled_BSDF)
+        print("Material_Output:",Material_Output)
+        print("Principled_BSDF:",Principled_BSDF.location)
+        print("Material_Output:",Material_Output.location)
+        # ----
+        
+        # Creates the new nodes
+        MixShader_node = myActiveMaterial.node_tree.nodes.new('ShaderNodeMixShader')
+        MixShader_node.location = (Principled_BSDF.location[0]+250,-100)
+        BrightContrast_node = myActiveMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
+        BrightContrast_node.location = (Principled_BSDF.location[0],-100)
+        
+        # Connecting nodes
+        myActiveMaterial.node_tree.links.new(Principled_BSDF.outputs[0],MixShader_node.inputs[1])
+        myActiveMaterial.node_tree.links.new(MixShader_node.outputs[0],Material_Output.inputs[0])
+        myActiveMaterial.node_tree.links.new(BrightContrast_node.outputs[0],MixShader_node.inputs[2])
+        
+        # Legit Default values of the nodes is needed(Check TheArtisan's manual)
+        MixShader_node.inputs[0].default_value       = 0.010
+        BrightContrast_node.inputs[1].default_value  = 1.000
+        
         return {'FINISHED'}
 
 
@@ -204,10 +264,12 @@ class IEAS_PT_ShadingNodes(Panel):
     def draw(self, context):
         layout = self.layout
         # Instances by pointers
-        layout.prop(context.scene.IEAS_properties, "Principle_BSDF")
+        layout.prop(context.scene.IEAS_properties, "Principled_BSDF")
         layout.prop(context.scene.IEAS_properties, "Material_Output")
-        col = layout.column(align=True)
+        layout.prop(context.scene.IEAS_properties, "Material_List")
+        col = layout.column()
         col.operator("ieas.shading_nodes") # selfdefined button functionality
+        
         
  
 # --------
