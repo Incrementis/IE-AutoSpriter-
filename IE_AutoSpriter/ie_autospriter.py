@@ -4,9 +4,9 @@
 # https://docs.blender.org/api/current/bpy.types.Operator.html
 # https://developer.blender.org/docs/release_notes/2.80/python_api/addons/#Naming
 # https://docs.blender.org/api/current/bpy.props.html#bpy.props.PointerProperty
-# (PT = Panel Type)
-# (OT = Operator Type)
-# (PGT = Property Group Type)
+# (PT   = Panel Type)
+# (OT   = Operator Type)
+# (PGT  = Property Group Type)
 from bpy.types import Panel
 from bpy.types import PropertyGroup
 from bpy.types import Operator
@@ -21,7 +21,7 @@ import bpy
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 6, 0),
+    "version": (0, 6, 4),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -46,6 +46,8 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Save_at:        bpy.props.StringProperty(name="Save at",subtype='FILE_PATH') # File-opener
     Prefix:         bpy.props.StringProperty(name="Prefix")
     Resref:         bpy.props.StringProperty(name="Resref")
+    Resolution_X:   bpy.props.IntProperty(name="Resolution X",default=256, min=1)
+    Resolution_Y:   bpy.props.IntProperty(name="Resolution Y",default=256, min=1)
     Every_X_Frame:  bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
     # --- Step 2: Shading Nodes
     Principled_BSDF:    bpy.props.StringProperty(name="Principle BSDF", default="Principled BSDF")
@@ -119,58 +121,36 @@ class IEAS_OT_ShadingNodes(Operator):
     bl_idname = "ieas.shading_nodes" # To be on the safe side, the follwoing naming "convention" is used <lower case>.<lower case>[_<lower case>]
     bl_label = "ADD"
     
-    # TODO: This function needs refactoring!!!!!!
+    # Blender specific function which is executed in this case when ADD button is pressed
     def execute(self, context):
-        # Put your render property code here
-        print("----IEAS_OT_ShadingNodes----")
         
-        # Get currently active mesh
-        active_obj = bpy.context.active_object
+        materialName    = context.scene.IEAS_properties.Material_List.name
+        activeMaterial  = bpy.data.materials[materialName]
+        # Activates nodes for specific mesh material(See toggle button "Use Nodes" in "Shading" screen)
+        use_nodes = bpy.data.materials[materialName].use_nodes
         
-        # ---MONTIORING: Delete this!
-        if active_obj and active_obj.type == 'MESH':
-            print(f"\nCurrently active mesh object: {active_obj.name}")
-        else:
-            print("\nNo mesh object is currently active.")
-        
-        
-        print("active material:", bpy.data.objects['Ch25'].active_material)
-        
-        print("name:",context.scene.IEAS_properties.Material_List.name)
-        # ---
-        
-        myMaterialName = context.scene.IEAS_properties.Material_List.name
-        myActiveMaterial = bpy.data.materials[myMaterialName]
-        #Activate nodes for specific mesh material(See toggle button "Use Nodes" in "Shading" screen)
-        use_nodes = bpy.data.materials[myMaterialName].use_nodes
-        
+        # The materials "use nodes" will set to true, so adding new nodes is possible. 
         if(use_nodes==False):
             use_nodes = True
-            
+        
+        # Gets the user given string inputs(see Step 2) and stores them into variables.
         Principled_BSDF_name = context.scene.IEAS_properties.Principled_BSDF
         Material_Output_name = context.scene.IEAS_properties.Material_Output
         
+        # Gets the node types "ShaderNodeBsdfPrincipled" and "ShaderNodeOutputMaterial" depending on their name 
+        Principled_BSDF = activeMaterial.node_tree.nodes.get(Principled_BSDF_name)
+        Material_Output = activeMaterial.node_tree.nodes.get(Material_Output_name)
         
-        Principled_BSDF = myActiveMaterial.node_tree.nodes.get(Principled_BSDF_name)
-        Material_Output = myActiveMaterial.node_tree.nodes.get(Material_Output_name)
-        
-        # ----MONITORING: DELETE IT!
-        print("Principled_BSDF:",Principled_BSDF)
-        print("Material_Output:",Material_Output)
-        print("Principled_BSDF:",Principled_BSDF.location)
-        print("Material_Output:",Material_Output.location)
-        # ----
-        
-        # Creates the new nodes
-        MixShader_node = myActiveMaterial.node_tree.nodes.new('ShaderNodeMixShader')
+        # Creates the new nodes and positions them  near "Principled BSDF" node.
+        MixShader_node = activeMaterial.node_tree.nodes.new('ShaderNodeMixShader')
         MixShader_node.location = (Principled_BSDF.location[0]+250,-100)
-        BrightContrast_node = myActiveMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
+        BrightContrast_node = activeMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
         BrightContrast_node.location = (Principled_BSDF.location[0],-100)
         
-        # Connecting nodes
-        myActiveMaterial.node_tree.links.new(Principled_BSDF.outputs[0],MixShader_node.inputs[1])
-        myActiveMaterial.node_tree.links.new(MixShader_node.outputs[0],Material_Output.inputs[0])
-        myActiveMaterial.node_tree.links.new(BrightContrast_node.outputs[0],MixShader_node.inputs[2])
+        # Connects nodes
+        activeMaterial.node_tree.links.new(Principled_BSDF.outputs[0],MixShader_node.inputs[1])
+        activeMaterial.node_tree.links.new(MixShader_node.outputs[0],Material_Output.inputs[0])
+        activeMaterial.node_tree.links.new(BrightContrast_node.outputs[0],MixShader_node.inputs[2])
         
         # Legit Default values of the nodes is needed(Check TheArtisan's manual)
         MixShader_node.inputs[0].default_value       = 0.010
@@ -189,9 +169,16 @@ class IEAS_OT_Final(Operator):
     bl_idname = "ieas.final" # To be on the safe side, the follwoing naming "convention" is used <lower case>.<lower case>[_<lower case>]
     bl_label = "RENDER"
     
+    # Blender specific function which is executed in this case when RENDER button is pressed
     def execute(self, context):
         # Put your render property code here
-        print("Hello IEAS_OT_Final")
+        print("--------IEAS_OT_Final----------")
+        
+        # TODO:
+        # 1. Set path to store the sprites
+        # 2. 
+        
+        
         return {'FINISHED'}
 
 
@@ -239,6 +226,8 @@ class IEAS_PT_GlobalParameters(Panel):
         self.layout.prop(context.scene.IEAS_properties, "Save_at")
         self.layout.prop(context.scene.IEAS_properties, "Prefix")
         self.layout.prop(context.scene.IEAS_properties, "Resref")
+        self.layout.prop(context.scene.IEAS_properties, "Resolution_X")
+        self.layout.prop(context.scene.IEAS_properties, "Resolution_Y")
         self.layout.prop(context.scene.IEAS_properties, "Every_X_Frame")
         
  
