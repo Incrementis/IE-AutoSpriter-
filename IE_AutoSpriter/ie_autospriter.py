@@ -25,7 +25,7 @@ import math
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 7, 1),
+    "version": (0, 7, 2),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -212,6 +212,8 @@ class IEAS_OT_Final(Operator):
         objectName = context.scene.IEAS_properties.Object_List.name
         # Selects the specific object.
         bpy.context.scene.objects[objectName].select_set(True)
+        bpy.context.view_layer.objects.active = bpy.data.objects[objectName]
+        
         
         # ---- Camera
         cameraPosFolderNames = {
@@ -227,10 +229,10 @@ class IEAS_OT_Final(Operator):
             'east': context.scene.IEAS_properties.Use_E,   'south_east': context.scene.IEAS_properties.Use_SE
         }
         cameraAngles = {
-            'south': 0,  'south_west': 315,
-            'west': 270,   'north_west': 225,
-            'north': 180,  'north_east': 135,
-            'east': 90,   'south_east': 45
+            'south':0,      'south_west': 315,
+            'west': 270,    'north_west': 225,
+            'north':180,    'north_east': 135,
+            'east': 90,     'south_east': 45
         }
         # ----- Animation
         animationFolderNames = {
@@ -301,18 +303,17 @@ class IEAS_OT_Final(Operator):
             
                     frameStart      = bpy.context.scene.frame_start
                     frameEnd        = bpy.context.scene.frame_end
-                    frameCurrent    = bpy.context.scene.frame_current
                     renderFrame     = bpy.ops.render.render
                     Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
                     
                     #loop through and render frames.  Can set how "often" it renders.
                     for frame in range(frameStart,frameEnd,Every_X_Frame):
-                        frameCurrent = frame
-                        
+                        # Current frame 
+                        bpy.context.scene.frame_current = frame
                         # TODO: Delte print
                         print("position_folder:",position_folder)
                         
-                        fileName = f"{prefixResref}{animationKey}_{positionKey}_{str(frameCurrent).zfill(5)}.png"
+                        fileName = f"{prefixResref}{animationKey}_{positionKey}_{str(frame).zfill(5)}.png"
                          # TODO: Delte print
                         print("fileName:",fileName)
                         
