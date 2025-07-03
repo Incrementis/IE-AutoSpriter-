@@ -26,7 +26,7 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 7, 5),
+    "version": (0, 7, 7),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
@@ -306,53 +306,57 @@ class IEAS_OT_Final(Operator):
                         if not os.path.exists(position_folder):
                             os.makedirs(position_folder)
                             
-                    # Rotates the active object (the character/model) around its Z-axis to face the current direction.
-                    # The script rotates the subject, relying on a static camera to capture it, rather than rotating the camera itself.
-                    bpy.context.active_object.rotation_euler[2] = math.radians(cameraAngles[positionKey])
-                    
-                    # ----- Debugging
-                    # TODO: Delete print
-                    #print("\nbpy.context.active_object.rotation_euler:",bpy.context.active_object.rotation_euler)
-                    # TODO: Delete print
-                    #print("\nbpy.context.active_object.rotation_euler[2]:",bpy.context.active_object.rotation_euler[2])
-            
-                    # ----- Variables used in nested inner loop
-                    frameStart      = bpy.context.scene.frame_start
-                    frameEnd        = bpy.context.scene.frame_end
-                    renderFrame     = bpy.ops.render.render
-                    Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
-                    
-                    #  ----- Nested/Inner loop 
-                    # Loops through frames within the animation's range, stepping by 'Every_X_Frame'.
-                    for frame in range(frameStart,frameEnd,Every_X_Frame):
-                        # Sets the current frame of the scene, updating the object's animation pose.
-                        bpy.context.scene.frame_current = frame
+                        # Rotates the active object (the character/model) around its Z-axis to face the current direction.
+                        # The script rotates the subject, relying on a static camera to capture it, rather than rotating the camera itself.
+                        bpy.context.active_object.rotation_euler[2] = math.radians(cameraAngles[positionKey])
                         
-                        # Constructs the filename for the current sprite, including prefix, animation, position, and padded frame number.                     
-                        fileName = f"{prefixResref}{animationKey}_{positionKey}_{str(frame).zfill(5)}.png"
+                        # ----- Debugging
+                        # TODO: Delete print
+                        #print("\nbpy.context.active_object.rotation_euler:",bpy.context.active_object.rotation_euler)
+                        # TODO: Delete print
+                        #print("\nbpy.context.active_object.rotation_euler[2]:",bpy.context.active_object.rotation_euler[2])
+                
+                        # ----- Variables used in nested inner loop
+                        frameStart      = bpy.context.scene.frame_start
+                        frameEnd        = bpy.context.scene.frame_end
+                        renderFrame     = bpy.ops.render.render
+                        Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
                         
-                        # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
-                        bpy.context.scene.render.filepath = os.path.join(position_folder, fileName)
-                        
-                        # This is the actual rendering process.
-                        # `animation=False` renders a single still image.
-                        # `write_still=True` saves the rendered image to the specified `filepath`.
-                        # The first `False` argument disables undo support for the operation.              
-                        renderFrame(  False,    
-                                      animation     =False, 
-                                      write_still   =True) 
-                        
-                        # ----- Debugging              
-                        # TODO: Delete print
-                        #print("position_folder:",position_folder)
-                        # TODO: Delete print
-                        print("fileName:",fileName)
-                        # TODO: Delete print
-                        print("filepath:",bpy.context.scene.render.filepath)
-                        # TODO: Delete print
-                        print("action:",bpy.context.active_object.animation_data.action)
+                        #  ----- Nested/Inner loop 
+                        # Loops through frames within the animation's range, stepping by 'Every_X_Frame'.
+                        for frame in range(frameStart,frameEnd,Every_X_Frame):
+                            # Sets the current frame of the scene, updating the object's animation pose.
+                            bpy.context.scene.frame_current = frame
+                            
+                            # Constructs the filename for the current sprite, including prefix, animation, position, and padded frame number.
+                            if(positionKey == 'east' or positionKey == 'south_east' or positionKey == 'north_east'):                     
+                                fileName = f"{prefixResref}{animationKey}E_{positionKey}_{str(frame).zfill(5)}.png"
+                            else:
+                                fileName = f"{prefixResref}{animationKey}_{positionKey}_{str(frame).zfill(5)}.png"
+                                
+                            
+                            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+                            bpy.context.scene.render.filepath = os.path.join(position_folder, fileName)
+                            
+                            # This is the actual rendering process.
+                            # `animation=False` renders a single still image.
+                            # `write_still=True` saves the rendered image to the specified `filepath`.
+                            # The first `False` argument disables undo support for the operation.
+                            renderFrame(  False,
+                                          animation     =False,
+                                          write_still   =True)
+                            
+                            # ----- Debugging
+                            # TODO: Delete print
+                            #print("position_folder:",position_folder)
+                            # TODO: Delete print
+                            print("fileName:",fileName)
+                            # TODO: Delete print
+                            print("filepath:",bpy.context.scene.render.filepath)
+                            # TODO: Delete print
+                            print("action:",bpy.context.active_object.animation_data.action)
         
-        # ----- Debugging                
+        # ----- Debugging
         # TODO: Delete print
         # Calculates and prints the total time taken for the rendering process.
         print("Elapsed:",time.time() - startTimer)
