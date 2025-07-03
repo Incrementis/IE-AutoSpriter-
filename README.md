@@ -12,6 +12,7 @@ Alpha Version:
 * Performance intensive (current). Rendering a frame took 3 to 4 seconds. In one case, the performance outlier was 15 seconds for rendering a frame.
 * May contain issues for various reasons.
 * I am not a Blender or Blender API expert, so this may also cause issues.
+* Only Tested it with blender version 4.0
 
 ## Discussion
 * Beamdog
