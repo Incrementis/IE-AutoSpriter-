@@ -44,3 +44,4 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [IE-Animations](https://github.com/ArtemiusI/IE-Animations) by Artemiusl
 * [education/175-Blender-Properties](https://github.com/pagekey/education/tree/main/175-Blender-Properties) by PageKey
 * [Your Own Operator | Scripting for Artists [8]](https://www.youtube.com/watch?v=xscQ9tcN4GI&list=LL) by Blender
+* [Render 8 Direction Animated Sprites in Blender with Python](https://www.youtube.com/watch?v=l1Io7fLYV4o) by FozleCC
