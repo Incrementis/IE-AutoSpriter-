@@ -15,9 +15,9 @@ Alpha Version:
 * Only Tested it with blender version 4.0(It may already work on higher versions)
 
 ## Discussion
-* Beamdog Forums
-* G3 Forums
-* GitHub
+* [Beamdog Forums](https://forums.beamdog.com/discussion/89525/blender-add-on-ie-autospriter)
+* [G3 Forums](https://www.gibberlings3.net/forums/topic/39792-blender-add-on-ie-autospriter)
+* [GitHub](https://github.com/Incrementis/IE-AutoSpriter-/discussions)
 
 ## Key Features
 * Keeps parameters in a Blender file (reduces workflow)
@@ -48,4 +48,4 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [education/175-Blender-Properties](https://github.com/pagekey/education/tree/main/175-Blender-Properties) by PageKey
 * [Your Own Operator | Scripting for Artists [8]](https://www.youtube.com/watch?v=xscQ9tcN4GI&list=LL) by Blender
 * [Render 8 Direction Animated Sprites in Blender with Python](https://www.youtube.com/watch?v=l1Io7fLYV4o) by FozleCC
-* [Blender documentations](https://docs.blender.org) by blender
+* [Blender documentations](https://docs.blender.org) by Blender

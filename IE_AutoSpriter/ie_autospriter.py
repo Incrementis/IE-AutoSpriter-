@@ -26,7 +26,7 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 7, 7),
+    "version": (0, 8, 2),
     "blender": (4, 0, 0),
     "location": "View3d > Tool",
     "support": "https://github.com/Incrementis/IE-AutoSpriter-",
