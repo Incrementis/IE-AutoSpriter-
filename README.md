@@ -1,7 +1,7 @@
 # IE-AutoSpriter-
 Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations.
 
-This is a work in progress and an alpha release. This means that most things are not implemented and the mod is subject to heavy changes. Use this mod with caution!!
+This is a work in progress and an alpha release. This means that most things are not implemented and the add-on is subject to heavy changes. Use this add-on with caution!!
 
 This is also a learning project focused on my personal use. Suggestions are welcome!
 
