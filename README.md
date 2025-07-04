@@ -12,17 +12,19 @@ Alpha Version:
 * Performance intensive (current). Rendering a frame took 3 to 4 seconds. In one case, the performance outlier was 15 seconds for rendering a frame.
 * May contain issues for various reasons.
 * I am not a Blender or Blender API expert, so this may also cause issues.
-* Only Tested it with blender version 4.0
+* Only Tested it with blender version 4.0(It may already work on higher versions)
 
 ## Discussion
-* Beamdog
-* G3Forums
+* Beamdog Forums
+* G3 Forums
+* GitHub
 
 ## Key Features
 * Keeps parameters in a Blender file (reduces workflow)
 * Automated rendering
 * Provides steps for better usability
 * Provides many useful parameters
+* To make it work on higher Blender versions
 
 ## Guides
 The functions are explained in detail in the manual.
@@ -46,3 +48,4 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [education/175-Blender-Properties](https://github.com/pagekey/education/tree/main/175-Blender-Properties) by PageKey
 * [Your Own Operator | Scripting for Artists [8]](https://www.youtube.com/watch?v=xscQ9tcN4GI&list=LL) by Blender
 * [Render 8 Direction Animated Sprites in Blender with Python](https://www.youtube.com/watch?v=l1Io7fLYV4o) by FozleCC
+* [Blender documentations](https://docs.blender.org) by blender
