@@ -26,16 +26,11 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 8, 2),
+    "version": (0, 8, 3),
     "blender": (4, 0, 0),
-    "location": "View3d > Tool",
-    "support": "https://github.com/Incrementis/IE-AutoSpriter-",
-    "category": "Object",
-    "description": "Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations for IE games.",
-    "warning": "",
-    "wiki_url": "https://github.com/Incrementis/IE-AutoSpriter-",
-    "tracker_url": "",
-    "category": "Render Animation"
+    "location": "Render > IE AutoSpriter",
+    "category": "Render",
+    "description": "Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations for IE games. GitHub:https://github.com/Incrementis/IE-AutoSpriter- ",
 }
 
 
