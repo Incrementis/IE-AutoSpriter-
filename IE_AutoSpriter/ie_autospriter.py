@@ -26,7 +26,7 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 8, 3),
+    "version": (0, 9, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -45,7 +45,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     
     # --- Step 1: Global Parameters
     # File path property for saving rendered sprites.
-    Save_at:        bpy.props.StringProperty(name="Save at",subtype='FILE_PATH') # File-opener
+    Save_at:        bpy.props.StringProperty(name="Save at",subtype='DIR_PATH') # File-opener
     # String property for the file prefix.
     Prefix:         bpy.props.StringProperty(name="Prefix")
     # String property for the resource reference (resref).
@@ -313,7 +313,7 @@ class IEAS_OT_Final(Operator):
                 
                         # ----- Variables used in nested inner loop
                         frameStart      = bpy.context.scene.frame_start
-                        frameEnd        = bpy.context.scene.frame_end
+                        frameEnd        = bpy.context.scene.frame_end+1
                         renderFrame     = bpy.ops.render.render
                         Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
                         
@@ -630,7 +630,7 @@ def register():
 # This prevents data remnants and potential conflicts if the add-on is re-enabled or other add-ons are used(??).
 def unregister():
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
-    bpy.utils.register_class(IEAS_OT_Final)
+    bpy.utils.unregister_class(IEAS_OT_Final)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
     bpy.utils.unregister_class(IEAS_PT_Core)
     bpy.utils.unregister_class(IEAS_PT_GlobalParameters)

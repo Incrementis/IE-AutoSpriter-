@@ -7,7 +7,6 @@ This is also a learning project focused on my personal use. Suggestions are welc
 
 Alpha Version:
 * May not work or only work under special conditions.
-* The script has been tested, but not as an add-on.
 * May not work due to missing information in the manual.
 * Performance intensive (current). Rendering a frame took 3 to 4 seconds. In one case, the performance outlier was 15 seconds for rendering a frame.
 * May contain issues for various reasons.
