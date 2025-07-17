@@ -8,7 +8,7 @@ This is also a learning project focused on my personal use. Suggestions are welc
 Alpha Version:
 * May not work or only work under special conditions.
 * May not work due to missing information in the manual.
-* Performance intensive (current). Rendering a frame took 3 to 4 seconds. In one case, the performance outlier was 15 seconds for rendering a frame.
+* Performance current: Rendering a frame took [0.8 to 1 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079607164).
 * May contain issues for various reasons.
 * I am not a Blender or Blender API expert, so this may also cause issues.
 * Only Tested it with blender version 4.0(It may already work on higher versions)
@@ -48,3 +48,4 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [Your Own Operator | Scripting for Artists [8]](https://www.youtube.com/watch?v=xscQ9tcN4GI&list=LL) by Blender
 * [Render 8 Direction Animated Sprites in Blender with Python](https://www.youtube.com/watch?v=l1Io7fLYV4o) by FozleCC
 * [Blender documentations](https://docs.blender.org) by Blender
+* [Blender Rendering Optimization Tips](https://whoisryosuke.com/blog/2024/blender-rendering-optimization-tips) by Ryo

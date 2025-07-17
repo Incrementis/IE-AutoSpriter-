@@ -26,7 +26,7 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 9, 0),
+    "version": (0, 8, 6),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -160,10 +160,14 @@ class IEAS_OT_ShadingNodes(Operator):
         Material_Output = activeMaterial.node_tree.nodes.get(Material_Output_name)
         
         # Creates the new nodes (Mix Shader and Bright/Contrast) and positions them near the Principled BSDF node.
-        MixShader_node = activeMaterial.node_tree.nodes.new('ShaderNodeMixShader')
-        MixShader_node.location = (Principled_BSDF.location[0]+250,-100)
-        BrightContrast_node = activeMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
-        BrightContrast_node.location = (Principled_BSDF.location[0],-100)
+        x           = 0
+        x_location  = Principled_BSDF.location[x]
+        x_offset    = 250
+        y_location  = -100       
+        MixShader_node                  = activeMaterial.node_tree.nodes.new('ShaderNodeMixShader')
+        MixShader_node.location         = (x_location, y_location)
+        BrightContrast_node             = activeMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
+        BrightContrast_node.location    = (x_location+x_offset, y_location)
         
         # Connects the newly created nodes and existing nodes to form the desired shader graph.
         activeMaterial.node_tree.links.new(Principled_BSDF.outputs[0],MixShader_node.inputs[1])
@@ -171,8 +175,10 @@ class IEAS_OT_ShadingNodes(Operator):
         activeMaterial.node_tree.links.new(BrightContrast_node.outputs[0],MixShader_node.inputs[2])
         
         # Sets default values for the new nodes' inputs, based on typical(??) IE sprite requirements.
-        MixShader_node.inputs[0].default_value       = 0.010
-        BrightContrast_node.inputs[1].default_value  = 1.000
+        fac     = 0
+        bright  = 1    
+        MixShader_node.inputs[fac].default_value            = 0.010
+        BrightContrast_node.inputs[bright].default_value    = 1.000
         
         return {'FINISHED'}
 
@@ -235,9 +241,7 @@ class IEAS_OT_Final(Operator):
         
         # ----- Filename and path
         # Retrieves the base save path from user input.            
-        pathSaveAt = context.scene.IEAS_properties.Save_at
-        # Converts the path to an absolute path for consistency, preventing relative path issues.
-        pathSaveAt = os.path.abspath(pathSaveAt)
+        pathSaveAt = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
         # Combines prefix and resref for use in filename construction.      
         prefixResref = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
                 
