@@ -5,13 +5,18 @@ This is a work in progress and an alpha release. This means that most things are
 
 This is also a learning project focused on my personal use. Suggestions are welcome!
 
-Alpha Version:
+## Alpha Version:
 * May not work or only work under special conditions.
 * May not work due to missing information in the manual.
-* Performance current: Rendering a frame took [0.8 to 1 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079607164).
 * May contain issues for various reasons.
 * I am not a Blender or Blender API expert, so this may also cause issues.
 * Only Tested it with blender version 4.0(It may already work on higher versions)
+### Performance
+The 4.0 blend save files contain the appropriate settings.
+#### Render engine "Cycles": 
+* Rendering a frame took [0.8 to 1 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079607164)
+#### Render engine "EEVEE": 
+* Rendering a frame took [0.05 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079719096)
 
 ## Discussion
 * [Beamdog Forums](https://forums.beamdog.com/discussion/89525/blender-add-on-ie-autospriter)
