@@ -26,7 +26,7 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 10, 0),
+    "version": (0, 11, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -56,6 +56,8 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                 name="Object List", # Label for the UI element
                                                 description="Select the armature to be used to apply rendering." # Tooltip
                                                 )
+    # Enables the use of weapon collections in the animation step
+    Use_Weapons:  bpy.props.BoolProperty(name="Use Weapon Collections", default=False)
     # Integer property for the render resolution in X-dimension.
     Resolution_X:   bpy.props.IntProperty(name="Resolution X",default=256, min=1)
     # Integer property for the render resolution in Y-dimension.
@@ -84,13 +86,13 @@ class IEAS_PGT_Inputs(PropertyGroup):
     East:       bpy.props.StringProperty(name="Subfolder E", default="east")
     South_East: bpy.props.StringProperty(name="Subfolder SE", default="south_east")
     # Boolean toggles for rendering each camera direction.
-    Use_S:     bpy.props.BoolProperty(name="Use S", default=True)
+    Use_SO:    bpy.props.BoolProperty(name="Use S", default=True)
     Use_SW:    bpy.props.BoolProperty(name="Use SW", default=True)
-    Use_W:     bpy.props.BoolProperty(name="Use W", default=True)
+    Use_WE:    bpy.props.BoolProperty(name="Use W", default=True)
     Use_NW:    bpy.props.BoolProperty(name="Use NW", default=True)
-    Use_N:     bpy.props.BoolProperty(name="Use N", default=True)
+    Use_NO:    bpy.props.BoolProperty(name="Use N", default=True)
     Use_NE:    bpy.props.BoolProperty(name="Use NE", default=True)
-    Use_E:     bpy.props.BoolProperty(name="Use E", default=True)
+    Use_ES:    bpy.props.BoolProperty(name="Use E", default=True)
     Use_SE:    bpy.props.BoolProperty(name="Use SE", default=True)
     
     # --- Step 4: Animation (Animation Names and Toggles)
@@ -109,21 +111,46 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Conjure:    bpy.props.StringProperty(name="SP", default="conjure")
     Dead:       bpy.props.StringProperty(name="TW", default="dead")
     Walk:       bpy.props.StringProperty(name="WK", default="walk")
+    # String properties for names of various weapon animations based on the collection names.
+    Creature:   bpy.props.StringProperty(name="Creature Collection", default="")
+    Axe:        bpy.props.StringProperty(name="A", default="axe")
+    Bow:        bpy.props.StringProperty(name="B", default="bow")
+    Club:       bpy.props.StringProperty(name="C", default="club")
+    Dagger:     bpy.props.StringProperty(name="D", default="dagger")
+    Flail:      bpy.props.StringProperty(name="F", default="flail")
+    Halberd:    bpy.props.StringProperty(name="H", default="halberd")
+    Mace:       bpy.props.StringProperty(name="M", default="mace")
+    Sword:      bpy.props.StringProperty(name="S", default="sword")
+    Warhammer:  bpy.props.StringProperty(name="W", default="warhammer")
+    Quarterstaff: bpy.props.StringProperty(name="Q", default="quarterstaff")    
+    
     # Boolean toggles for rendering each animation.
-    Use_A1: bpy.props.BoolProperty(name="Use A1", default=True)
-    Use_A2: bpy.props.BoolProperty(name="Use A2", default=True)
-    Use_A3: bpy.props.BoolProperty(name="Use A3", default=True)
-    Use_A4: bpy.props.BoolProperty(name="Use A4", default=True)
-    Use_CA: bpy.props.BoolProperty(name="Use CA", default=True)
-    Use_DE: bpy.props.BoolProperty(name="Use DE", default=True)
-    Use_GH: bpy.props.BoolProperty(name="Use GH", default=True)
-    Use_GU: bpy.props.BoolProperty(name="Use GU", default=True)
-    Use_SC: bpy.props.BoolProperty(name="Use SC", default=True)
-    Use_SD: bpy.props.BoolProperty(name="Use SD", default=True)
-    Use_SL: bpy.props.BoolProperty(name="Use SL", default=True)
-    Use_SP: bpy.props.BoolProperty(name="Use SP", default=True)
-    Use_TW: bpy.props.BoolProperty(name="Use TW", default=True)
-    Use_WK: bpy.props.BoolProperty(name="Use WK", default=True)
+    Use_A1: bpy.props.BoolProperty(name="Use A1",   default=True)
+    Use_A2: bpy.props.BoolProperty(name="Use A2",   default=True)
+    Use_A3: bpy.props.BoolProperty(name="Use A3",   default=True)
+    Use_A4: bpy.props.BoolProperty(name="Use A4",   default=True)
+    Use_CA: bpy.props.BoolProperty(name="Use CA",   default=True)
+    Use_DE: bpy.props.BoolProperty(name="Use DE",   default=True)
+    Use_GH: bpy.props.BoolProperty(name="Use GH",   default=True)
+    Use_GU: bpy.props.BoolProperty(name="Use GU",   default=True)
+    Use_SC: bpy.props.BoolProperty(name="Use SC",   default=True)
+    Use_SD: bpy.props.BoolProperty(name="Use SD",   default=True)
+    Use_SL: bpy.props.BoolProperty(name="Use SL",   default=True)
+    Use_SP: bpy.props.BoolProperty(name="Use SP",   default=True)
+    Use_TW: bpy.props.BoolProperty(name="Use TW",   default=True)
+    Use_WK: bpy.props.BoolProperty(name="Use WK",   default=True)
+    # Boolean toggles to render each weapon animation with the selected creature animation.
+    Use_A:  bpy.props.BoolProperty(name="Use A",    default=False)
+    Use_B:  bpy.props.BoolProperty(name="Use B",    default=False)
+    Use_C:  bpy.props.BoolProperty(name="Use C",    default=False)
+    Use_D:  bpy.props.BoolProperty(name="Use D",    default=False)
+    Use_F:  bpy.props.BoolProperty(name="Use F",    default=False)
+    Use_H:  bpy.props.BoolProperty(name="Use H",    default=False)
+    Use_M:  bpy.props.BoolProperty(name="Use M",    default=False)
+    Use_S:  bpy.props.BoolProperty(name="Use S",    default=False)
+    Use_W:  bpy.props.BoolProperty(name="Use W",    default=False)
+    Use_Q:  bpy.props.BoolProperty(name="Use Q",    default=False)
+    
     # --- Step 5: Render
     # Reserved/None
 
@@ -158,6 +185,11 @@ class IEAS_OT_ShadingNodes(Operator):
         # Retrieves existing nodes by their names from the active material's node tree.
         Principled_BSDF = activeMaterial.node_tree.nodes.get(Principled_BSDF_name)
         Material_Output = activeMaterial.node_tree.nodes.get(Material_Output_name)
+                
+        # TODO:Sanity chekc needs Testing
+#        if not Principled_BSDF or not Material_Output:
+#            self.report({'ERROR'}, "Principled BSDF or Material Output node not found. Please check names in settings.")
+#            return {'CANCELLED'}
         
         # Creates the new nodes (Mix Shader and Bright/Contrast) and positions them near the Principled BSDF node.
         x           = 0
@@ -206,10 +238,10 @@ class IEAS_OT_Final(Operator):
             'east': context.scene.IEAS_properties.East,    'south_east': context.scene.IEAS_properties.South_East
         }
         cameraPosToggles = {
-            'south': context.scene.IEAS_properties.Use_S,  'south_west': context.scene.IEAS_properties.Use_SW,
-            'west': context.scene.IEAS_properties.Use_W,   'north_west': context.scene.IEAS_properties.Use_NW,
-            'north': context.scene.IEAS_properties.Use_N,  'north_east': context.scene.IEAS_properties.Use_NE,
-            'east': context.scene.IEAS_properties.Use_E,   'south_east': context.scene.IEAS_properties.Use_SE
+            'south': context.scene.IEAS_properties.Use_SO,  'south_west': context.scene.IEAS_properties.Use_SW,
+            'west': context.scene.IEAS_properties.Use_WE,   'north_west': context.scene.IEAS_properties.Use_NW,
+            'north': context.scene.IEAS_properties.Use_NO,  'north_east': context.scene.IEAS_properties.Use_NE,
+            'east': context.scene.IEAS_properties.Use_ES,   'south_east': context.scene.IEAS_properties.Use_SE
         }
         # Dictionary mapping internal keys to rotation angles in degrees.
         cameraAngles = {
@@ -229,7 +261,7 @@ class IEAS_OT_Final(Operator):
             'SL': context.scene.IEAS_properties.Sleep,      'SP': context.scene.IEAS_properties.Conjure,
             'TW': context.scene.IEAS_properties.Dead,       'WK': context.scene.IEAS_properties.Walk,            
         }
-        animationToggle = {
+        animationToggles = {
             'A1': context.scene.IEAS_properties.Use_A1,     'A2': context.scene.IEAS_properties.Use_A2,
             'A3': context.scene.IEAS_properties.Use_A3,     'A4': context.scene.IEAS_properties.Use_A4,
             'CA': context.scene.IEAS_properties.Use_CA,     'DE': context.scene.IEAS_properties.Use_DE,
@@ -238,6 +270,33 @@ class IEAS_OT_Final(Operator):
             'SL': context.scene.IEAS_properties.Use_SL,     'SP': context.scene.IEAS_properties.Use_SP,
             'TW': context.scene.IEAS_properties.Use_TW,     'WK': context.scene.IEAS_properties.Use_WK,            
         }
+        animationWeaponFolderNames = {
+            'A': context.scene.IEAS_properties.Axe,     'B': context.scene.IEAS_properties.Bow,
+            'C': context.scene.IEAS_properties.Club,    'D': context.scene.IEAS_properties.Dagger,
+            'F': context.scene.IEAS_properties.Flail,   'H': context.scene.IEAS_properties.Halberd,
+            'M': context.scene.IEAS_properties.Mace,    'S': context.scene.IEAS_properties.Sword,
+            'W': context.scene.IEAS_properties.Warhammer, 'Q': context.scene.IEAS_properties.Quarterstaff,          
+        }
+        animationWeaponToggles = {
+            'A': context.scene.IEAS_properties.Use_A,   'B': context.scene.IEAS_properties.Use_B,
+            'C': context.scene.IEAS_properties.Use_C,   'D': context.scene.IEAS_properties.Use_D,
+            'F': context.scene.IEAS_properties.Use_F,   'H': context.scene.IEAS_properties.Use_H,
+            'M': context.scene.IEAS_properties.Use_M,   'S': context.scene.IEAS_properties.Use_S,
+            'W': context.scene.IEAS_properties.Use_W,   'Q': context.scene.IEAS_properties.Use_Q,          
+        }
+        # ----- Init varibales
+        CreatureCollectionName  = context.scene.IEAS_properties.Creature
+        WeaponCollectionsToggle = context.scene.IEAS_properties.Use_Weapons
+        axis_Z                  = 2
+        originalLocation        = bpy.context.active_object.rotation_euler[axis_Z]
+        
+        # ----- Deactivates/Activates collections        
+        if (WeaponCollectionsToggle == True):
+            # Deactivates every collection found                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection
+            bpy.context.view_layer.layer_collection.children[CreatureCollectionName].exclude = False
         
         # ----- Filename and path
         # Retrieves the base save path from user input.            
@@ -259,11 +318,15 @@ class IEAS_OT_Final(Operator):
         # TODO: Delete print
         print("--------IEAS_OT_Final----------")
         # TODO: Delete print
+        print("CreatureCollectionName:",CreatureCollectionName)
+        # TODO: Delete print
+        print("WeaponCollectionsToggle:",WeaponCollectionsToggle)
+        # TODO: Delete print
         print("pathSaveAt:",pathSaveAt)
         # TODO: Delete print
         print("prefixResref:",prefixResref)
         # TODO: Delete print
-        print("Object List:",context.scene.IEAS_properties.Object_List.name)
+        print("Object List:",context.scene.IEAS_properties.Object_List.name)        
         
         # ----- Main/Outer loop 
         # Iterates through each defined animation.  
@@ -273,7 +336,7 @@ class IEAS_OT_Final(Operator):
             currentAction = bpy.context.active_object.animation_data.action
             
             # Proceeds only if the animation is enabled by the user and the action exists in Blender. 
-            if(animationToggle[animationKey] == True and currentAction != None):
+            if(animationToggles[animationKey] == True and currentAction != None):
                
                 # Assigns the current animation action to the active object's animation data.
                 bpy.context.active_object.animation_data.action = bpy.data.actions.get(animation)               
@@ -281,7 +344,7 @@ class IEAS_OT_Final(Operator):
                 # to prevent rendering empty frames beyond the action's actual length.
                 bpy.context.scene.frame_end = int(bpy.context.active_object.animation_data.action.frame_range[1])     
                 # Constructs the base folder path for the current animation.
-                animation_folder = os.path.join(pathSaveAt, animation)
+                animation_folder = os.path.join(pathSaveAt, "00-"+animation)
                 
                 # ----- Debugging
                 # TODO: Delete print
@@ -307,7 +370,7 @@ class IEAS_OT_Final(Operator):
                             
                         # Rotates the active object (the character/model) around its Z-axis to face the current direction.
                         # The script rotates the subject, relying on a static camera to capture it, rather than rotating the camera itself.
-                        bpy.context.active_object.rotation_euler[2] = math.radians(cameraAngles[positionKey])
+                        bpy.context.active_object.rotation_euler[axis_Z] = math.radians(cameraAngles[positionKey])
                         
                         # ----- Debugging
                         # TODO: Delete print
@@ -354,6 +417,94 @@ class IEAS_OT_Final(Operator):
                             print("filepath:",bpy.context.scene.render.filepath)
                             # TODO: Delete print
                             print("action:",bpy.context.active_object.animation_data.action)
+                            
+                            
+                            # ----- Deactivates/Activates collections        
+                            if (WeaponCollectionsToggle == True):
+                                
+                                # Stores the initial 'holdout' state of the creature collection before modification.
+                                # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
+                                holdout = bpy.context.view_layer.layer_collection.children[CreatureCollectionName].holdout
+                                
+                                # ----- Debugging
+                                # TODO: Delete print
+                                print("holdout:",holdout)
+                                                                
+                                # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
+                                # This ensures only weapon sprites are rendered when collections are toggled.
+                                if ( holdout == False):
+                                    # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                                    bpy.context.view_layer.layer_collection.children[CreatureCollectionName].holdout = True
+                                
+                                # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+                                for collection in bpy.context.view_layer.layer_collection.children:
+                                    collectionName  = collection.name
+                                    # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
+                                    # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
+                                    wovl = next((key for key,value in animationWeaponFolderNames.items() if value == collectionName), None)
+                                    
+                                     # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                                    if ( (wovl != None) and (animationWeaponToggles[wovl] == True) ):
+                                        # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                                        # All other weapon collections remain excluded (invisible) by default.
+                                        collection.exclude=False
+                                        
+                                        # Constructs the base output folder path for the current weapon.
+                                        weapon_folder = os.path.join(pathSaveAt, collectionName)
+                                        
+                                        # Creates a subfolder for the specific weapon and camera angle
+                                        weapon_position_folder = os.path.join(weapon_folder, positionKey)                  
+                                        if not os.path.exists(weapon_position_folder):
+                                            os.makedirs(weapon_position_folder)
+                                        
+                                        # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                                        # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                                        if(positionKey == 'east' or positionKey == 'south_east' or positionKey == 'north_east'):                     
+                                            fileName = f"{prefixResref}{wovl}{animationKey}E_{positionKey}_{str(frame).zfill(5)}.png"
+                                        else:
+                                            fileName = f"{prefixResref}{wovl}{animationKey}_{positionKey}_{str(frame).zfill(5)}.png"
+                                            
+                                        # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                                        bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)
+                                        
+                                        # This is the actual rendering process.
+                                        # `animation=False` renders a single still image.
+                                        # `write_still=True` saves the rendered image to the specified `filepath`.
+                                        # The first `False` argument disables undo support for the operation.
+                                        renderFrame(  False,
+                                                      animation     =False,
+                                                      write_still   =True)
+
+                                        # ----- Debugging
+                                        # TODO: Delete print
+                                        #print("position_folder:",position_folder)
+                                        # TODO: Delete print
+                                        print("fileName:",fileName)
+                                        # TODO: Delete print
+                                        print("weapon_folder:",weapon_folder)
+                                        # TODO: Delete print
+                                        print("weapon_position_folder:",weapon_position_folder)
+                                        
+                                        
+                                        # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                                        # This ensures only one weapon collection is active at any given time for subsequent renders.
+                                        collection.exclude = True
+ 
+                                    # ----- Debugging
+                                    # TODO: Delete print
+                                    print("collectionName:",collectionName)
+                                    # TODO: Delete print
+                                    print("wovl:",wovl)
+                                
+                                # Resets the 'holdout' state of the creature collection to its original value.
+                                # This ensures the creature is visible again after weapon rendering is complete, if it was originally visible.
+                                if (holdout == False):
+                                    # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                                    bpy.context.view_layer.layer_collection.children[CreatureCollectionName].holdout = False                           
+        
+        
+        # Restore the object's Z-axis rotation to its original state
+        bpy.context.active_object.rotation_euler[axis_Z] = originalLocation 
         
         # ----- Debugging
         # TODO: Delete print
@@ -407,13 +558,22 @@ class IEAS_PT_GlobalParameters(Panel):
     # This method draws the UI elements for global rendering parameters.
     def draw(self, context):
         # Instances by pointers: Draws UI elements linked to the properties defined in IEAS_PGT_Inputs.
-        self.layout.prop(context.scene.IEAS_properties, "Save_at")
-        self.layout.prop(context.scene.IEAS_properties, "Prefix")
-        self.layout.prop(context.scene.IEAS_properties, "Resref")
-        self.layout.prop(context.scene.IEAS_properties, "Object_List")
-        self.layout.prop(context.scene.IEAS_properties, "Resolution_X")
-        self.layout.prop(context.scene.IEAS_properties, "Resolution_Y")
-        self.layout.prop(context.scene.IEAS_properties, "Every_X_Frame")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Save_at")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Prefix")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Resref")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Object_List")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Use_Weapons")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Resolution_X")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Resolution_Y")
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Every_X_Frame")
         
  
 # --------
@@ -472,7 +632,7 @@ class IEAS_PT_Camera(Panel):
         # Creates rows for each direction, displaying the subfolder name input and a toggle.       
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "South")
-        row.prop(context.scene.IEAS_properties, "Use_S")
+        row.prop(context.scene.IEAS_properties, "Use_SO")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "South_West")
@@ -480,7 +640,7 @@ class IEAS_PT_Camera(Panel):
                
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "West")
-        row.prop(context.scene.IEAS_properties, "Use_W")
+        row.prop(context.scene.IEAS_properties, "Use_WE")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "North_West")
@@ -488,7 +648,7 @@ class IEAS_PT_Camera(Panel):
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "North")
-        row.prop(context.scene.IEAS_properties, "Use_N")
+        row.prop(context.scene.IEAS_properties, "Use_NO")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "North_East")
@@ -496,7 +656,7 @@ class IEAS_PT_Camera(Panel):
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "East")
-        row.prop(context.scene.IEAS_properties, "Use_E")
+        row.prop(context.scene.IEAS_properties, "Use_ES")
         
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "South_East")
@@ -522,8 +682,7 @@ class IEAS_PT_Animation(Panel):
     bl_options      = {'DEFAULT_CLOSED'}
     # --- Blender specific function which places elements into GUI
     # This method draws the UI elements for animation selection and naming.
-    def draw(self, context):
-            
+    def draw(self, context):          
         # Creates rows for each animation, displaying the name input and a toggle.  
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Attack1")
@@ -585,6 +744,71 @@ class IEAS_PT_Animation(Panel):
 # --------
 # Purpose:
 # --------
+# This panel defines which weapon animations (Blender Collection) should be rendered
+# and how their corresponding output folders/filenames will be named.
+# ----------------------------------------------------------------------------------
+class IEAS_PT_Weapons(Panel):
+    """This panel defines which weapon animations (Blender Collection) should be rendered and how they are named in the output."""
+    
+    # --- Blender specific class variables
+    bl_label        = "Weapon Collections"
+    bl_idname       = 'IEAS_PT_Weapons'
+    bl_space_type   = 'VIEW_3D'
+    bl_region_type  = 'UI'
+    bl_category     = "IE AutoSpriter"
+    bl_parent_id    = 'IEAS_PT_Animation'
+    bl_options      = {'DEFAULT_CLOSED'}
+    # --- Blender specific function which places elements into GUI
+    # This method draws the UI elements for animation selection and naming.
+    def draw(self, context):
+        row = self.layout.row()
+        row.prop(context.scene.IEAS_properties, "Creature")    
+        # Creates rows for each weapon, displaying the name input and a toggle.  
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Axe")
+        row.prop(context.scene.IEAS_properties, "Use_A")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Bow")
+        row.prop(context.scene.IEAS_properties, "Use_B")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Club")
+        row.prop(context.scene.IEAS_properties, "Use_C")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Dagger")
+        row.prop(context.scene.IEAS_properties, "Use_D")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Flail")
+        row.prop(context.scene.IEAS_properties, "Use_F")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Halberd")
+        row.prop(context.scene.IEAS_properties, "Use_H")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Mace")
+        row.prop(context.scene.IEAS_properties, "Use_M")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Sword")
+        row.prop(context.scene.IEAS_properties, "Use_S")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Warhammer")
+        row.prop(context.scene.IEAS_properties, "Use_W")
+        
+        row = self.layout.box().row()
+        row.prop(context.scene.IEAS_properties, "Quarterstaff")
+        row.prop(context.scene.IEAS_properties, "Use_Q")
+        
+
+
+# --------
+# Purpose:
+# --------
 # This final panel contains the button to start the sprite rendering process.
 # ---------------------------------------------------------------------------
 class IEAS_PT_Final(Panel):
@@ -621,6 +845,7 @@ def register():
     bpy.utils.register_class(IEAS_PT_ShadingNodes)
     bpy.utils.register_class(IEAS_PT_Camera)
     bpy.utils.register_class(IEAS_PT_Animation)
+    bpy.utils.register_class(IEAS_PT_Weapons)
     bpy.utils.register_class(IEAS_PT_Final)
     
     # Pointers: Registers the PropertyGroup to the scene, making its properties accessible via `bpy.context.scene.IEAS_properties`.
@@ -641,6 +866,7 @@ def unregister():
     bpy.utils.unregister_class(IEAS_PT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_PT_Camera)
     bpy.utils.unregister_class(IEAS_PT_Animation)
+    bpy.utils.unregister_class(IEAS_PT_Weapons)
     bpy.utils.unregister_class(IEAS_PT_Final)
     del bpy.types.Scene.IEAS_properties
     
