@@ -33,6 +33,7 @@ The 4.0 blend save files contain the appropriate settings.
 ## Guides
 The functions are explained in detail in the manual.
 * [manula.pdf](https://github.com/Incrementis/IE-AutoSpriter-/blob/main/manual.pdf)
+* Please note that the demos are not intended as a guide or tutorial. They are intended ONLY to demonstrate/test the features of IE Autospriter.
 
 ## Operating Systems
 * Windows 11

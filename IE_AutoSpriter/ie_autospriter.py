@@ -26,7 +26,7 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 11, 2),
+    "version": (0, 11, 9),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -284,10 +284,22 @@ class IEAS_OT_Final(Operator):
             'M': context.scene.IEAS_properties.Use_M,   'S': context.scene.IEAS_properties.Use_S,
             'W': context.scene.IEAS_properties.Use_W,   'Q': context.scene.IEAS_properties.Use_Q,          
         }
-        # ----- Init varibales
+        # ----- Init varibales(oder is relevant)
+        # Retrieves the name of the creature collection from the UI settings.
         CreatureCollectionName  = context.scene.IEAS_properties.Creature
+        # Retrieves the toggle state for weapon collections from the UI.
         WeaponCollectionsToggle = context.scene.IEAS_properties.Use_Weapons
+        # Activates creature collection to recieve original location and armature.
+        bpy.context.view_layer.layer_collection.children[CreatureCollectionName].exclude = False
+        # Retrieves the name of the object selected in the UI.        
+        objectName = context.scene.IEAS_properties.Object_List.name
+        # Selects the specific object by setting its selection state to True.
+        bpy.context.scene.objects[objectName].select_set(True)
+        # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
+        bpy.context.view_layer.objects.active = bpy.data.objects[objectName]
+        # The index '2' corresponds to the Z-axis in Blender's rotation_euler tuple.        
         axis_Z                  = 2
+        # Stores the object's initial Z-axis rotation to be restored at the end of the method.
         originalLocation        = bpy.context.active_object.rotation_euler[axis_Z]
         
         # ----- Deactivates/Activates collections        
@@ -307,8 +319,6 @@ class IEAS_OT_Final(Operator):
         # ----- Deselecting and selecting
         # Deselects all objects in the scene to ensure only the target object is affected.
         bpy.ops.object.select_all(action='DESELECT')
-        # Retrieves the name of the object selected in the UI.        
-        objectName = context.scene.IEAS_properties.Object_List.name
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
         # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
@@ -451,7 +461,6 @@ class IEAS_OT_Final(Operator):
                                         
                                         # Constructs the base output folder path for the current weapon.
                                         weapon_folder = os.path.join(pathSaveAt, collectionName)
-                                        
                                         weapon_animation_folder = os.path.join(weapon_folder, animation)
                                         
                                         # Creates a subfolder for the specific weapon and camera angle
