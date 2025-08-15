@@ -12,6 +12,7 @@
 from bpy.types import Panel
 from bpy.types import PropertyGroup
 from bpy.types import Operator
+from dataclasses import dataclass, replace
 import bpy
 import os
 import math
@@ -32,6 +33,147 @@ bl_info = {
     "category": "Render",
     "description": "Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations for IE games. GitHub:https://github.com/Incrementis/IE-AutoSpriter- ",
 }
+
+# --------
+# Purpose:
+# --------
+# Contains parameters for the class IEAS_AnimationTypes 
+# -----------------------------------------------------
+@dataclass
+class IEAS_AnimationTypesParameters:
+    """Contains parameters for the class IEAS_AnimationTypes"""
+    exclude:                    bool    # Deactivates every collection and activates only creature collection.
+    CreatureCollectionName:     str     # The name of the main creature's collection.
+    animationWeaponFolderNames: dict    # Maps weapon keys to collection names.
+    animationWeaponToggles:     dict    # Toggles rendering for specific weapons.
+    pathSaveAt:                 str     # The output file path for rendered sprites.
+    animation:                  str     # The current animation name (e.g., "dead").
+    positionKey:                str     # The camera angle/direction key (e.g., "south").
+    animationKey:               str     # A short key for the animation (e.g., "TW").
+    frame:                      int     # The current frame number.
+    prefixResref:               str     # The combined filename prefix and resref.   
+
+# --------
+# Purpose:
+# --------
+# Collection of methods for preparing animation types for rendering 
+# -----------------------------------------------------------------
+class IEAS_AnimationTypes():
+    """Contains methods for handling different animation types before rendering"""
+    
+    # --- TODO: Methods
+    def type0000(self):
+        """Method for handling 0000 type logic."""
+        print("Executing complex logic for 0000 type.")
+    
+    def type9000(self):
+        """Method for handling 9000 type logic."""
+        print("Executing complex logic for 9000 type.")
+        
+    def typeB000(self):
+        """Method for handling B000 type logic."""
+        print("Executing complex logic for B000 type.")
+        
+    def typeE000(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling E000 type logic."""     
+        #   ----- Deactivates/Activates collections      
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("typeE000: Executing 'exclude' logic for E000 type.")   
+        else:
+            # TODO:Delete!
+            print("typeE000: Executing complex logic for E000 type.")             
+            # Stores the initial 'holdout' state of the creature collection before modification.
+            # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
+            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            
+            # ----- Debugging
+            # TODO: Delete print
+            print("holdout:",holdout)
+                                            
+            # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
+            # This ensures only weapon sprites are rendered when collections are toggled.
+            if (holdout == False):
+                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = True
+            
+            # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collectionName  = collection.name
+                # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
+                # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
+                wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
+                
+                 # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
+                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                    # All other weapon collections remain excluded (invisible) by default.
+                    collection.exclude=False
+                    
+                    # Constructs the base output folder path for the current weapon.
+                    weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
+                    weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
+                    
+                    # Creates a subfolder for the specific weapon and camera angle.
+                    weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
+                    if not os.path.exists(weapon_position_folder):
+                        os.makedirs(weapon_position_folder)
+                    
+                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                    if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    else:
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        
+                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                    bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)
+                    
+                    # This is the actual rendering process.
+                    # `animation=False` renders a single still image.
+                    # `write_still=True` saves the rendered image to the specified `filepath`.
+                    # The first `False` argument disables undo support for the operation.
+                    renderFrame = bpy.ops.render.render
+                    renderFrame(  False,
+                                  animation     =False,
+                                  write_still   =True)
+
+                    # ----- Debugging
+                    # TODO: Delete print
+                    #print("position_folder:",position_folder)
+                    # TODO: Delete print
+                    print("fileName:",fileName)
+                    # TODO: Delete print
+                    print("weapon_folder:",weapon_folder)
+                    # TODO: Delete print
+                    print("weapon_position_folder:",weapon_position_folder)
+                    
+                    
+                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                    # This ensures only one weapon collection is active at any given time for subsequent renders.
+                    collection.exclude = True
+ 
+                # ----- Debugging
+                # TODO: Delete print
+                print("collectionName:",collectionName)
+                # TODO: Delete print
+                print("wovl:",wovl)
+            
+            # Resets the 'holdout' state of the creature collection to its original value.
+            # This ensures the creature is visible again after weapon rendering is complete, if it was originally visible.
+            if (holdout == False):
+                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False 
+                  
+        
+    def typeNone(self):
+        """Method for handling no type logic."""
+        print("No type.")
 
 
 # --------
@@ -56,8 +198,17 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                 name="Object List", # Label for the UI element
                                                 description="Select the armature to be used to apply rendering." # Tooltip
                                                 )
-    # Enables the use of weapon collections in the animation step
-    Use_Weapons:  bpy.props.BoolProperty(name="Use Weapon Collections", default=False)
+    # (unique identifier, property name, property description, icon identifier, number)
+    Type:         bpy.props.EnumProperty(
+                                            items=[
+                                                ('0000/4000', '0000/4000','','',0),
+                                                ('9000','9000','','',1),
+                                                ('B000/C000','B000/C000','','',2),
+                                                ('E000','E000','','',3),
+                                                ('unique identifier', 'property name', 'property description', 'icon identifier', 4),
+                                            ],
+                                            default='E000'
+                                            )
     # Integer property for the render resolution in X-dimension.
     Resolution_X:   bpy.props.IntProperty(name="Resolution X",default=256, min=1)
     # Integer property for the render resolution in Y-dimension.
@@ -228,7 +379,17 @@ class IEAS_OT_Final(Operator):
     # Blender specific function which is executed in this case when RENDER button is pressed
     def execute(self, context):
         # ---- Start timer
-        startTimer = time.time()    
+        startTimer = time.time()
+        
+        # ----- Global
+        animationTypeHandlers = {
+            '0000/4000':    IEAS_AnimationTypes().type0000,
+            '9000':         IEAS_AnimationTypes().type9000,
+            'B000/C000':    IEAS_AnimationTypes().typeB000,
+            'E000':         IEAS_AnimationTypes().typeE000,
+            'unique identifier': False,
+        }
+                   
         # ---- Camera
         # Dictionaries mapping internal keys to user-defined subfolder names and toggle states for camera angles.
         cameraPosFolderNames = {
@@ -250,6 +411,7 @@ class IEAS_OT_Final(Operator):
             'north':180,    'north_east': 135,
             'east': 90,     'south_east': 45
         }
+        
         # ----- Animation
         # Dictionaries mapping internal keys to user-defined animation names and toggle states.
         animationFolderNames = {
@@ -284,11 +446,18 @@ class IEAS_OT_Final(Operator):
             'M': context.scene.IEAS_properties.Use_M,   'S': context.scene.IEAS_properties.Use_S,
             'W': context.scene.IEAS_properties.Use_W,   'Q': context.scene.IEAS_properties.Use_Q,          
         }
+        
+        # ----- Filename and path
+        # Retrieves the base save path from user input.            
+        pathSaveAt = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
+        # Combines prefix and resref for use in filename construction.      
+        prefixResref = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
+        
         # ----- Init varibales(oder is relevant)
-        # Retrieves the name of the creature collection from the UI settings.
-        CreatureCollectionName  = context.scene.IEAS_properties.Creature
-        # Retrieves the toggle state for weapon collections from the UI.
-        WeaponCollectionsToggle = context.scene.IEAS_properties.Use_Weapons
+        # Retrieves the animation type name of the type list from the UI settings.
+        selectedType            = context.window_manager.IEAS_properties.Type
+        # TODO: DELETE CreatureCollectionName
+        CreatureCollectionName  = context.scene.IEAS_properties.Creature    
         # Activates creature collection to recieve original location and armature.
         bpy.context.view_layer.layer_collection.children[CreatureCollectionName].exclude = False
         # Retrieves the name of the object selected in the UI.        
@@ -301,21 +470,24 @@ class IEAS_OT_Final(Operator):
         axis_Z                  = 2
         # Stores the object's initial Z-axis rotation to be restored at the end of the method.
         originalLocation        = bpy.context.active_object.rotation_euler[axis_Z]
-        
-        # ----- Deactivates/Activates collections        
-        if (WeaponCollectionsToggle == True):
-            # Deactivates every collection found                   
-            for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
-            # Activates only creature collection
-            bpy.context.view_layer.layer_collection.children[CreatureCollectionName].exclude = False
-        
-        # ----- Filename and path
-        # Retrieves the base save path from user input.            
-        pathSaveAt = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
-        # Combines prefix and resref for use in filename construction.      
-        prefixResref = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
-                
+        # TODO: need comment
+        typeParameters = IEAS_AnimationTypesParameters(
+            exclude                     = True,
+            # Retrieves the name of the creature collection from the UI settings.
+            CreatureCollectionName      = context.scene.IEAS_properties.Creature,
+            animationWeaponFolderNames  = animationWeaponFolderNames,
+            animationWeaponToggles      = animationWeaponToggles,
+            pathSaveAt                  = pathSaveAt,
+            animation                   = "",
+            positionKey                 = "",
+            animationKey                = "",
+            frame                       = 0,
+            prefixResref                = prefixResref
+        )
+        # Get the method from the dictionary, defaulting to a general handler if not found
+        handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
+        handler_method(typeParameters) 
+                        
         # ----- Deselecting and selecting
         # Deselects all objects in the scene to ensure only the target object is affected.
         bpy.ops.object.select_all(action='DESELECT')
@@ -330,14 +502,14 @@ class IEAS_OT_Final(Operator):
         # TODO: Delete print
         print("CreatureCollectionName:",CreatureCollectionName)
         # TODO: Delete print
-        print("WeaponCollectionsToggle:",WeaponCollectionsToggle)
-        # TODO: Delete print
         print("pathSaveAt:",pathSaveAt)
         # TODO: Delete print
         print("prefixResref:",prefixResref)
         # TODO: Delete print
-        print("Object List:",context.scene.IEAS_properties.Object_List.name)        
-        
+        print("Object List:",context.scene.IEAS_properties.Object_List.name) 
+        # TODO: Delete print      
+        print("selectedType:",selectedType)
+
         # ----- Main/Outer loop 
         # Iterates through each defined animation.  
         for animationKey, animation in animationFolderNames.items():
@@ -428,90 +600,19 @@ class IEAS_OT_Final(Operator):
                             # TODO: Delete print
                             print("action:",bpy.context.active_object.animation_data.action)
                             
+                            # TODO: need comment
+                            typeParametersUpdated = replace(
+                                typeParameters,
+                                exclude                     = False,
+                                animation                   = animation,
+                                positionKey                 = positionKey,
+                                animationKey                = animationKey, 
+                                frame                       = frame
+                            )
                             
-                            # ----- Deactivates/Activates collections        
-                            if (WeaponCollectionsToggle == True):
-                                
-                                # Stores the initial 'holdout' state of the creature collection before modification.
-                                # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
-                                holdout = bpy.context.view_layer.layer_collection.children[CreatureCollectionName].holdout
-                                
-                                # ----- Debugging
-                                # TODO: Delete print
-                                print("holdout:",holdout)
-                                                                
-                                # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
-                                # This ensures only weapon sprites are rendered when collections are toggled.
-                                if ( holdout == False):
-                                    # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
-                                    bpy.context.view_layer.layer_collection.children[CreatureCollectionName].holdout = True
-                                
-                                # Iterates through all top-level collections in the current view layer to manage their visibility.                   
-                                for collection in bpy.context.view_layer.layer_collection.children:
-                                    collectionName  = collection.name
-                                    # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
-                                    # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
-                                    wovl = next((key for key,value in animationWeaponFolderNames.items() if value == collectionName), None)
-                                    
-                                     # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
-                                    if ( (wovl != None) and (animationWeaponToggles[wovl] == True) ):
-                                        # Deactivates exclusion for the current weapon collection, making it visible for rendering.
-                                        # All other weapon collections remain excluded (invisible) by default.
-                                        collection.exclude=False
-                                        
-                                        # Constructs the base output folder path for the current weapon.
-                                        weapon_folder = os.path.join(pathSaveAt, collectionName)
-                                        weapon_animation_folder = os.path.join(weapon_folder, animation)
-                                        
-                                        # Creates a subfolder for the specific weapon and camera angle
-                                        weapon_position_folder = os.path.join(weapon_animation_folder, positionKey)                  
-                                        if not os.path.exists(weapon_position_folder):
-                                            os.makedirs(weapon_position_folder)
-                                        
-                                        # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                                        # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                                        if(positionKey == 'east' or positionKey == 'south_east' or positionKey == 'north_east'):                     
-                                            fileName = f"{prefixResref}{wovl}{animationKey}E_{positionKey}_{str(frame).zfill(5)}.png"
-                                        else:
-                                            fileName = f"{prefixResref}{wovl}{animationKey}_{positionKey}_{str(frame).zfill(5)}.png"
-                                            
-                                        # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
-                                        bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)
-                                        
-                                        # This is the actual rendering process.
-                                        # `animation=False` renders a single still image.
-                                        # `write_still=True` saves the rendered image to the specified `filepath`.
-                                        # The first `False` argument disables undo support for the operation.
-                                        renderFrame(  False,
-                                                      animation     =False,
-                                                      write_still   =True)
-
-                                        # ----- Debugging
-                                        # TODO: Delete print
-                                        #print("position_folder:",position_folder)
-                                        # TODO: Delete print
-                                        print("fileName:",fileName)
-                                        # TODO: Delete print
-                                        print("weapon_folder:",weapon_folder)
-                                        # TODO: Delete print
-                                        print("weapon_position_folder:",weapon_position_folder)
-                                        
-                                        
-                                        # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
-                                        # This ensures only one weapon collection is active at any given time for subsequent renders.
-                                        collection.exclude = True
- 
-                                    # ----- Debugging
-                                    # TODO: Delete print
-                                    print("collectionName:",collectionName)
-                                    # TODO: Delete print
-                                    print("wovl:",wovl)
-                                
-                                # Resets the 'holdout' state of the creature collection to its original value.
-                                # This ensures the creature is visible again after weapon rendering is complete, if it was originally visible.
-                                if (holdout == False):
-                                    # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
-                                    bpy.context.view_layer.layer_collection.children[CreatureCollectionName].holdout = False                           
+                            # Get the method from the dictionary, defaulting to a general handler if not found
+                            handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
+                            handler_method(typeParametersUpdated)                        
         
         
         # Restore the object's Z-axis rotation to its original state
@@ -576,9 +677,10 @@ class IEAS_PT_GlobalParameters(Panel):
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Resref")
         row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Object_List")
+        # "True" displayes as radio buttons, not as drop-down list
+        row.prop(context.window_manager.IEAS_properties, 'Type', expand=False)
         row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Use_Weapons")
+        row.prop(context.scene.IEAS_properties, "Object_List")
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Resolution_X")
         row = self.layout.row()
@@ -586,7 +688,10 @@ class IEAS_PT_GlobalParameters(Panel):
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Every_X_Frame")
         
- 
+        
+
+
+         
 # --------
 # Purpose:
 # --------
@@ -860,7 +965,9 @@ def register():
     bpy.utils.register_class(IEAS_PT_Final)
     
     # Pointers: Registers the PropertyGroup to the scene, making its properties accessible via `bpy.context.scene.IEAS_properties`.
-    bpy.types.Scene.IEAS_properties = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
+    bpy.types.Scene.IEAS_properties         = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
+    bpy.types.WindowManager.IEAS_properties = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
+
     
 
 # --------
@@ -879,7 +986,10 @@ def unregister():
     bpy.utils.unregister_class(IEAS_PT_Animation)
     bpy.utils.unregister_class(IEAS_PT_Weapons)
     bpy.utils.unregister_class(IEAS_PT_Final)
+    
+    # Deletes pointer
     del bpy.types.Scene.IEAS_properties
+    del bpy.types.WindowManager.IEAS_properties
     
 
 # --------
