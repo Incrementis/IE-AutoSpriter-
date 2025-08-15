@@ -1,14 +1,19 @@
 # Never Forget: Comments can "lie", but code not so much ;P
-# Used source: 
+
+# Used source:
+# ------------
 # https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html#your-first-add-onimport bpy
 # https://docs.blender.org/api/current/bpy.types.Operator.html
 # https://developer.blender.org/docs/release_notes/2.80/python_api/addons/#Naming
 # https://docs.blender.org/api/current/bpy.props.html#bpy.props.PointerProperty
 # https://docs.blender.org/api/current/bpy.ops.object.html#bpy.ops.object.select_all
 # https://docs.blender.org/api/current/bpy.ops.render.html#bpy.ops.render.render
+# https://docs.blender.org/api/current/info_best_practice.html#user-interface-layout
+# ----------------------------------------------------------------------------------
 # (PT   = Panel Type)
 # (OT   = Operator Type)
 # (PGT  = Property Group Type)
+
 from bpy.types import Panel
 from bpy.types import PropertyGroup
 from bpy.types import Operator
@@ -62,21 +67,39 @@ class IEAS_AnimationTypes():
     """Contains methods for handling different animation types before rendering"""
     
     # --- TODO: Methods
-    def type0000(self):
+    def type0000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 0000 type logic."""
+        pass
+        # TODO: Delete print
         print("Executing complex logic for 0000 type.")
     
-    def type9000(self):
+    def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling 4000 type logic."""
+        pass
+        # TODO: Delete print
+        print("Executing complex logic for 4000 type.")
+    
+    def type9000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 9000 type logic."""
+        pass
+        # TODO: Delete print
         print("Executing complex logic for 9000 type.")
         
-    def typeB000(self):
+    def typeB000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling B000 type logic."""
+        pass
+        # TODO: Delete print
         print("Executing complex logic for B000 type.")
+        
+    def typeC000(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling C000 type logic."""
+        pass
+        # TODO: Delete print
+        print("Executing complex logic for C000 type.")
         
     def typeE000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling E000 type logic."""     
-        #   ----- Deactivates/Activates collections      
+        # ----- Deactivates/Activates collections      
         if (typeParameters.exclude == True):
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
@@ -201,11 +224,13 @@ class IEAS_PGT_Inputs(PropertyGroup):
     # (unique identifier, property name, property description, icon identifier, number)
     Type:         bpy.props.EnumProperty(
                                             items=[
-                                                ('0000/4000', '0000/4000','','',0),
-                                                ('9000','9000','','',1),
-                                                ('B000/C000','B000/C000','','',2),
-                                                ('E000','E000','','',3),
-                                                ('unique identifier', 'property name', 'property description', 'icon identifier', 4),
+                                                ('0000','0000','','',0),
+                                                ('4000','4000','','',1),
+                                                ('9000','9000','','',2),
+                                                ('B000','B000','','',3),
+                                                ('C000','C000','','',4),
+                                                ('E000','E000','','',5),
+                                                ('unique identifier', 'property name', 'property description', 'icon identifier', 6),
                                             ],
                                             default='E000'
                                             )
@@ -273,34 +298,39 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Mace:       bpy.props.StringProperty(name="M", default="mace")
     Sword:      bpy.props.StringProperty(name="S", default="sword")
     Warhammer:  bpy.props.StringProperty(name="W", default="warhammer")
-    Quarterstaff: bpy.props.StringProperty(name="Q", default="quarterstaff")    
+    Quarterstaff: bpy.props.StringProperty(name="Q", default="quarterstaff")
+    # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
+    Effect:     bpy.props.StringProperty(name="Effect", default="")
+     
     
     # Boolean toggles for rendering each animation.
-    Use_A1: bpy.props.BoolProperty(name="Use A1",   default=True)
-    Use_A2: bpy.props.BoolProperty(name="Use A2",   default=True)
-    Use_A3: bpy.props.BoolProperty(name="Use A3",   default=True)
-    Use_A4: bpy.props.BoolProperty(name="Use A4",   default=True)
-    Use_CA: bpy.props.BoolProperty(name="Use CA",   default=True)
-    Use_DE: bpy.props.BoolProperty(name="Use DE",   default=True)
-    Use_GH: bpy.props.BoolProperty(name="Use GH",   default=True)
-    Use_GU: bpy.props.BoolProperty(name="Use GU",   default=True)
-    Use_SC: bpy.props.BoolProperty(name="Use SC",   default=True)
-    Use_SD: bpy.props.BoolProperty(name="Use SD",   default=True)
-    Use_SL: bpy.props.BoolProperty(name="Use SL",   default=True)
-    Use_SP: bpy.props.BoolProperty(name="Use SP",   default=True)
-    Use_TW: bpy.props.BoolProperty(name="Use TW",   default=True)
-    Use_WK: bpy.props.BoolProperty(name="Use WK",   default=True)
+    Use_A1:     bpy.props.BoolProperty(name="Use A1",   default=True)
+    Use_A2:     bpy.props.BoolProperty(name="Use A2",   default=True)
+    Use_A3:     bpy.props.BoolProperty(name="Use A3",   default=True)
+    Use_A4:     bpy.props.BoolProperty(name="Use A4",   default=True)
+    Use_CA:     bpy.props.BoolProperty(name="Use CA",   default=True)
+    Use_DE:     bpy.props.BoolProperty(name="Use DE",   default=True)
+    Use_GH:     bpy.props.BoolProperty(name="Use GH",   default=True)
+    Use_GU:     bpy.props.BoolProperty(name="Use GU",   default=True)
+    Use_SC:     bpy.props.BoolProperty(name="Use SC",   default=True)
+    Use_SD:     bpy.props.BoolProperty(name="Use SD",   default=True)
+    Use_SL:     bpy.props.BoolProperty(name="Use SL",   default=True)
+    Use_SP:     bpy.props.BoolProperty(name="Use SP",   default=True)
+    Use_TW:     bpy.props.BoolProperty(name="Use TW",   default=True)
+    Use_WK:     bpy.props.BoolProperty(name="Use WK",   default=True)
     # Boolean toggles to render each weapon animation with the selected creature animation.
-    Use_A:  bpy.props.BoolProperty(name="Use A",    default=False)
-    Use_B:  bpy.props.BoolProperty(name="Use B",    default=False)
-    Use_C:  bpy.props.BoolProperty(name="Use C",    default=False)
-    Use_D:  bpy.props.BoolProperty(name="Use D",    default=False)
-    Use_F:  bpy.props.BoolProperty(name="Use F",    default=False)
-    Use_H:  bpy.props.BoolProperty(name="Use H",    default=False)
-    Use_M:  bpy.props.BoolProperty(name="Use M",    default=False)
-    Use_S:  bpy.props.BoolProperty(name="Use S",    default=False)
-    Use_W:  bpy.props.BoolProperty(name="Use W",    default=False)
-    Use_Q:  bpy.props.BoolProperty(name="Use Q",    default=False)
+    Use_A:      bpy.props.BoolProperty(name="Use A",    default=False)
+    Use_B:      bpy.props.BoolProperty(name="Use B",    default=False)
+    Use_C:      bpy.props.BoolProperty(name="Use C",    default=False)
+    Use_D:      bpy.props.BoolProperty(name="Use D",    default=False)
+    Use_F:      bpy.props.BoolProperty(name="Use F",    default=False)
+    Use_H:      bpy.props.BoolProperty(name="Use H",    default=False)
+    Use_M:      bpy.props.BoolProperty(name="Use M",    default=False)
+    Use_S:      bpy.props.BoolProperty(name="Use S",    default=False)
+    Use_W:      bpy.props.BoolProperty(name="Use W",    default=False)
+    Use_Q:      bpy.props.BoolProperty(name="Use Q",    default=False)
+    # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
+    Use_Effect: bpy.props.BoolProperty(name="Use Effect", default=False)
     
     # --- Step 5: Render
     # Reserved/None
@@ -383,10 +413,12 @@ class IEAS_OT_Final(Operator):
         
         # ----- Global
         animationTypeHandlers = {
-            '0000/4000':    IEAS_AnimationTypes().type0000,
-            '9000':         IEAS_AnimationTypes().type9000,
-            'B000/C000':    IEAS_AnimationTypes().typeB000,
-            'E000':         IEAS_AnimationTypes().typeE000,
+            '0000': IEAS_AnimationTypes().type0000,
+            '4000': IEAS_AnimationTypes().type4000,
+            '9000': IEAS_AnimationTypes().type9000,
+            'B000': IEAS_AnimationTypes().typeB000,
+            'C000': IEAS_AnimationTypes().typeC000,
+            'E000': IEAS_AnimationTypes().typeE000,
             'unique identifier': False,
         }
                    
@@ -415,22 +447,24 @@ class IEAS_OT_Final(Operator):
         # ----- Animation
         # Dictionaries mapping internal keys to user-defined animation names and toggle states.
         animationFolderNames = {
-            'A1': context.scene.IEAS_properties.Attack1,    'A2': context.scene.IEAS_properties.Attack2,
-            'A3': context.scene.IEAS_properties.Attack3,    'A4': context.scene.IEAS_properties.Attack4,
-            'CA': context.scene.IEAS_properties.Cast,       'DE': context.scene.IEAS_properties.Death,
-            'GH': context.scene.IEAS_properties.Get_Hit,    'GU': context.scene.IEAS_properties.Get_Up,
-            'SC': context.scene.IEAS_properties.Ready,      'SD': context.scene.IEAS_properties.Idle,
-            'SL': context.scene.IEAS_properties.Sleep,      'SP': context.scene.IEAS_properties.Conjure,
-            'TW': context.scene.IEAS_properties.Dead,       'WK': context.scene.IEAS_properties.Walk,            
+            'A1':       context.scene.IEAS_properties.Attack1,    'A2': context.scene.IEAS_properties.Attack2,
+            'A3':       context.scene.IEAS_properties.Attack3,    'A4': context.scene.IEAS_properties.Attack4,
+            'CA':       context.scene.IEAS_properties.Cast,       'DE': context.scene.IEAS_properties.Death,
+            'GH':       context.scene.IEAS_properties.Get_Hit,    'GU': context.scene.IEAS_properties.Get_Up,
+            'SC':       context.scene.IEAS_properties.Ready,      'SD': context.scene.IEAS_properties.Idle,
+            'SL':       context.scene.IEAS_properties.Sleep,      'SP': context.scene.IEAS_properties.Conjure,
+            'TW':       context.scene.IEAS_properties.Dead,       'WK': context.scene.IEAS_properties.Walk,
+            'Effect':   context.scene.IEAS_properties.Effect,           
         }
         animationToggles = {
-            'A1': context.scene.IEAS_properties.Use_A1,     'A2': context.scene.IEAS_properties.Use_A2,
-            'A3': context.scene.IEAS_properties.Use_A3,     'A4': context.scene.IEAS_properties.Use_A4,
-            'CA': context.scene.IEAS_properties.Use_CA,     'DE': context.scene.IEAS_properties.Use_DE,
-            'GH': context.scene.IEAS_properties.Use_GH,     'GU': context.scene.IEAS_properties.Use_GU,
-            'SC': context.scene.IEAS_properties.Use_SC,     'SD': context.scene.IEAS_properties.Use_SD,
-            'SL': context.scene.IEAS_properties.Use_SL,     'SP': context.scene.IEAS_properties.Use_SP,
-            'TW': context.scene.IEAS_properties.Use_TW,     'WK': context.scene.IEAS_properties.Use_WK,            
+            'A1':       context.scene.IEAS_properties.Use_A1,     'A2': context.scene.IEAS_properties.Use_A2,
+            'A3':       context.scene.IEAS_properties.Use_A3,     'A4': context.scene.IEAS_properties.Use_A4,
+            'CA':       context.scene.IEAS_properties.Use_CA,     'DE': context.scene.IEAS_properties.Use_DE,
+            'GH':       context.scene.IEAS_properties.Use_GH,     'GU': context.scene.IEAS_properties.Use_GU,
+            'SC':       context.scene.IEAS_properties.Use_SC,     'SD': context.scene.IEAS_properties.Use_SD,
+            'SL':       context.scene.IEAS_properties.Use_SL,     'SP': context.scene.IEAS_properties.Use_SP,
+            'TW':       context.scene.IEAS_properties.Use_TW,     'WK': context.scene.IEAS_properties.Use_WK,
+            'Effect':   context.scene.IEAS_properties.Use_Effect,            
         }
         animationWeaponFolderNames = {
             'A': context.scene.IEAS_properties.Axe,     'B': context.scene.IEAS_properties.Bow,
@@ -798,63 +832,156 @@ class IEAS_PT_Animation(Panel):
     bl_options      = {'DEFAULT_CLOSED'}
     # --- Blender specific function which places elements into GUI
     # This method draws the UI elements for animation selection and naming.
-    def draw(self, context):          
-        # Creates rows for each animation, displaying the name input and a toggle.  
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Attack1")
-        row.prop(context.scene.IEAS_properties, "Use_A1")
+    def draw(self, context):                 
+        # --- Attack1
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_A1
+        row_input.prop(context.scene.IEAS_properties, "Attack1")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_A1")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Attack2")
-        row.prop(context.scene.IEAS_properties, "Use_A2") 
+        # --- Attack2
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_A2
+        row_input.prop(context.scene.IEAS_properties, "Attack2")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_A2")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Attack3")
-        row.prop(context.scene.IEAS_properties, "Use_A3")
+        # --- Attack3
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_A3
+        row_input.prop(context.scene.IEAS_properties, "Attack3")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_A3")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Attack4")
-        row.prop(context.scene.IEAS_properties, "Use_A4")
+        # --- Attack4
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_A4
+        row_input.prop(context.scene.IEAS_properties, "Attack4")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_A4")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Cast")
-        row.prop(context.scene.IEAS_properties, "Use_CA")
+        # --- Cast
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_CA
+        row_input.prop(context.scene.IEAS_properties, "Cast")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_CA")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Death")
-        row.prop(context.scene.IEAS_properties, "Use_DE")
+        # --- Death
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_DE
+        row_input.prop(context.scene.IEAS_properties, "Death")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_DE")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Get_Hit")
-        row.prop(context.scene.IEAS_properties, "Use_GH")
+        # --- Get Hit
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_GH
+        row_input.prop(context.scene.IEAS_properties, "Get_Hit")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_GH")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Get_Up")
-        row.prop(context.scene.IEAS_properties, "Use_GU")
+        # --- Get Up
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_GU
+        row_input.prop(context.scene.IEAS_properties, "Get_Up")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_GU")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Ready")
-        row.prop(context.scene.IEAS_properties, "Use_SC")
+        # --- Ready
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SC
+        row_input.prop(context.scene.IEAS_properties, "Ready")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SC")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Idle")
-        row.prop(context.scene.IEAS_properties, "Use_SD")
+        # --- Idle
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SD
+        row_input.prop(context.scene.IEAS_properties, "Idle")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SD")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Sleep")
-        row.prop(context.scene.IEAS_properties, "Use_SL")
+        # --- Sleep
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SL
+        row_input.prop(context.scene.IEAS_properties, "Sleep")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SL")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Conjure")
-        row.prop(context.scene.IEAS_properties, "Use_SP")
+        # --- Conjure
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SP
+        row_input.prop(context.scene.IEAS_properties, "Conjure")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SP")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Dead")
-        row.prop(context.scene.IEAS_properties, "Use_TW")
+        # --- Dead
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_TW
+        row_input.prop(context.scene.IEAS_properties, "Dead")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_TW")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Walk")
-        row.prop(context.scene.IEAS_properties, "Use_WK")
+        # --- Walk
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_WK
+        row_input.prop(context.scene.IEAS_properties, "Walk")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_WK")
+        
+        # --- Effect
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_Effect
+        row_input.prop(context.scene.IEAS_properties, "Effect")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_Effect")
 
 
 # --------
@@ -878,48 +1005,97 @@ class IEAS_PT_Weapons(Panel):
     # This method draws the UI elements for animation selection and naming.
     def draw(self, context):
         row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "Creature")    
-        # Creates rows for each weapon, displaying the name input and a toggle.  
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Axe")
-        row.prop(context.scene.IEAS_properties, "Use_A")
+        row.prop(context.scene.IEAS_properties, "Creature")   
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Bow")
-        row.prop(context.scene.IEAS_properties, "Use_B")
+        # --- Bow
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_B
+        row_input.prop(context.scene.IEAS_properties, "Bow")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_B")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Club")
-        row.prop(context.scene.IEAS_properties, "Use_C")
+        # --- Club
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_C
+        row_input.prop(context.scene.IEAS_properties, "Club")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_C")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Dagger")
-        row.prop(context.scene.IEAS_properties, "Use_D")
+        # --- Dagger
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_D
+        row_input.prop(context.scene.IEAS_properties, "Dagger")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_D")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Flail")
-        row.prop(context.scene.IEAS_properties, "Use_F")
+        # --- Flail
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_F
+        row_input.prop(context.scene.IEAS_properties, "Flail")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_F")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Halberd")
-        row.prop(context.scene.IEAS_properties, "Use_H")
+        # --- Halberd
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_H
+        row_input.prop(context.scene.IEAS_properties, "Halberd")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_H")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Mace")
-        row.prop(context.scene.IEAS_properties, "Use_M")
+        # --- Mace
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_M
+        row_input.prop(context.scene.IEAS_properties, "Mace")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_M")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Sword")
-        row.prop(context.scene.IEAS_properties, "Use_S")
+        # --- Sword
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_S
+        row_input.prop(context.scene.IEAS_properties, "Sword")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_S")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Warhammer")
-        row.prop(context.scene.IEAS_properties, "Use_W")
+        # --- Warhammer
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_W
+        row_input.prop(context.scene.IEAS_properties, "Warhammer")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_W")
         
-        row = self.layout.box().row()
-        row.prop(context.scene.IEAS_properties, "Quarterstaff")
-        row.prop(context.scene.IEAS_properties, "Use_Q")
-        
+        # --- Quarterstaff
+        split       = self.layout.box().split(factor=0.7)
+        row_input   = split.row() # Right/second column 
+        row_toggle  = split.row() # Left/first column
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_Q
+        row_input.prop(context.scene.IEAS_properties, "Quarterstaff")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_Q")
 
 
 # --------
