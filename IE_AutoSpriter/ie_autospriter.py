@@ -440,23 +440,35 @@ class IEAS_OT_Final(Operator):
         # ---- Camera
         # Dictionaries mapping internal keys to user-defined subfolder names and toggle states for camera angles.
         cameraPosFolderNames = {
-            'south': context.scene.IEAS_properties.South,  'south_west': context.scene.IEAS_properties.South_West,
-            'west': context.scene.IEAS_properties.West,    'north_west': context.scene.IEAS_properties.North_West,
-            'north': context.scene.IEAS_properties.North,  'north_east': context.scene.IEAS_properties.North_East,
-            'east': context.scene.IEAS_properties.East,    'south_east': context.scene.IEAS_properties.South_East
+            'south': context.scene.IEAS_properties.South,           'south_south_west': context.scene.IEAS_properties.South_South_West,
+            'south_west': context.scene.IEAS_properties.South_West, 'west_south_west': context.scene.IEAS_properties.West_South_West,
+            'west': context.scene.IEAS_properties.West,             'west_north_west': context.scene.IEAS_properties.West_North_West,
+            'north_west': context.scene.IEAS_properties.North_West, 'north_north_west': context.scene.IEAS_properties.North_North_West,
+            'north': context.scene.IEAS_properties.North,           'north_north_east': context.scene.IEAS_properties.North_North_East,
+            'north_east': context.scene.IEAS_properties.North_East, 'east_north_east': context.scene.IEAS_properties.East_North_East,
+            'east': context.scene.IEAS_properties.East,             'east_south_east': context.scene.IEAS_properties.East_South_East,
+            'south_east': context.scene.IEAS_properties.South_East, 'south_south_east': context.scene.IEAS_properties.South_South_East
         }
         cameraPosToggles = {
-            'south': context.scene.IEAS_properties.Use_SO,  'south_west': context.scene.IEAS_properties.Use_SW,
-            'west': context.scene.IEAS_properties.Use_WE,   'north_west': context.scene.IEAS_properties.Use_NW,
-            'north': context.scene.IEAS_properties.Use_NO,  'north_east': context.scene.IEAS_properties.Use_NE,
-            'east': context.scene.IEAS_properties.Use_ES,   'south_east': context.scene.IEAS_properties.Use_SE
+            'south': context.scene.IEAS_properties.Use_SO,      'south_south_west': context.scene.IEAS_properties.Use_SSW,
+            'south_west': context.scene.IEAS_properties.Use_SW, 'west_south_west': context.scene.IEAS_properties.Use_WSW,
+            'west': context.scene.IEAS_properties.Use_WE,       'west_north_west': context.scene.IEAS_properties.Use_WNW,
+            'north_west': context.scene.IEAS_properties.Use_NW, 'north_north_west': context.scene.IEAS_properties.Use_NNW,
+            'north': context.scene.IEAS_properties.Use_NO,      'north_north_east': context.scene.IEAS_properties.Use_NNE,
+            'north_east': context.scene.IEAS_properties.Use_NE, 'east_north_east': context.scene.IEAS_properties.Use_ENE,
+            'east': context.scene.IEAS_properties.Use_ES,       'east_south_east': context.scene.IEAS_properties.Use_ESE,
+            'south_east': context.scene.IEAS_properties.Use_SE, 'south_south_east': context.scene.IEAS_properties.Use_SSE
         }
         # Dictionary mapping internal keys to rotation angles in degrees.
         cameraAngles = {
-            'south':0,      'south_west': 315,
-            'west': 270,    'north_west': 225,
-            'north':180,    'north_east': 135,
-            'east': 90,     'south_east': 45
+            'south':        0,      'south_south_west': 337.5,     
+            'south_west':   315,    'west_south_west':  292.5,
+            'west':         270,    'west_north_west':  247.5,   
+            'north_west':   225,    'north_north_west': 202.5,
+            'north':        180,    'north_north_east': 157.5,
+            'north_east':   135,    'east_north_east':  112.5,
+            'east':         90,     'east_south_east':  67.5,  
+            'south_east':   45,     'south_south_east': 22.5
         }
         
         # ----- Animation
