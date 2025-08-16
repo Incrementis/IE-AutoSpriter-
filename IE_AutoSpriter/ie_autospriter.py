@@ -253,24 +253,39 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                     )
                                                     
     # --- Step 3: Camera (Subfolder Names and Toggles for each direction)
-    South:      bpy.props.StringProperty(name="Subfolder S", default="south")
-    South_West: bpy.props.StringProperty(name="Subfolder SW", default="south_west")
-    West:       bpy.props.StringProperty(name="Subfolder W", default="west")
-    North_West: bpy.props.StringProperty(name="Subfolder NW", default="noth_west")
-    North:      bpy.props.StringProperty(name="Subfolder N", default="north")
-    North_East: bpy.props.StringProperty(name="Subfolder NE", default="north_east")
-    East:       bpy.props.StringProperty(name="Subfolder E", default="east")
-    South_East: bpy.props.StringProperty(name="Subfolder SE", default="south_east")
+    South:              bpy.props.StringProperty(name="Subfolder S", default="south")
+    South_South_West:   bpy.props.StringProperty(name="Subfolder SSW", default="south_south_west")
+    South_West:         bpy.props.StringProperty(name="Subfolder SW", default="south_west")
+    West_South_West:    bpy.props.StringProperty(name="Subfolder WSW", default="west_south_west")
+    West:               bpy.props.StringProperty(name="Subfolder W", default="west")
+    West_North_West:    bpy.props.StringProperty(name="Subfolder WNW", default="west_noth_west")
+    North_West:         bpy.props.StringProperty(name="Subfolder NW", default="noth_west")
+    North_North_West:   bpy.props.StringProperty(name="Subfolder NNW", default="north_noth_west")
+    North:              bpy.props.StringProperty(name="Subfolder N", default="north")
+    North_North_East:   bpy.props.StringProperty(name="Subfolder NNE", default="north_north_east")
+    North_East:         bpy.props.StringProperty(name="Subfolder NE", default="north_east")
+    East_North_East:    bpy.props.StringProperty(name="Subfolder ENE", default="east_north_east")
+    East:               bpy.props.StringProperty(name="Subfolder E", default="east")
+    East_South_East:    bpy.props.StringProperty(name="Subfolder ESE", default="east_south_east")
+    South_East:         bpy.props.StringProperty(name="Subfolder SE", default="south_east")
+    South_South_East:   bpy.props.StringProperty(name="Subfolder SSE", default="south_south_east")
     # Boolean toggles for rendering each camera direction.
-    Use_SO:    bpy.props.BoolProperty(name="Use S", default=True)
-    Use_SW:    bpy.props.BoolProperty(name="Use SW", default=True)
-    Use_WE:    bpy.props.BoolProperty(name="Use W", default=True)
-    Use_NW:    bpy.props.BoolProperty(name="Use NW", default=True)
-    Use_NO:    bpy.props.BoolProperty(name="Use N", default=True)
-    Use_NE:    bpy.props.BoolProperty(name="Use NE", default=True)
-    Use_ES:    bpy.props.BoolProperty(name="Use E", default=True)
-    Use_SE:    bpy.props.BoolProperty(name="Use SE", default=True)
-    
+    Use_SO:     bpy.props.BoolProperty(name="Use S", default=True)
+    Use_SSW:    bpy.props.BoolProperty(name="Use SSW", default=False)
+    Use_SW:     bpy.props.BoolProperty(name="Use SW", default=True)
+    Use_WSW:    bpy.props.BoolProperty(name="Use WSW", default=False)
+    Use_WE:     bpy.props.BoolProperty(name="Use W", default=True)
+    Use_WNW:    bpy.props.BoolProperty(name="Use WNW", default=False)
+    Use_NW:     bpy.props.BoolProperty(name="Use NW", default=True)
+    Use_NNW:    bpy.props.BoolProperty(name="Use NNW", default=False)
+    Use_NO:     bpy.props.BoolProperty(name="Use N", default=True)
+    Use_NNE:    bpy.props.BoolProperty(name="Use NNE", default=False)
+    Use_NE:     bpy.props.BoolProperty(name="Use NE", default=True)
+    Use_ENE:    bpy.props.BoolProperty(name="Use ENE", default=False)
+    Use_ES:     bpy.props.BoolProperty(name="Use E", default=True)
+    Use_ESE:    bpy.props.BoolProperty(name="Use ESE", default=False)
+    Use_SE:     bpy.props.BoolProperty(name="Use SE", default=True)
+    Use_SSE:    bpy.props.BoolProperty(name="Use SSE", default=False)    
     # --- Step 4: Animation (Animation Names and Toggles)
     # String properties for names of various animation actions.
     Attack1:    bpy.props.StringProperty(name="A1", default="slash")
@@ -762,11 +777,11 @@ class IEAS_PT_ShadingNodes(Panel):
 # --------
 # Purpose:
 # --------
-# This panel manages the output folders and defines which camera orientations (directions)
+# This panel manages the output folders and defines which orientations (directions)
 # will be rendered for the sprites.
-# --------------------------------------------------------------------------------------------
+# ---------------------------------------------------------------------------------
 class IEAS_PT_Camera(Panel):
-    """This step manages the output folders and defines which camera orientations will be rendered."""
+    """This step manages the output folders and defines which object orientations shown in the camera will be rendered."""
     
     # --- Blender specific class variables
     bl_label        = "Step 3: Camera" 
@@ -777,40 +792,168 @@ class IEAS_PT_Camera(Panel):
     bl_parent_id    = 'IEAS_PT_Core'
     bl_options      = {'DEFAULT_CLOSED'}
     # --- Blender specific function which places elements into GUI
-    # This method draws the UI elements for camera direction settings.
+    # This method draws the UI elements for camera settings.
     def draw(self, context):
         # Creates rows for each direction, displaying the subfolder name input and a toggle.       
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "South")
-        row.prop(context.scene.IEAS_properties, "Use_SO")
+        # --- South
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SO
+        row_input.prop(context.scene.IEAS_properties, "South")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SO")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "South_West")
-        row.prop(context.scene.IEAS_properties, "Use_SW")
+        # --- South South West
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SSW
+        row_input.prop(context.scene.IEAS_properties, "South_South_West")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SSW")
+        
+        # --- South West
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SW
+        row_input.prop(context.scene.IEAS_properties, "South_West")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SW")
+        
+        # --- West South West
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_WSW
+        row_input.prop(context.scene.IEAS_properties, "West_South_West")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_WSW")
                
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "West")
-        row.prop(context.scene.IEAS_properties, "Use_WE")
+        # --- West
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_WE
+        row_input.prop(context.scene.IEAS_properties, "West")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_WE")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "North_West")
-        row.prop(context.scene.IEAS_properties, "Use_NW")
+        # --- West North West
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_WNW
+        row_input.prop(context.scene.IEAS_properties, "West_North_West")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_WNW")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "North")
-        row.prop(context.scene.IEAS_properties, "Use_NO")
+        # --- North West
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_NW
+        row_input.prop(context.scene.IEAS_properties, "North_West")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_NW")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "North_East")
-        row.prop(context.scene.IEAS_properties, "Use_NE")
+        # --- North North West
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_NNW
+        row_input.prop(context.scene.IEAS_properties, "North_North_West")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_NNW")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "East")
-        row.prop(context.scene.IEAS_properties, "Use_ES")
+        # --- North
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_NO
+        row_input.prop(context.scene.IEAS_properties, "North")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_NO")
         
-        row = self.layout.row()
-        row.prop(context.scene.IEAS_properties, "South_East")
-        row.prop(context.scene.IEAS_properties, "Use_SE")      
+        # --- North North East
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_NNE
+        row_input.prop(context.scene.IEAS_properties, "North_North_East")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_NNE")
+        
+        # --- North East
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_NE
+        row_input.prop(context.scene.IEAS_properties, "North_East")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_NE")
+        
+        # --- East North East
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_ENE
+        row_input.prop(context.scene.IEAS_properties, "East_North_East")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_ENE")
+        
+        # --- East
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_ES
+        row_input.prop(context.scene.IEAS_properties, "East")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_ES")
+        
+        # --- East South East
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_ESE
+        row_input.prop(context.scene.IEAS_properties, "East_South_East")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_ESE")  
+         
+        # --- South East
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SE
+        row_input.prop(context.scene.IEAS_properties, "South_East")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SE")
+        
+        # --- South South East
+        split       = self.layout.split(factor=0.7)
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
+        # The text input is on the disabled row
+        row_input.enabled = context.scene.IEAS_properties.Use_SSE
+        row_input.prop(context.scene.IEAS_properties, "South_South_East")
+        # The toggle is on the enabled row
+        row_toggle.prop(context.scene.IEAS_properties, "Use_SSE")
 
 
 # --------
@@ -835,8 +978,8 @@ class IEAS_PT_Animation(Panel):
     def draw(self, context):                 
         # --- Attack1
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_A1
         row_input.prop(context.scene.IEAS_properties, "Attack1")
@@ -845,8 +988,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Attack2
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_A2
         row_input.prop(context.scene.IEAS_properties, "Attack2")
@@ -855,8 +998,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Attack3
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_A3
         row_input.prop(context.scene.IEAS_properties, "Attack3")
@@ -865,8 +1008,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Attack4
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_A4
         row_input.prop(context.scene.IEAS_properties, "Attack4")
@@ -875,8 +1018,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Cast
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_CA
         row_input.prop(context.scene.IEAS_properties, "Cast")
@@ -885,8 +1028,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Death
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_DE
         row_input.prop(context.scene.IEAS_properties, "Death")
@@ -895,8 +1038,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Get Hit
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_GH
         row_input.prop(context.scene.IEAS_properties, "Get_Hit")
@@ -905,8 +1048,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Get Up
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_GU
         row_input.prop(context.scene.IEAS_properties, "Get_Up")
@@ -915,8 +1058,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Ready
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_SC
         row_input.prop(context.scene.IEAS_properties, "Ready")
@@ -925,8 +1068,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Idle
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_SD
         row_input.prop(context.scene.IEAS_properties, "Idle")
@@ -935,8 +1078,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Sleep
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_SL
         row_input.prop(context.scene.IEAS_properties, "Sleep")
@@ -945,8 +1088,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Conjure
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_SP
         row_input.prop(context.scene.IEAS_properties, "Conjure")
@@ -955,8 +1098,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Dead
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_TW
         row_input.prop(context.scene.IEAS_properties, "Dead")
@@ -965,8 +1108,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Walk
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_WK
         row_input.prop(context.scene.IEAS_properties, "Walk")
@@ -975,8 +1118,8 @@ class IEAS_PT_Animation(Panel):
         
         # --- Effect
         split       = self.layout.split(factor=0.7)
-        row_input   = split.row() # Right/second column 
-        row_toggle  = split.row() # Left/first column
+        row_input   = split.row() # Left/first column  
+        row_toggle  = split.row() # Right/second column 
         # The text input is on the disabled row
         row_input.enabled = context.scene.IEAS_properties.Use_Effect
         row_input.prop(context.scene.IEAS_properties, "Effect")
