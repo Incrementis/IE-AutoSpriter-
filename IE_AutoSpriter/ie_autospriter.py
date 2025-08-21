@@ -33,12 +33,13 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 11, 9),
+    "version": (0, 17, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
     "description": "Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations for IE games. GitHub:https://github.com/Incrementis/IE-AutoSpriter- ",
 }
+
 
 # --------
 # Purpose:
@@ -57,7 +58,9 @@ class IEAS_AnimationTypesParameters:
     positionKey:                str     # The camera angle/direction key (e.g., "south").
     animationKey:               str     # A short key for the animation (e.g., "TW").
     frame:                      int     # The current frame number.
-    prefixResref:               str     # The combined filename prefix and resref.   
+    prefixResref:               str     # The combined filename prefix and resref.
+    position_folder:            str   
+
 
 # --------
 # Purpose:
@@ -69,40 +72,131 @@ class IEAS_AnimationTypes():
     
     # --- TODO: Methods
     def type0000(self, typeParameters:IEAS_AnimationTypesParameters):
-        """Method for handling 0000 type logic."""
-        pass
-        # TODO: Delete print
-        print("Executing complex logic for 0000 type.")
+        """Method for handling 0000 type logic."""       
+        if (typeParameters.exclude == False):
+            # Constructs the filename for the current sprite, including prefix,resref and padded frame number.
+            fileName = f"{typeParameters.prefixResref}_{str(typeParameters.frame).zfill(5)}.png"                    
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)         
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
-        pass
-        # TODO: Delete print
-        print("Executing complex logic for 4000 type.")
+        if (typeParameters.exclude == False):
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.                  
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"              
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)        
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
     
     def type9000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 9000 type logic."""
-        pass
-        # TODO: Delete print
-        print("Executing complex logic for 9000 type.")
+        if (typeParameters.exclude == False):
+            # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'SD':'G1', 'SC':'G1', 'WK':'G1',
+                'A1':'G2', 'A2':'G2',
+                'A3':'G3', 'GH':'G3', 'DE':'G3', 'TW':'G3'
+            }
+            animationKey = sequences[typeParameters.animationKey]
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                       
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
         
     def typeB000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling B000 type logic."""
-        pass
-        # TODO: Delete print
-        print("Executing complex logic for B000 type.")
+        if (typeParameters.exclude == False):
+            # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+                'A1':'G2', 'CA':'G2', 'A3':'G2',
+            }
+            animationKey = sequences[typeParameters.animationKey]
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                       
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
         
     def typeC000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling C000 type logic."""
-        pass
-        # TODO: Delete print
-        print("Executing complex logic for C000 type.")
+        if (typeParameters.exclude == False):
+            # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+                'A1':'G2', 'CA':'G2', 'A3':'G2',
+            }
+            animationKey = sequences[typeParameters.animationKey]
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                       
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
         
     def typeD000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling D000 type logic."""
-        pass
-        # TODO: Delete print
-        print("Executing complex logic for D000 type.")
+        if (typeParameters.exclude == False):
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.                  
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"              
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)        
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
         
     def typeE000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling E000 type logic."""     
@@ -114,10 +208,32 @@ class IEAS_AnimationTypes():
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
-            print("typeE000: Executing 'exclude' logic for E000 type.")   
+            print("typeE000: Executing 'exclude' logic for E000 type.")
         else:
+            
+
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                
+            
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
+            
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
+            
+            
             # TODO:Delete!
-            print("typeE000: Executing complex logic for E000 type.")             
+            print("typeE000: Executing complex logic for E000 type.")
             # Stores the initial 'holdout' state of the creature collection before modification.
             # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
             holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
@@ -289,7 +405,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                 # TODO: Delete unique identifier
                                                 ('unique identifier', 'property name', 'property description', 'icon identifier', 7),
                                             ],
-                                            name            ="TODO: Enum Name Argument",
+                                            name            ="Animationtype",
                                             description     ="TODO: Enum Name Description",
                                             default         ='E000',
                                             update          = resetToggles
@@ -493,7 +609,7 @@ class IEAS_OT_Final(Operator):
             'C000': IEAS_AnimationTypes().typeC000,
             'D000': IEAS_AnimationTypes().typeD000,
             'E000': IEAS_AnimationTypes().typeE000,
-            'unique identifier': False,
+            'unique identifier': False, # TODO: delete 'unique identifier'
         }
                    
         # ---- Camera
@@ -602,7 +718,8 @@ class IEAS_OT_Final(Operator):
             positionKey                 = "",
             animationKey                = "",
             frame                       = 0,
-            prefixResref                = prefixResref
+            prefixResref                = prefixResref,
+            position_folder             = ""
         )
         # Get the method from the dictionary, defaulting to a general handler if not found
         handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
@@ -683,7 +800,6 @@ class IEAS_OT_Final(Operator):
                         # ----- Variables used in nested inner loop
                         frameStart      = bpy.context.scene.frame_start
                         frameEnd        = bpy.context.scene.frame_end+1
-                        renderFrame     = bpy.ops.render.render
                         Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
                         
                         #  ----- Nested/Inner loop 
@@ -691,34 +807,13 @@ class IEAS_OT_Final(Operator):
                         for frame in range(frameStart,frameEnd,Every_X_Frame):
                             # Sets the current frame of the scene, updating the object's animation pose.
                             bpy.context.scene.frame_current = frame
-                            
-                            # Constructs the filename for the current sprite, including prefix, animation, position, and padded frame number.
-                            if(positionKey == 'east' or positionKey == 'south_east' or positionKey == 'north_east'):                     
-                                fileName = f"{prefixResref}{animationKey}E_{positionKey}_{str(frame).zfill(5)}.png"
-                            else:
-                                fileName = f"{prefixResref}{animationKey}_{positionKey}_{str(frame).zfill(5)}.png"
-                                
-                            
-                            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
-                            bpy.context.scene.render.filepath = os.path.join(position_folder, fileName)
-                            
-                            # This is the actual rendering process.
-                            # `animation=False` renders a single still image.
-                            # `write_still=True` saves the rendered image to the specified `filepath`.
-                            # The first `False` argument disables undo support for the operation.
-                            renderFrame(  False,
-                                          animation     =False,
-                                          write_still   =True)
-                            
+                                                       
                             # ----- Debugging
                             # TODO: Delete print
-                            #print("position_folder:",position_folder)
-                            # TODO: Delete print
-                            print("fileName:",fileName)
-                            # TODO: Delete print
-                            print("filepath:",bpy.context.scene.render.filepath)
+                            print("position_folder:",position_folder)
                             # TODO: Delete print
                             print("action:",bpy.context.active_object.animation_data.action)
+
                             
                             # TODO: need comment
                             typeParametersUpdated = replace(
@@ -727,7 +822,8 @@ class IEAS_OT_Final(Operator):
                                 animation                   = animation,
                                 positionKey                 = positionKey,
                                 animationKey                = animationKey, 
-                                frame                       = frame
+                                frame                       = frame,
+                                position_folder             = position_folder,
                             )
                             
                             # Get the method from the dictionary, defaulting to a general handler if not found
@@ -809,9 +905,7 @@ class IEAS_PT_GlobalParameters(Panel):
         row.prop(context.scene.IEAS_properties, "Every_X_Frame")
         
         
-
-
-         
+        
 # --------
 # Purpose:
 # --------
@@ -844,7 +938,6 @@ class IEAS_PT_ShadingNodes(Panel):
         col.operator("ieas.shading_nodes")
         
         
- 
 # --------
 # Purpose:
 # --------
@@ -910,8 +1003,7 @@ class IEAS_PT_Camera(Panel):
             'East':         'Use_ES', 'East_South_East':  'Use_ESE',
             'South_East':   'Use_SE', 'South_South_East': 'Use_SSE'
         }
-        
-        
+                
         # --- Reset and activate
         activeType = context.window_manager.IEAS_properties.Type
         # Reset active types to false
@@ -1147,7 +1239,6 @@ class IEAS_PT_Animation(Panel):
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
 
-
 # --------
 # Purpose:
 # --------
@@ -1269,7 +1360,6 @@ def register():
     bpy.types.WindowManager.IEAS_properties = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
 
     
-
 # --------
 # Purpose:
 # --------
