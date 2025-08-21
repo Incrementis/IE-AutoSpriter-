@@ -692,10 +692,6 @@ class IEAS_OT_Final(Operator):
         # ----- Init varibales(oder is relevant)
         # Retrieves the animation type name of the type list from the UI settings.
         selectedType            = context.window_manager.IEAS_properties.Type
-        # TODO: DELETE CreatureCollectionName
-        CreatureCollectionName  = context.scene.IEAS_properties.Creature    
-        # Activates creature collection to recieve original location and armature.
-        bpy.context.view_layer.layer_collection.children[CreatureCollectionName].exclude = False
         # Retrieves the name of the object selected in the UI.        
         objectName = context.scene.IEAS_properties.Object_List.name
         # Selects the specific object by setting its selection state to True.
@@ -721,9 +717,10 @@ class IEAS_OT_Final(Operator):
             prefixResref                = prefixResref,
             position_folder             = ""
         )
-        # Get the method from the dictionary, defaulting to a general handler if not found
-        handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
-        handler_method(typeParameters) 
+        if (selectedType == 'E000'):
+            # Get the method from the dictionary, defaulting to a general handler if not found
+            handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
+            handler_method(typeParameters)
                         
         # ----- Deselecting and selecting
         # Deselects all objects in the scene to ensure only the target object is affected.
@@ -737,7 +734,7 @@ class IEAS_OT_Final(Operator):
         # TODO: Delete print
         print("--------IEAS_OT_Final----------")
         # TODO: Delete print
-        print("CreatureCollectionName:",CreatureCollectionName)
+        #print("CreatureCollectionName:",CreatureCollectionName)
         # TODO: Delete print
         print("pathSaveAt:",pathSaveAt)
         # TODO: Delete print

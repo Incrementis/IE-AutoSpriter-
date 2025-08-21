@@ -3,6 +3,8 @@ Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation f
 
 This is a work in progress and an alpha release. This means that most things are not implemented and the add-on is subject to heavy changes. Use this add-on with caution!!
 
+Please use the latest version instead of the latest commit.
+
 This is also a learning project focused on my personal use. Suggestions are welcome!
 
 ## Alpha Version:
