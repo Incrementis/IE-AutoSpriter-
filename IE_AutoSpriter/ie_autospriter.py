@@ -33,7 +33,7 @@ import time
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 17, 0),
+    "version": (0, 18, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -130,6 +130,33 @@ class IEAS_AnimationTypes():
                           animation     =False,
                           write_still   =True)
         
+    def typeA000(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling A000 type logic."""
+        if (typeParameters.exclude == False):
+             # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'WK':'G1',
+                'SD':'G2', 'SC':'G2', 'GH':'G3', 'DE':'G3', 'TW':'G3',
+                'A1':'G2', 'A2':'G2', 'A3':'G3', 
+            }
+            animationKey = sequences[typeParameters.animationKey]
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                       
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
+                          
     def typeB000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling B000 type logic."""
         if (typeParameters.exclude == False):
@@ -210,8 +237,6 @@ class IEAS_AnimationTypes():
             # TODO:Delete!
             print("typeE000: Executing 'exclude' logic for E000 type.")
         else:
-            
-
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -220,8 +245,7 @@ class IEAS_AnimationTypes():
                 
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
-            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
-            
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
             # This is the actual rendering process.
             # `animation=False` renders a single still image.
             # `write_still=True` saves the rendered image to the specified `filepath`.
@@ -398,12 +422,13 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                 ('0000','0000','','',0),
                                                 ('4000','4000','','',1),
                                                 ('9000','9000','','',2),
-                                                ('B000','B000','','',3),
-                                                ('C000','C000','','',4),
-                                                ('D000','D000','','',5),
-                                                ('E000','E000','','',6),
+                                                ('A000','A000','','',3),
+                                                ('B000','B000','','',4),
+                                                ('C000','C000','','',5),
+                                                ('D000','D000','','',6),
+                                                ('E000','E000','','',7),
                                                 # TODO: Delete unique identifier
-                                                ('unique identifier', 'property name', 'property description', 'icon identifier', 7),
+                                                ('unique identifier', 'property name', 'property description', 'icon identifier', 8),
                                             ],
                                             name            ="Animationtype",
                                             description     ="TODO: Enum Name Description",
@@ -605,6 +630,7 @@ class IEAS_OT_Final(Operator):
             '0000': IEAS_AnimationTypes().type0000,
             '4000': IEAS_AnimationTypes().type4000,
             '9000': IEAS_AnimationTypes().type9000,
+            'A000': IEAS_AnimationTypes().typeA000,
             'B000': IEAS_AnimationTypes().typeB000,
             'C000': IEAS_AnimationTypes().typeC000,
             'D000': IEAS_AnimationTypes().typeD000,
@@ -960,6 +986,7 @@ class IEAS_PT_Camera(Panel):
             '0000': False,
             '4000': False,
             '9000': False,
+            'A000': False,
             'B000': False,
             'C000': False,
             'D000': False,
@@ -1022,7 +1049,7 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
                 
-        if (animationTypesActive['4000']):
+        if (animationTypesActive['4000'] or animationTypesActive['A000']):
             for orientationKey, toggle in Toggles16.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1085,6 +1112,7 @@ class IEAS_PT_Animation(Panel):
             '0000': False,
             '4000': False,
             '9000': False,
+            'A000': False,
             'B000': False,
             'C000': False,
             'D000': False,
@@ -1100,6 +1128,13 @@ class IEAS_PT_Animation(Panel):
             'Dead':     context.scene.IEAS_properties.Use_TW,
         }
         Toggles9000 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
+            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
+            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
+        }
+        TogglesA000 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
             'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
             'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
@@ -1186,6 +1221,18 @@ class IEAS_PT_Animation(Panel):
                 row_input.prop(context.scene.IEAS_properties, animationKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+        
+        if (animationTypesActive['A000']):
+            for animationKey, toggle in TogglesA000.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
         if (animationTypesActive['B000']):
             for animationKey, toggle in TogglesB000.items():
@@ -1261,6 +1308,7 @@ class IEAS_PT_Weapons(Panel):
             '0000': False,
             '4000': False,
             '9000': False,
+            'A000': False,
             'B000': False,
             'C000': False,
             'D000': False,
