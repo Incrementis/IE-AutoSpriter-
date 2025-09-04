@@ -5,7 +5,7 @@ This is a work in progress and an alpha release. This means that most things are
 
 Please use the latest version instead of the latest commit.
 
-This is also a learning project focused on my personal use. Suggestions are welcome!
+This is also a learning project focused on my personal use and interest. Suggestions are welcome!
 
 ## Alpha Version:
 * May not work or only work under special conditions.
@@ -13,6 +13,7 @@ This is also a learning project focused on my personal use. Suggestions are welc
 * May contain issues for various reasons.
 * I am not a Blender or Blender API expert, so this may also cause issues.
 * Only Tested it with blender version 4.0(It may already work on higher versions)
+* The focus of the beta phase will be on bug fixing.
 ### Performance
 The 4.0 blend save files contain the appropriate settings.
 #### Render engine "Cycles": 
