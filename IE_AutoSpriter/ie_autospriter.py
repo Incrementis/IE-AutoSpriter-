@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 19, 0),
+    "version": (0, 21, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -104,6 +104,7 @@ class IEAS_AnimationTypes():
             height          = bpy.context.scene.render.resolution_y
             fileName        = "temp.png"
             # Used to identify which quadrant has which coordinates for slicing.
+            # Since the image is divided into four parts, a divisor of 2 is required.
             quadrants = {
                 'Q1': (slice(height//2, height), slice(0, width//2)),   'Q2': (slice(height//2, height), slice(width//2, width)),
                 'Q3': (slice(0, height//2), slice(0, width//2)),        'Q4': (slice(0, height//2), slice(width//2, width)),
@@ -156,7 +157,7 @@ class IEAS_AnimationTypes():
                 # Deletes the current quadrant coordinate, so the remaining quadrants values can be set(Benefit: No if statements needed).
                 del tempQuadrants[quadrant]
                 for remainingCoordinate in tempQuadrants.values():
-                    tempArrPixelsReshaped[remainingCoordinate] = 0
+                    tempArrPixelsReshaped[remainingCoordinate] = 0 # Transparent
                     
                 # Flattens the array so it can be stored into a blender image data block.
                 arrPixelsFlatten = np.reshape(tempArrPixelsReshaped,arrPixels.shape)               
@@ -179,7 +180,7 @@ class IEAS_AnimationTypes():
             shutil.rmtree(temp_folder)
             
     def type1000_monster_multi_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
-        """Handles the logic for rendering and processing monster multi of type 1000."""
+        """Handles the logic for rendering and processing monster multi of type 1000(split_bams = 0)."""
         if (typeParameters.exclude == False):
             # Used to identify which sprite file is defined for which sequence.
             sequences = {
@@ -195,6 +196,7 @@ class IEAS_AnimationTypes():
             height          = bpy.context.scene.render.resolution_y
             fileName        = "temp.png"
             # Used to identify which quadrant has which coordinates for slicing.
+            # Since the image is divided into four parts, a divisor of 2 is required.
             quadrants = {
                 'Q1': (slice(height//2, height), slice(0, width//2)),   'Q2': (slice(height//2, height), slice(width//2, width)),
                 'Q3': (slice(0, height//2), slice(0, width//2)),        'Q4': (slice(0, height//2), slice(width//2, width)),
@@ -244,7 +246,7 @@ class IEAS_AnimationTypes():
                 # Deletes the current quadrant coordinate, so the remaining quadrants values can be set(Benefit: No if statements needed).
                 del tempQuadrants[quadrant]
                 for remainingCoordinate in tempQuadrants.values():
-                    tempArrPixelsReshaped[remainingCoordinate] = 0
+                    tempArrPixelsReshaped[remainingCoordinate] = 0 # Transparent
                     
                 # Flattens the array so it can be stored into a blender image data block.
                 arrPixelsFlatten = np.reshape(tempArrPixelsReshaped,arrPixels.shape)               
@@ -265,6 +267,128 @@ class IEAS_AnimationTypes():
                 
             # Deletes the temporary folder.
             shutil.rmtree(temp_folder)
+    
+    def type1000_monster_multi_sp1(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Handles the logic for rendering and processing monster multi of type 1000(split_bams = 1)."""
+        if (typeParameters.exclude == False):
+            # Used to identify which sprite file is defined for which sequence.
+            sequences = {
+                'WK':'G1',
+                'SD':'G2', 'SC':'G2', 'SP':'G2',
+                'A1':'G3', 'A2':'G3', 'A3':'G3',
+                'GH':'G4', 'DE':'G4', 'SL':'G4', 'GU':'G4', 'DE':'G4', 'TW':'G4',
+                'SP':'G5', 'CA':'G5',
+            }
+            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            # TODO: Don't forget to apply resolution in step 1 to blender renderer(Those lines are key lines).
+            width           = bpy.context.scene.render.resolution_x
+            height          = bpy.context.scene.render.resolution_y
+            fileName        = "temp.png"
+            # Used to identify which quadrant has which coordinates for slicing.
+            # Since the image is divided into nine parts, a divisor of 3 is required.
+            rowsA       = slice((2*height)//3, height)
+            rowsC       = slice(0, height//3)
+            rowsB       = slice(height//3, (2*height)//3)
+            columnsA    = slice(0, width//3)
+            columnsB    = slice(width//3, (2*width)//3)
+            columnsC    = slice((2*width)//3, width)    
+            quadrants = {
+                'Q1': (rowsA, columnsA), 'Q2': (rowsA, columnsB), 'Q3': (rowsA, columnsC),
+                'Q4': (rowsB, columnsA), 'Q5': (rowsB, columnsB), 'Q6': (rowsB, columnsC),
+                'Q7': (rowsC, columnsA), 'Q8': (rowsC, columnsB), 'Q9': (rowsC, columnsC),           
+            }
+            quadrantsNumbers = {
+                'Q1': "1", 'Q2': "2",'Q3': "3",
+                'Q4': "4", 'Q5': "5",'Q6': "6",
+                'Q7': "7", 'Q8': "8",'Q9': "9",
+            }
+            
+            # --- Debugging: TODO - Delete all following prints
+#            print(f"rowsA: {rowsA.start} to {rowsA.stop}")
+#            print(f"rowsB: {rowsB.start} to {rowsB.stop}")
+#            print(f"rowsC: {rowsC.start} to {rowsC.stop}")
+#            print(f"columnsA: {columnsA.start} to {columnsA.stop}")
+#            print(f"columnsB: {columnsB.start} to {columnsB.stop}")
+#            print(f"columnsC: {columnsC.start} to {columnsC.stop}")
+            
+            # This tells Blender where to save the next (temporary) rendered image.
+            temp_folder = os.path.join(typeParameters.position_folder, "temp")
+            if not os.path.exists(temp_folder):
+                os.makedirs(temp_folder)
+            # This tells Blender where to save the next (temporary) rendered image.                    
+            bpy.context.scene.render.filepath = os.path.join(temp_folder, fileName)                 
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
+            # Loads the rendered image from disk and retrieves its pixel data.      
+            renderedImage       = bpy.data.images.load(bpy.context.scene.render.filepath)                       
+            pixels              = renderedImage.pixels
+            arrPixels           = np.array(pixels)# (flat array)  
+            channels            = 4
+            # Reshapes the 1D pixel array into a 3D array (height, width, channels).
+            arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
+            arrPixelsFlipped    = arrPixelsReshaped          
+            # Creates a path for a transparent pixel that serves as a placeholder for the unused cycles in the BAM file.
+            placeholder_path    = os.path.join(typeParameters.position_folder, "placeholder.png")              
+            # Creates a new Blender image data block.        
+            placeholderImage = bpy.data.images.new(
+                    name="QuadrantType1000MMsp1Placeholder",
+                    width=1,
+                    height=1,
+                    alpha=True,
+            )
+            placeholderImage.pixels = [0,0,0,0]  # One transparent pixel (RGBA)             
+            # Set the new image's file path and format.
+            placeholderImage.filepath_raw   = placeholder_path
+            placeholderImage.file_format    = 'PNG'
+            # Save the new image data block to a file.
+            placeholderImage.save()
+                    
+            # Processes the pixels for each quadrant and writes them as an image to a specific location.
+            for quadrant, coordinate in quadrants.items():                                                          
+                # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                
+                # Zeroes out the pixels of all quadrants except the current one.
+                # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
+                quadrant_path = os.path.join(typeParameters.position_folder, f"{quadrant}")
+                if not os.path.exists(quadrant_path):
+                    os.makedirs(quadrant_path)
+                    
+                quadrantFile_path       = os.path.join(quadrant_path, fileNameQuadrant)
+                # Prevents referencing the original values of the variables
+                tempQuadrants           = quadrants.copy()
+                tempArrPixelsReshaped   = arrPixelsReshaped.copy()
+                # Deletes the current quadrant coordinate, so the remaining quadrants values can be set(Benefit: No if statements needed).
+                del tempQuadrants[quadrant]
+                for remainingCoordinate in tempQuadrants.values():
+                    tempArrPixelsReshaped[remainingCoordinate] = 0 # Transparent
+                    
+                # Flattens the array so it can be stored into a blender image data block.
+                arrPixelsFlatten = np.reshape(tempArrPixelsReshaped,arrPixels.shape)               
+                # Creates a new Blender image data block.
+                quadrantImage = bpy.data.images.new(
+                    name="QuadrantType1000MMsp1",
+                    width=width,
+                    height=height,
+                    alpha=True,
+                )               
+                # Assign the manipulated NumPy array's pixel data to the new Blender image.
+                quadrantImage.pixels = arrPixelsFlatten
+                # Set the new image's file path and format.
+                quadrantImage.filepath_raw = quadrantFile_path
+                quadrantImage.file_format = 'PNG'
+                # Save the new image data block to a file.
+                quadrantImage.save()
+                
+            # Deletes the temporary folder.
+            shutil.rmtree(temp_folder)
+            
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
@@ -595,16 +719,17 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                     items=[
                                         ('0000','0000','','',0),
                                         ('1000 monster quadrant','1000 monster quadrant','','',1),
-                                        ('1000 monster multi split bam 0','1000 monster multi split bam 0','','',2),
-                                        ('4000','4000','','',3),
-                                        ('9000','9000','','',4),
-                                        ('A000','A000','','',5),
-                                        ('B000','B000','','',6),
-                                        ('C000','C000','','',7),
-                                        ('D000','D000','','',8),
-                                        ('E000','E000','','',9),
+                                        ('1000 monster multi split bams 0','1000 monster multi split bams 0','','',2),
+                                        ('1000 monster multi split bams 1','1000 monster multi split bams 1','','',3),
+                                        ('4000','4000','','',4),
+                                        ('9000','9000','','',5),
+                                        ('A000','A000','','',6),
+                                        ('B000','B000','','',7),
+                                        ('C000','C000','','',8),
+                                        ('D000','D000','','',9),
+                                        ('E000','E000','','',10),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 10),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 11),
                                     ],
                                     name            ="Animationtype",
                                     description     ="TODO: Enum Name Description",
@@ -647,22 +772,22 @@ class IEAS_PGT_Inputs(PropertyGroup):
     South_East:         bpy.props.StringProperty(name="Subfolder SE", default="south_east")
     South_South_East:   bpy.props.StringProperty(name="Subfolder SSE", default="south_south_east")
     # Boolean toggles for rendering each camera direction.
-    Use_SO:     bpy.props.BoolProperty(name="Use S", default=True)
-    Use_SSW:    bpy.props.BoolProperty(name="Use SSW", default=False)
-    Use_SW:     bpy.props.BoolProperty(name="Use SW", default=True)
-    Use_WSW:    bpy.props.BoolProperty(name="Use WSW", default=False)
-    Use_WE:     bpy.props.BoolProperty(name="Use W", default=True)
-    Use_WNW:    bpy.props.BoolProperty(name="Use WNW", default=False)
-    Use_NW:     bpy.props.BoolProperty(name="Use NW", default=True)
-    Use_NNW:    bpy.props.BoolProperty(name="Use NNW", default=False)
-    Use_NO:     bpy.props.BoolProperty(name="Use N", default=True)
-    Use_NNE:    bpy.props.BoolProperty(name="Use NNE", default=False)
-    Use_NE:     bpy.props.BoolProperty(name="Use NE", default=True)
-    Use_ENE:    bpy.props.BoolProperty(name="Use ENE", default=False)
-    Use_ES:     bpy.props.BoolProperty(name="Use E", default=True)
-    Use_ESE:    bpy.props.BoolProperty(name="Use ESE", default=False)
-    Use_SE:     bpy.props.BoolProperty(name="Use SE", default=True)
-    Use_SSE:    bpy.props.BoolProperty(name="Use SSE", default=False)    
+    Use_SO:     bpy.props.BoolProperty(name="Use S",    default=True)
+    Use_SSW:    bpy.props.BoolProperty(name="Use SSW",  default=False)
+    Use_SW:     bpy.props.BoolProperty(name="Use SW",   default=True)
+    Use_WSW:    bpy.props.BoolProperty(name="Use WSW",  default=False)
+    Use_WE:     bpy.props.BoolProperty(name="Use W",    default=True)
+    Use_WNW:    bpy.props.BoolProperty(name="Use WNW",  default=False)
+    Use_NW:     bpy.props.BoolProperty(name="Use NW",   default=True)
+    Use_NNW:    bpy.props.BoolProperty(name="Use NNW",  default=False)
+    Use_NO:     bpy.props.BoolProperty(name="Use N",    default=True)
+    Use_NNE:    bpy.props.BoolProperty(name="Use NNE",  default=False)
+    Use_NE:     bpy.props.BoolProperty(name="Use NE",   default=True)
+    Use_ENE:    bpy.props.BoolProperty(name="Use ENE",  default=False)
+    Use_ES:     bpy.props.BoolProperty(name="Use E",    default=True)
+    Use_ESE:    bpy.props.BoolProperty(name="Use ESE",  default=False)
+    Use_SE:     bpy.props.BoolProperty(name="Use SE",   default=True)
+    Use_SSE:    bpy.props.BoolProperty(name="Use SSE",  default=False)    
     # --- Step 4: Animation (Animation Names and Toggles)
     # String properties for names of various animation actions.
     Attack1:    bpy.props.StringProperty(name="A1", default="slash")
@@ -805,7 +930,8 @@ class IEAS_OT_Final(Operator):
         animationTypeHandlers = {
             '0000':                                 IEAS_AnimationTypes().type0000,
             '1000 monster quadrant':                IEAS_AnimationTypes().type1000_monster_quadrant,
-            '1000 monster multi split bam 0':       IEAS_AnimationTypes().type1000_monster_multi_sp0,
+            '1000 monster multi split bams 0':      IEAS_AnimationTypes().type1000_monster_multi_sp0,
+            '1000 monster multi split bams 1':      IEAS_AnimationTypes().type1000_monster_multi_sp1,
             '4000':                                 IEAS_AnimationTypes().type4000,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
@@ -1163,7 +1289,8 @@ class IEAS_PT_Camera(Panel):
         animationTypesActive = {
             '0000':                                 False,
             '1000 monster quadrant':                False,
-            '1000 monster multi split bam 0':       False,
+            '1000 monster multi split bams 0':      False,
+            '1000 monster multi split bams 1':      False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1255,7 +1382,8 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
             
-        if (animationTypesActive['D000'] or animationTypesActive['1000 monster multi split bam 0']):
+        if (animationTypesActive['D000'] or animationTypesActive['1000 monster multi split bams 0'] or
+            animationTypesActive['1000 monster multi split bams 1']):
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1292,7 +1420,8 @@ class IEAS_PT_Animation(Panel):
         animationTypesActive = {
             '0000':                                 False,
             '1000 monster quadrant':                False,
-            '1000 monster multi split bam 0':       False,
+            '1000 monster multi split bams 0':      False,
+            '1000 monster multi split bams 1':      False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1301,11 +1430,10 @@ class IEAS_PT_Animation(Panel):
             'D000':                                 False,
             'E000':                                 False,
             'unique identifier':                    False,# TODO: Delete unique identifier!
-        }       
+        }
         Toggles0000 = {
             'Effect':   context.scene.IEAS_properties.Use_Effect           
         }
-        # TODO: Check if num of dict can or should be reduced, e.g. Toggles1000_monster_quadrant, Toggles9000,TogglesA000 are equal.
         Toggles1000_monster_quadrant = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
             'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
@@ -1314,6 +1442,15 @@ class IEAS_PT_Animation(Panel):
             'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles1000_monster_multi_sp0 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
+            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
+            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Walk':     context.scene.IEAS_properties.Use_WK, 'Conjure':  context.scene.IEAS_properties.Use_SP,
+            'Get_Up':   context.scene.IEAS_properties.Use_GU, 'Sleep':    context.scene.IEAS_properties.Use_SL,
+            'Cast':     context.scene.IEAS_properties.Use_CA,
+        }
+        Toggles1000_monster_multi_sp1 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
             'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
             'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
@@ -1410,8 +1547,20 @@ class IEAS_PT_Animation(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
-        if (animationTypesActive['1000 monster multi split bam 0']):
+        if (animationTypesActive['1000 monster multi split bams 0']):
             for animationKey, toggle in Toggles1000_monster_multi_sp0.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+                
+        if (animationTypesActive['1000 monster multi split bams 1']):
+            for animationKey, toggle in Toggles1000_monster_multi_sp1.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
                 row_input   = split.row() # Left/first column  
@@ -1531,7 +1680,8 @@ class IEAS_PT_Weapons(Panel):
         animationTypesActive = {
             '0000':                                 False,
             '1000 monster quadrant':                False,
-            '1000 monster multi split bam 0':       False,
+            '1000 monster multi split bams 0':      False,
+            '1000 monster multi split bams 1':      False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
