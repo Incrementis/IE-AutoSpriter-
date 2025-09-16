@@ -456,7 +456,7 @@ class IEAS_AnimationTypes():
                 arrPixelsFlatten = np.reshape(tempArrPixelsReshaped,arrPixels.shape)               
                 # Creates a new Blender image data block.
                 quadrantImage = bpy.data.images.new(
-                    name    = "QuadrantType1000MMsp0",
+                    name    = "QuadrantType1000MNsp0",
                     width   = width,
                     height  = height,
                     alpha   = True,
