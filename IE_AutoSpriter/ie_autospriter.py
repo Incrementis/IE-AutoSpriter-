@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 21, 0),
+    "version": (0, 21, 3),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -96,7 +96,7 @@ class IEAS_AnimationTypes():
             sequences = {
                 'WK':'G1', 
                 'SD':'G2', 'SC':'G2', 'GH':'G2', 'DE':'G2', 'TW':'G2',
-                'A1':'G3', 'A2':'G3', 'A3':'G3',              
+                'A1':'G3', 'A2':'G3', 'A3':'G3',
             }
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             # TODO: Don't forget to apply resolution in step 1 to blender renderer(Those lines are key lines).
@@ -191,7 +191,6 @@ class IEAS_AnimationTypes():
                 'SP':'G5', 'CA':'G5',
             }
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            # TODO: Don't forget to apply resolution in step 1 to blender renderer(Those lines are key lines).
             width           = bpy.context.scene.render.resolution_x
             height          = bpy.context.scene.render.resolution_y
             fileName        = "temp.png"
@@ -280,7 +279,6 @@ class IEAS_AnimationTypes():
                 'SP':'G5', 'CA':'G5',
             }
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            # TODO: Don't forget to apply resolution in step 1 to blender renderer(Those lines are key lines).
             width           = bpy.context.scene.render.resolution_x
             height          = bpy.context.scene.render.resolution_y
             fileName        = "temp.png"
@@ -655,51 +653,43 @@ class IEAS_PGT_Inputs(PropertyGroup):
     
     # --- Resets all camera and animation toggles to false.
     def resetToggles(self, context):
-        # Camera toggles
-        context.scene.IEAS_properties.Use_SO    = False
-        context.scene.IEAS_properties.Use_SSW   = False
-        context.scene.IEAS_properties.Use_SW    = False
-        context.scene.IEAS_properties.Use_WSW   = False
-        context.scene.IEAS_properties.Use_WE    = False
-        context.scene.IEAS_properties.Use_WNW   = False
-        context.scene.IEAS_properties.Use_NW    = False
-        context.scene.IEAS_properties.Use_NNW   = False
-        context.scene.IEAS_properties.Use_NO    = False
-        context.scene.IEAS_properties.Use_NNE   = False
-        context.scene.IEAS_properties.Use_NE    = False
-        context.scene.IEAS_properties.Use_ENE   = False
-        context.scene.IEAS_properties.Use_ES    = False
-        context.scene.IEAS_properties.Use_ESE   = False
-        context.scene.IEAS_properties.Use_SE    = False        
-        context.scene.IEAS_properties.Use_SSE   = False
-        # Animation type toggles
-        context.scene.IEAS_properties.Use_A1        = False
-        context.scene.IEAS_properties.Use_A2        = False
-        context.scene.IEAS_properties.Use_A3        = False
-        context.scene.IEAS_properties.Use_A4        = False
-        context.scene.IEAS_properties.Use_CA        = False
-        context.scene.IEAS_properties.Use_DE        = False
-        context.scene.IEAS_properties.Use_GH        = False
-        context.scene.IEAS_properties.Use_GU        = False
-        context.scene.IEAS_properties.Use_SC        = False
-        context.scene.IEAS_properties.Use_SD        = False
-        context.scene.IEAS_properties.Use_SL        = False
-        context.scene.IEAS_properties.Use_SP        = False
-        context.scene.IEAS_properties.Use_TW        = False
-        context.scene.IEAS_properties.Use_WK        = False
-        context.scene.IEAS_properties.Use_Effect    = False
-        # Weapon type toggles
-        context.scene.IEAS_properties.Use_A = False
-        context.scene.IEAS_properties.Use_B = False
-        context.scene.IEAS_properties.Use_C = False
-        context.scene.IEAS_properties.Use_D = False
-        context.scene.IEAS_properties.Use_F = False
-        context.scene.IEAS_properties.Use_H = False
-        context.scene.IEAS_properties.Use_M = False
-        context.scene.IEAS_properties.Use_S = False
-        context.scene.IEAS_properties.Use_W = False
-        context.scene.IEAS_properties.Use_Q = False
+        # Lists with property names.
+        cameraToggles = [
+            'Use_SO', 'Use_SSW', 'Use_SW', 'Use_WSW', 'Use_WE', 'Use_WNW',
+            'Use_NW', 'Use_NNW', 'Use_NO', 'Use_NNE', 'Use_NE', 'Use_ENE',
+            'Use_ES', 'Use_ESE', 'Use_SE', 'Use_SSE'
+        ]
+        animationToggles = [
+            'Use_A1', 'Use_A2', 'Use_A3', 'Use_A4', 'Use_CA', 'Use_DE',
+            'Use_GH', 'Use_GU', 'Use_SC', 'Use_SD', 'Use_SL', 'Use_SP',
+            'Use_TW', 'Use_WK', 'Use_Effect'
+        ]
+        weaponToggles = [
+            'Use_A', 'Use_B', 'Use_C', 'Use_D', 'Use_F', 'Use_H',
+            'Use_M', 'Use_S', 'Use_W', 'Use_Q'
+        ]
         
+        # Resets all properties to false to prevent unwanted background sprite rendering.  
+        for propertyName in cameraToggles:
+            setattr(context.scene.IEAS_properties, propertyName, False)
+
+        for propertyName in animationToggles:
+            setattr(context.scene.IEAS_properties, propertyName, False)
+
+        for propertyName in weaponToggles:
+            setattr(context.scene.IEAS_properties, propertyName, False)
+
+    # --- Updates the user-specified resolution X input from IE Autospriter to Output Properties and vice versa
+    def updateResolutionX(self, context):
+        bpy.context.scene.render.resolution_x = context.scene.IEAS_properties.Resolution_X
+        #TODO: delete prints
+        print("bpy resX:",bpy.context.scene.render.resolution_x)
+        print("resX:",context.scene.IEAS_properties.Resolution_X)
+    
+    # --- Updates the user-specified resolution Y input from IE Autospriter to Output Properties and vice versa
+    def updateResolutionY(self, context):
+        bpy.context.scene.render.resolution_y = context.scene.IEAS_properties.Resolution_Y
+                
     
     # --- Step 1: Global Parameters    
     # File path property for saving rendered sprites.
@@ -737,9 +727,15 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                     update          = resetToggles
                                     )
     # Integer property for the render resolution in X-dimension.
-    Resolution_X:   bpy.props.IntProperty(name="Resolution X",default=256, min=1)
+    Resolution_X:   bpy.props.IntProperty(  name    = "Resolution X",
+                                            default = 256, 
+                                            min     = 1,
+                                            update  = updateResolutionX)
     # Integer property for the render resolution in Y-dimension.
-    Resolution_Y:   bpy.props.IntProperty(name="Resolution Y",default=256, min=1)
+    Resolution_Y:   bpy.props.IntProperty(  name    = "Resolution Y",
+                                            default = 256, 
+                                            min     = 1,
+                                            update = updateResolutionY)
     # Integer property to control rendering frequency (e.g., render every X frames).
     Every_X_Frame:  bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
     # --- Step 2: Shading Nodes
@@ -891,7 +887,7 @@ class IEAS_OT_ShadingNodes(Operator):
         x           = 0
         x_location  = Principled_BSDF.location[x]
         x_offset    = 250
-        y_location  = -100       
+        y_location  = -100
         MixShader_node                  = activeMaterial.node_tree.nodes.new('ShaderNodeMixShader')
         MixShader_node.location         = (x_location, y_location)
         BrightContrast_node             = activeMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
@@ -1013,17 +1009,24 @@ class IEAS_OT_Final(Operator):
             'W': context.scene.IEAS_properties.Use_W,   'Q': context.scene.IEAS_properties.Use_Q,          
         }
         
+        # ----- Resolution balancing in Blender and IE AutoSpriter, with Blender taking priority here.
+        if (context.scene.IEAS_properties.Resolution_X != bpy.context.scene.render.resolution_x):
+            context.scene.IEAS_properties.Resolution_X = bpy.context.scene.render.resolution_x
+                       
+        if (context.scene.IEAS_properties.Resolution_Y != bpy.context.scene.render.resolution_y):
+            context.scene.IEAS_properties.Resolution_Y = bpy.context.scene.render.resolution_y
+        
         # ----- Filename and path
         # Retrieves the base save path from user input.            
-        pathSaveAt = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
+        pathSaveAt      = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
         # Combines prefix and resref for use in filename construction.      
-        prefixResref = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
+        prefixResref    = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
         
-        # ----- Init varibales(oder is relevant)
+        # ----- Init varibales(order is relevant)
         # Retrieves the animation type name of the type list from the UI settings.
-        selectedType            = context.window_manager.IEAS_properties.Type
+        selectedType    = context.window_manager.IEAS_properties.Type
         # Retrieves the name of the object selected in the UI.        
-        objectName = context.scene.IEAS_properties.Object_List.name
+        objectName      = context.scene.IEAS_properties.Object_List.name
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
         # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
@@ -1033,7 +1036,7 @@ class IEAS_OT_Final(Operator):
         # Stores the object's initial Z-axis rotation to be restored at the end of the method.
         originalLocation        = bpy.context.active_object.rotation_euler[axis_Z]
         # Initilaizes the all parameters.
-        typeParameters = IEAS_AnimationTypesParameters(
+        typeParameters          = IEAS_AnimationTypesParameters(
             exclude                     = True,
             # Retrieves the name of the creature collection from the UI settings.
             CreatureCollectionName      = context.scene.IEAS_properties.Creature,
@@ -1230,7 +1233,6 @@ class IEAS_PT_GlobalParameters(Panel):
         row.prop(context.scene.IEAS_properties, "Resolution_Y")
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Every_X_Frame")
-        
         
         
 # --------
