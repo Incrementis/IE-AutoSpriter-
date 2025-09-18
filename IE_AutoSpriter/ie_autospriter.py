@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 22, 0),
+    "version": (0, 22, 1),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -471,7 +471,11 @@ class IEAS_AnimationTypes():
                 
             # Deletes the temporary folder.
             shutil.rmtree(temp_folder)
-            
+    
+    # TODO: Implement method     
+    def type1000_multi_new_sp1(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Handles the logic for rendering and processing multi new of type 1000(split_bams = 1)."""
+        pass
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
@@ -774,8 +778,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     # --- Updates the user-specified resolution Y input from IE Autospriter to Output Properties and vice versa
     def updateResolutionY(self, context):
         bpy.context.scene.render.resolution_y = context.scene.IEAS_properties.Resolution_Y
-                
-    
+                    
     # --- Step 1: Global Parameters    
     # File path property for saving rendered sprites.
     Save_at:        bpy.props.StringProperty(name="Save at",subtype='DIR_PATH') # File-opener
@@ -797,19 +800,20 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('1000 monster multi split bams 0','1000 monster multi split bams 0','','',2),
                                         ('1000 monster multi split bams 1','1000 monster multi split bams 1','','',3),
                                         ('1000 multi new split bams 0','1000 multi new split bams 0','','',4),
-                                        ('4000','4000','','',5),
-                                        ('9000','9000','','',6),
-                                        ('A000','A000','','',7),
-                                        ('B000','B000','','',8),
-                                        ('C000','C000','','',9),
-                                        ('D000','D000','','',10),
-                                        ('E000','E000','','',11),
+                                        ('1000 multi new split bams 1','1000 multi new split bams 1','','',5),
+                                        ('4000','4000','','',6),
+                                        ('9000','9000','','',7),
+                                        ('A000','A000','','',8),
+                                        ('B000','B000','','',9),
+                                        ('C000','C000','','',10),
+                                        ('D000','D000','','',11),
+                                        ('E000','E000','','',12),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 12),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 13),
                                     ],
-                                    name            ="Animationtype",
-                                    description     ="TODO: Enum Name Description",
-                                    default         ='E000',
+                                    name            = "Animationtype",
+                                    description     = "TODO: Enum Name Description",
+                                    default         = 'E000',
                                     update          = resetToggles
                                     )
     # Integer property for the render resolution in X-dimension.
@@ -821,7 +825,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Resolution_Y:   bpy.props.IntProperty(  name    = "Resolution Y",
                                             default = 256, 
                                             min     = 1,
-                                            update = updateResolutionY)
+                                            update  = updateResolutionY)
     # Integer property to control rendering frequency (e.g., render every X frames).
     Every_X_Frame:  bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
     # --- Step 2: Shading Nodes
@@ -1017,6 +1021,7 @@ class IEAS_OT_Final(Operator):
             '1000 monster multi split bams 0':      IEAS_AnimationTypes().type1000_monster_multi_sp0,
             '1000 monster multi split bams 1':      IEAS_AnimationTypes().type1000_monster_multi_sp1,
             '1000 multi new split bams 0':          IEAS_AnimationTypes().type1000_multi_new_sp0,
+            '1000 multi new split bams 1':          IEAS_AnimationTypes().type1000_multi_new_sp1,
             '4000':                                 IEAS_AnimationTypes().type4000,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
@@ -1248,8 +1253,7 @@ class IEAS_OT_Final(Operator):
                             # Get the method from the dictionary, defaulting to a general handler if not found
                             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
                             handler_method(typeParametersUpdated)                        
-        
-        
+                
         # Restore the object's Z-axis rotation to its original state
         bpy.context.active_object.rotation_euler[axis_Z] = originalLocation 
         
@@ -1383,6 +1387,7 @@ class IEAS_PT_Camera(Panel):
             '1000 monster multi split bams 0':      False,
             '1000 monster multi split bams 1':      False,
             '1000 multi new split bams 0':          False,
+            '1000 multi new split bams 1':          False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1474,8 +1479,9 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
             
-        if (animationTypesActive['D000'] or animationTypesActive['1000 monster multi split bams 0'] or
-            animationTypesActive['1000 monster multi split bams 1'] or animationTypesActive['1000 multi new split bams 0']):
+        if (animationTypesActive['D000'] or 
+            animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
+            animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1']):
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1515,6 +1521,7 @@ class IEAS_PT_Animation(Panel):
             '1000 monster multi split bams 0':      False,
             '1000 monster multi split bams 1':      False,
             '1000 multi new split bams 0':          False,
+            '1000 multi new split bams 1':          False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1553,6 +1560,15 @@ class IEAS_PT_Animation(Panel):
             'Cast':     context.scene.IEAS_properties.Use_CA,
         }
         Toggles1000_multi_new_sp0 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
+            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Attack4':  context.scene.IEAS_properties.Use_A4,
+            'Attack5':  context.scene.IEAS_properties.Use_A5, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
+            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Walk':     context.scene.IEAS_properties.Use_WK, 'Conjure':  context.scene.IEAS_properties.Use_SP,
+            'Cast':     context.scene.IEAS_properties.Use_CA,
+        }
+        Toggles1000_multi_new_sp1 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
             'Attack3':  context.scene.IEAS_properties.Use_A3, 'Attack4':  context.scene.IEAS_properties.Use_A4,
             'Attack5':  context.scene.IEAS_properties.Use_A5, 'Death':    context.scene.IEAS_properties.Use_DE,
@@ -1684,6 +1700,18 @@ class IEAS_PT_Animation(Panel):
                 row_input.prop(context.scene.IEAS_properties, animationKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+                
+        if (animationTypesActive['1000 multi new split bams 1']):
+            for animationKey, toggle in Toggles1000_multi_new_sp0.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
         
         if (animationTypesActive['4000']):
             for animationKey, toggle in Toggles4000.items():
@@ -1797,6 +1825,7 @@ class IEAS_PT_Weapons(Panel):
             '1000 monster multi split bams 0':      False,
             '1000 monster multi split bams 1':      False,
             '1000 multi new split bams 0':          False,
+            '1000 multi new split bams 1':          False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
