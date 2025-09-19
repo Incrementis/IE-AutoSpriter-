@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 22, 1),
+    "version": (0, 22, 2),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -300,6 +300,13 @@ class IEAS_AnimationTypes():
                 'Q4': "4", 'Q5': "5",'Q6': "6",
                 'Q7': "7", 'Q8': "8",'Q9': "9",
             }
+            directions = {
+            'south':        0, 'south_south_west': 1,
+            'south_west':   2, 'west_south_west':  3,
+            'west':         4, 'west_north_west':  5,
+            'north_west':   6, 'north_north_west': 7,
+            'north':        8,
+            }
             
             # --- Debugging: TODO - Delete all following prints
 #            print(f"rowsA: {rowsA.start} to {rowsA.stop}")
@@ -350,7 +357,7 @@ class IEAS_AnimationTypes():
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
                 # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}{directions[typeParameters.positionKey]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
                 # Zeroes out the pixels of all quadrants except the current one.
                 # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
