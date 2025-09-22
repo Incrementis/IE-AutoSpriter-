@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 22, 2),
+    "version": (0, 23, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -289,11 +289,11 @@ class IEAS_AnimationTypes():
             rowsB       = slice(height//3, (2*height)//3)
             columnsA    = slice(0, width//3)
             columnsB    = slice(width//3, (2*width)//3)
-            columnsC    = slice((2*width)//3, width)    
+            columnsC    = slice((2*width)//3, width)
             quadrants = {
                 'Q1': (rowsA, columnsA), 'Q2': (rowsA, columnsB), 'Q3': (rowsA, columnsC),
                 'Q4': (rowsB, columnsA), 'Q5': (rowsB, columnsB), 'Q6': (rowsB, columnsC),
-                'Q7': (rowsC, columnsA), 'Q8': (rowsC, columnsB), 'Q9': (rowsC, columnsC),           
+                'Q7': (rowsC, columnsA), 'Q8': (rowsC, columnsB), 'Q9': (rowsC, columnsC),
             }
             quadrantsNumbers = {
                 'Q1': "1", 'Q2': "2",'Q3': "3",
@@ -301,11 +301,11 @@ class IEAS_AnimationTypes():
                 'Q7': "7", 'Q8': "8",'Q9': "9",
             }
             directions = {
-            'south':        0, 'south_south_west': 1,
-            'south_west':   2, 'west_south_west':  3,
-            'west':         4, 'west_north_west':  5,
-            'north_west':   6, 'north_north_west': 7,
-            'north':        8,
+            'south':        "00", 'south_south_west': "01",
+            'south_west':   "02", 'west_south_west':  "03",
+            'west':         "04", 'west_north_west':  "05",
+            'north_west':   "06", 'north_north_west': "07",
+            'north':        "08",
             }
             
             # --- Debugging: TODO - Delete all following prints
@@ -400,7 +400,7 @@ class IEAS_AnimationTypes():
             # Used to identify which sprite file is defined for which sequence.
             sequences = {
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
-                'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'SP':'G2', 'CA':'G2',
+                'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
             }
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             width           = bpy.context.scene.render.resolution_x
@@ -469,7 +469,7 @@ class IEAS_AnimationTypes():
                     alpha   = True,
                 )               
                 # Assign the manipulated NumPy array's pixel data to the new Blender image.
-                quadrantImage.pixels = arrPixelsFlatten
+                quadrantImage.pixels        = arrPixelsFlatten
                 # Set the new image's file path and format.
                 quadrantImage.filepath_raw  = quadrantFile_path
                 quadrantImage.file_format   = 'PNG'
@@ -478,11 +478,92 @@ class IEAS_AnimationTypes():
                 
             # Deletes the temporary folder.
             shutil.rmtree(temp_folder)
-    
-    # TODO: Implement method     
+         
     def type1000_multi_new_sp1(self, typeParameters:IEAS_AnimationTypesParameters):
         """Handles the logic for rendering and processing multi new of type 1000(split_bams = 1)."""
-        pass
+        if (typeParameters.exclude == False):
+            # Used to identify which sprite file is defined for which sequence.
+            sequences = {
+                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+                'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
+            }
+            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            width           = bpy.context.scene.render.resolution_x
+            height          = bpy.context.scene.render.resolution_y
+            fileName        = "temp.png"
+            # Used to identify which quadrant has which coordinates for slicing.
+            # Since the image is divided into four parts, a divisor of 2 is required.
+            quadrants = {
+                'Q1': (slice(height//2, height), slice(0, width//2)),   'Q2': (slice(height//2, height), slice(width//2, width)),
+                'Q3': (slice(0, height//2), slice(0, width//2)),        'Q4': (slice(0, height//2), slice(width//2, width)),
+            }
+            quadrantsNumbers = {
+                'Q1': "1", 'Q2': "2",
+                'Q3': "3", 'Q4': "4"
+            }
+            # This tells Blender where to save the next (temporary) rendered image.
+            temp_folder = os.path.join(typeParameters.position_folder, "temp")
+            if not os.path.exists(temp_folder):
+                os.makedirs(temp_folder)
+            # This tells Blender where to save the next (temporary) rendered image.                    
+            bpy.context.scene.render.filepath = os.path.join(temp_folder, fileName)                 
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     = False,
+                          write_still   = True)
+            # Loads the rendered image from disk and retrieves its pixel data.      
+            renderedImage       = bpy.data.images.load(bpy.context.scene.render.filepath)                       
+            pixels              = renderedImage.pixels
+            arrPixels           = np.array(pixels)# (flat array)  
+            channels            = 4
+            # Reshapes the 1D pixel array into a 3D array (height, width, channels).
+            arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
+            arrPixelsFlipped    = arrPixelsReshaped
+            
+            # Processes the pixels for each quadrant and writes them as an image to a specific location.
+            for quadrant, coordinate in quadrants.items():                                                          
+                # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                
+                # Zeroes out the pixels of all quadrants except the current one.
+                # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
+                quadrant_path = os.path.join(typeParameters.position_folder, f"{quadrant}")
+                if not os.path.exists(quadrant_path):
+                    os.makedirs(quadrant_path)
+                    
+                quadrantFile_path       = os.path.join(quadrant_path, fileNameQuadrant)
+                # Prevents referencing the original values of the variables
+                tempQuadrants           = quadrants.copy()
+                tempArrPixelsReshaped   = arrPixelsReshaped.copy()
+                # Deletes the current quadrant coordinate, so the remaining quadrants values can be set(Benefit: No if statements needed).
+                del tempQuadrants[quadrant]
+                for remainingCoordinate in tempQuadrants.values():
+                    tempArrPixelsReshaped[remainingCoordinate] = 0 # Transparent
+                    
+                # Flattens the array so it can be stored into a blender image data block.
+                arrPixelsFlatten = np.reshape(tempArrPixelsReshaped,arrPixels.shape)               
+                # Creates a new Blender image data block.
+                quadrantImage = bpy.data.images.new(
+                    name    = "QuadrantType1000MNsp1",
+                    width   = width,
+                    height  = height,
+                    alpha   = True,
+                )               
+                # Assign the manipulated NumPy array's pixel data to the new Blender image.
+                quadrantImage.pixels        = arrPixelsFlatten
+                # Set the new image's file path and format.
+                quadrantImage.filepath_raw  = quadrantFile_path
+                quadrantImage.file_format   = 'PNG'
+                # Save the new image data block to a file.
+                quadrantImage.save()
+                
+            # Deletes the temporary folder.
+            shutil.rmtree(temp_folder)
+            
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
