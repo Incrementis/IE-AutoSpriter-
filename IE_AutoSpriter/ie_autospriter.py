@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 23, 0),
+    "version": (0, 24, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -564,6 +564,123 @@ class IEAS_AnimationTypes():
             # Deletes the temporary folder.
             shutil.rmtree(temp_folder)
             
+    def type2000(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling 2000 type logic."""    
+        # ----- Deactivates/Activates collections      
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("type2000: Executing 'exclude' logic for 2000 type.")
+        else:
+            # Used to identify which sprite file is defined for which sequence.
+            sequences = {
+                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+                'A1':'G2', 'A2':'G2', 'A3':'G2', 'SP':'G2', 'CA':'G2',
+            }
+            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                          
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
+                       
+            # TODO:Delete!
+            print("type2000: Executing complex logic for 2000 type.")
+            # Stores the initial 'holdout' state of the creature collection before modification.
+            # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
+            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            
+            # ----- Debugging
+            # TODO: Delete print
+            print("holdout:",holdout)
+                                            
+            # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
+            # This ensures only weapon sprites are rendered when collections are toggled.
+            if (holdout == False):
+                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = True
+            
+            # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collectionName  = collection.name
+                # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
+                # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
+                wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
+                
+                # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
+                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                    # All other weapon collections remain excluded (invisible) by default.
+                    collection.exclude=False
+                    
+                    # Constructs the base output folder path for the current weapon.
+                    weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
+                    weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
+                    
+                    # Creates a subfolder for the specific weapon and camera angle.
+                    weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
+                    if not os.path.exists(weapon_position_folder):
+                        os.makedirs(weapon_position_folder)
+                    
+                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                    if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    else:
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        
+                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                    bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
+                    # This is the actual rendering process.
+                    # `animation=False` renders a single still image.
+                    # `write_still=True` saves the rendered image to the specified `filepath`.
+                    # The first `False` argument disables undo support for the operation.
+                    renderFrame = bpy.ops.render.render
+                    renderFrame(  False,
+                                  animation     =False,
+                                  write_still   =True)
+
+                    # ----- Debugging
+                    # TODO: Delete print
+                    #print("position_folder:",position_folder)
+                    # TODO: Delete print
+                    print("fileName:",fileName)
+                    # TODO: Delete print
+                    print("weapon_folder:",weapon_folder)
+                    # TODO: Delete print
+                    print("weapon_position_folder:",weapon_position_folder)
+                       
+                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                    # This ensures only one weapon collection is active at any given time for subsequent renders.
+                    collection.exclude = True
+ 
+                # ----- Debugging
+                # TODO: Delete print
+                print("collectionName:",collectionName)
+                # TODO: Delete print
+                print("wovl:",wovl)
+            
+            # Resets the 'holdout' state of the creature collection to its original value.
+            # This ensures the creature is visible again after weapon rendering is complete, if it was originally visible.
+            if (holdout == False):
+                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
@@ -889,15 +1006,16 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('1000 monster multi split bams 1','1000 monster multi split bams 1','','',3),
                                         ('1000 multi new split bams 0','1000 multi new split bams 0','','',4),
                                         ('1000 multi new split bams 1','1000 multi new split bams 1','','',5),
-                                        ('4000','4000','','',6),
-                                        ('9000','9000','','',7),
-                                        ('A000','A000','','',8),
-                                        ('B000','B000','','',9),
-                                        ('C000','C000','','',10),
-                                        ('D000','D000','','',11),
-                                        ('E000','E000','','',12),
+                                        ('2000','2000','','',6),
+                                        ('4000','4000','','',7),
+                                        ('9000','9000','','',8),
+                                        ('A000','A000','','',9),
+                                        ('B000','B000','','',10),
+                                        ('C000','C000','','',11),
+                                        ('D000','D000','','',12),
+                                        ('E000','E000','','',13),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 13),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 14),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -906,16 +1024,17 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                     )
     # Integer property for the render resolution in X-dimension.
     Resolution_X:   bpy.props.IntProperty(  name    = "Resolution X",
-                                            default = 256, 
+                                            default = 256,
                                             min     = 1,
                                             update  = updateResolutionX)
     # Integer property for the render resolution in Y-dimension.
     Resolution_Y:   bpy.props.IntProperty(  name    = "Resolution Y",
-                                            default = 256, 
+                                            default = 256,
                                             min     = 1,
                                             update  = updateResolutionY)
     # Integer property to control rendering frequency (e.g., render every X frames).
     Every_X_Frame:  bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
+    
     # --- Step 2: Shading Nodes
     # String property for the name of the Principled BSDF node.
     Principled_BSDF:    bpy.props.StringProperty(name="Principle BSDF", default="Principled BSDF")
@@ -1110,6 +1229,7 @@ class IEAS_OT_Final(Operator):
             '1000 monster multi split bams 1':      IEAS_AnimationTypes().type1000_monster_multi_sp1,
             '1000 multi new split bams 0':          IEAS_AnimationTypes().type1000_multi_new_sp0,
             '1000 multi new split bams 1':          IEAS_AnimationTypes().type1000_multi_new_sp1,
+            '2000':                                 IEAS_AnimationTypes().type2000,
             '4000':                                 IEAS_AnimationTypes().type4000,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
@@ -1476,6 +1596,7 @@ class IEAS_PT_Camera(Panel):
             '1000 monster multi split bams 1':      False,
             '1000 multi new split bams 0':          False,
             '1000 multi new split bams 1':          False,
+            '2000':                                 False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1555,7 +1676,8 @@ class IEAS_PT_Camera(Panel):
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
                 
         if (animationTypesActive['9000'] or animationTypesActive['B000'] or 
-            animationTypesActive['C000'] or animationTypesActive['E000']):
+            animationTypesActive['C000'] or animationTypesActive['E000'] or
+            animationTypesActive['2000']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1611,6 +1733,7 @@ class IEAS_PT_Animation(Panel):
             '1000 multi new split bams 0':          False,
             '1000 multi new split bams 1':          False,
             '4000':                                 False,
+            '2000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -1660,6 +1783,14 @@ class IEAS_PT_Animation(Panel):
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
             'Attack3':  context.scene.IEAS_properties.Use_A3, 'Attack4':  context.scene.IEAS_properties.Use_A4,
             'Attack5':  context.scene.IEAS_properties.Use_A5, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
+            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Walk':     context.scene.IEAS_properties.Use_WK, 'Conjure':  context.scene.IEAS_properties.Use_SP,
+            'Cast':     context.scene.IEAS_properties.Use_CA,
+        }
+        Toggles2000 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
+            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
             'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
             'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
             'Walk':     context.scene.IEAS_properties.Use_WK, 'Conjure':  context.scene.IEAS_properties.Use_SP,
@@ -1801,6 +1932,18 @@ class IEAS_PT_Animation(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
         
+        if (animationTypesActive['2000']):
+            for animationKey, toggle in Toggles2000.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+        
         if (animationTypesActive['4000']):
             for animationKey, toggle in Toggles4000.items():
                 # Splits row into two columns            
@@ -1914,6 +2057,7 @@ class IEAS_PT_Weapons(Panel):
             '1000 monster multi split bams 1':      False,
             '1000 multi new split bams 0':          False,
             '1000 multi new split bams 1':          False,
+            '2000':                                 False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1948,7 +2092,7 @@ class IEAS_PT_Weapons(Panel):
         animationTypesActive[activeType] = True
             
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
-        if (animationTypesActive['E000']):
+        if (animationTypesActive['E000'] or animationTypesActive['2000']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
             
