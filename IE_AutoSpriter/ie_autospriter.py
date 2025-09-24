@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 24, 0),
+    "version": (0, 24, 2),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -682,6 +682,11 @@ class IEAS_AnimationTypes():
                 # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
                 bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False
     
+    def type3000_mirror0(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Handles the logic for rendering and processing type 3000(mirror = 0)."""
+        if (typeParameters.exclude == False):
+            pass
+    
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
         if (typeParameters.exclude == False):
@@ -956,7 +961,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
         animationToggles = [
             'Use_A1', 'Use_A2', 'Use_A3', 'Use_A4', 'Use_A5', 'Use_CA', 'Use_DE',
             'Use_GH', 'Use_GU', 'Use_SC', 'Use_SD', 'Use_SL', 'Use_SP',
-            'Use_TW', 'Use_WK', 'Use_Effect'
+            'Use_TW', 'Use_WK', 'Use_Effect', 'Use_Emerge', 'Use_Hide',
         ]
         weaponToggles = [
             'Use_A', 'Use_B', 'Use_C', 'Use_D', 'Use_F', 'Use_H',
@@ -1007,15 +1012,16 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('1000 multi new split bams 0','1000 multi new split bams 0','','',4),
                                         ('1000 multi new split bams 1','1000 multi new split bams 1','','',5),
                                         ('2000','2000','','',6),
-                                        ('4000','4000','','',7),
-                                        ('9000','9000','','',8),
-                                        ('A000','A000','','',9),
-                                        ('B000','B000','','',10),
-                                        ('C000','C000','','',11),
-                                        ('D000','D000','','',12),
-                                        ('E000','E000','','',13),
+                                        ('3000 mirror 0','3000 mirror 0','','',7),
+                                        ('4000','4000','','',8),
+                                        ('9000','9000','','',9),
+                                        ('A000','A000','','',10),
+                                        ('B000','B000','','',11),
+                                        ('C000','C000','','',12),
+                                        ('D000','D000','','',13),
+                                        ('E000','E000','','',14),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 14),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 15),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -1098,6 +1104,9 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Conjure:    bpy.props.StringProperty(name="SP", default="conjure")
     Dead:       bpy.props.StringProperty(name="TW", default="dead")
     Walk:       bpy.props.StringProperty(name="WK", default="walk")
+    # String property for unique effect animation(e.g. Ankheg)
+    Emerge:     bpy.props.StringProperty(name="EMERGE", default="emerge")
+    Hide:       bpy.props.StringProperty(name="HDIDE",  default="hide")    
     # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
     Effect:     bpy.props.StringProperty(name="Effect", default="")   
     # String properties for names of various weapon animations based on the collection names.
@@ -1128,7 +1137,10 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_SP:     bpy.props.BoolProperty(name="Use SP",   default=True)
     Use_TW:     bpy.props.BoolProperty(name="Use TW",   default=True)
     Use_WK:     bpy.props.BoolProperty(name="Use WK",   default=True)
-    # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
+    # Boolean toggles for unique effect animation(e.g. Ankheg)
+    Use_Emerge: bpy.props.BoolProperty(name="Use EMERGE", default=True)
+    Use_Hide:   bpy.props.BoolProperty(name="Use HIDE",   default=True)
+    # Boolean toggles for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
     Use_Effect: bpy.props.BoolProperty(name="Use Effect", default=False)
     # Boolean toggles to render each weapon animation with the selected creature animation.
     Use_A:      bpy.props.BoolProperty(name="Use A",    default=False)
@@ -1230,6 +1242,7 @@ class IEAS_OT_Final(Operator):
             '1000 multi new split bams 0':          IEAS_AnimationTypes().type1000_multi_new_sp0,
             '1000 multi new split bams 1':          IEAS_AnimationTypes().type1000_multi_new_sp1,
             '2000':                                 IEAS_AnimationTypes().type2000,
+            '3000 mirror 0':                        IEAS_AnimationTypes().type3000_mirror0,
             '4000':                                 IEAS_AnimationTypes().type4000,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
@@ -1284,7 +1297,8 @@ class IEAS_OT_Final(Operator):
             'SC':       context.scene.IEAS_properties.Ready,      'SD': context.scene.IEAS_properties.Idle,
             'SL':       context.scene.IEAS_properties.Sleep,      'SP': context.scene.IEAS_properties.Conjure,
             'TW':       context.scene.IEAS_properties.Dead,       'WK': context.scene.IEAS_properties.Walk,
-            'Effect':   context.scene.IEAS_properties.Effect,           
+            'Effect':   context.scene.IEAS_properties.Effect,     'EMERGE': context.scene.IEAS_properties.Emerge,
+            'Hide':     context.scene.IEAS_properties.Hide  
         }
         animationToggles = {
             'A1':       context.scene.IEAS_properties.Use_A1,     'A2': context.scene.IEAS_properties.Use_A2,
@@ -1294,7 +1308,8 @@ class IEAS_OT_Final(Operator):
             'SC':       context.scene.IEAS_properties.Use_SC,     'SD': context.scene.IEAS_properties.Use_SD,
             'SL':       context.scene.IEAS_properties.Use_SL,     'SP': context.scene.IEAS_properties.Use_SP,
             'TW':       context.scene.IEAS_properties.Use_TW,     'WK': context.scene.IEAS_properties.Use_WK,
-            'Effect':   context.scene.IEAS_properties.Use_Effect,            
+            'Effect':   context.scene.IEAS_properties.Use_Effect, 'EMERGE': context.scene.IEAS_properties.Use_Emerge,
+            'Hide':     context.scene.IEAS_properties.Use_Hide             
         }
         animationWeaponFolderNames = {
             'A': context.scene.IEAS_properties.Axe,     'B': context.scene.IEAS_properties.Bow,
@@ -1327,7 +1342,7 @@ class IEAS_OT_Final(Operator):
         # ----- Init varibales(order is relevant)
         # Retrieves the animation type name of the type list from the UI settings.
         selectedType    = context.window_manager.IEAS_properties.Type
-        # Retrieves the name of the object selected in the UI.        
+        # Retrieves the name of the object selected in the UI.       
         objectName      = context.scene.IEAS_properties.Object_List.name
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
@@ -1352,7 +1367,7 @@ class IEAS_OT_Final(Operator):
             prefixResref                = prefixResref,
             position_folder             = ""
         )
-        if (selectedType == 'E000'):
+        if (selectedType == 'E000' or selectedType == '2000'):
             # Get the method from the dictionary, defaulting to a general handler if not found
             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
             handler_method(typeParameters)
@@ -1597,6 +1612,7 @@ class IEAS_PT_Camera(Panel):
             '1000 multi new split bams 0':          False,
             '1000 multi new split bams 1':          False,
             '2000':                                 False,
+            '3000 mirror 0':                        False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1677,7 +1693,7 @@ class IEAS_PT_Camera(Panel):
                 
         if (animationTypesActive['9000'] or animationTypesActive['B000'] or 
             animationTypesActive['C000'] or animationTypesActive['E000'] or
-            animationTypesActive['2000']):
+            animationTypesActive['2000'] or animationTypesActive['3000 mirror 0']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1732,8 +1748,9 @@ class IEAS_PT_Animation(Panel):
             '1000 monster multi split bams 1':      False,
             '1000 multi new split bams 0':          False,
             '1000 multi new split bams 1':          False,
-            '4000':                                 False,
             '2000':                                 False,
+            '3000 mirror 0':                        False,
+            '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -1796,6 +1813,12 @@ class IEAS_PT_Animation(Panel):
             'Walk':     context.scene.IEAS_properties.Use_WK, 'Conjure':  context.scene.IEAS_properties.Use_SP,
             'Cast':     context.scene.IEAS_properties.Use_CA,
         }
+        Toggles3000_mirror0 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1,       'Death':    context.scene.IEAS_properties.Use_DE,
+            'Ready':    context.scene.IEAS_properties.Use_SC,       'Idle':     context.scene.IEAS_properties.Use_SD, 
+            'Dead':     context.scene.IEAS_properties.Use_TW,       'Cast':     context.scene.IEAS_properties.Use_CA,
+            'Emerge':   context.scene.IEAS_properties.Use_Emerge,   'Hide':     context.scene.IEAS_properties.Use_Hide,
+        }
         Toggles4000 = {
             'Death':    context.scene.IEAS_properties.Use_DE, 'Get_Hit':  context.scene.IEAS_properties.Use_GH,
             'Ready':    context.scene.IEAS_properties.Use_SC, 'Idle':     context.scene.IEAS_properties.Use_SD,
@@ -1841,14 +1864,15 @@ class IEAS_PT_Animation(Panel):
             'Dead':     context.scene.IEAS_properties.Use_TW, 'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         ToggleNames = {
-            'Attack1':  'Use_A1', 'Attack2':  'Use_A2',
-            'Attack3':  'Use_A3', 'Attack4':  'Use_A4',
-            'Attack5':  'Use_A5', 'Cast':     'Use_CA', 
-            'Death':    'Use_DE', 'Get_Hit':  'Use_GH', 
-            'Get_Up':   'Use_GU', 'Ready':    'Use_SC', 
-            'Idle':     'Use_SD', 'Sleep':    'Use_SL',
-            'Conjure':  'Use_SP', 'Dead':     'Use_TW', 
-            'Walk':     'Use_WK', 'Effect':   'Use_Effect'
+            'Attack1':  'Use_A1',       'Attack2':  'Use_A2',
+            'Attack3':  'Use_A3',       'Attack4':  'Use_A4',
+            'Attack5':  'Use_A5',       'Cast':     'Use_CA', 
+            'Death':    'Use_DE',       'Get_Hit':  'Use_GH', 
+            'Get_Up':   'Use_GU',       'Ready':    'Use_SC', 
+            'Idle':     'Use_SD',       'Sleep':    'Use_SL',
+            'Conjure':  'Use_SP',       'Dead':     'Use_TW', 
+            'Walk':     'Use_WK',       'Effect':   'Use_Effect',
+            'Emerge':   'Use_Emerge',   'Hide':     'Use_Hide',
         }
         
         # --- Reset and activate
@@ -1934,6 +1958,18 @@ class IEAS_PT_Animation(Panel):
         
         if (animationTypesActive['2000']):
             for animationKey, toggle in Toggles2000.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+        
+        if (animationTypesActive['3000 mirror 0']):
+            for animationKey, toggle in Toggles3000_mirror0.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
                 row_input   = split.row() # Left/first column  
@@ -2058,6 +2094,7 @@ class IEAS_PT_Weapons(Panel):
             '1000 multi new split bams 0':          False,
             '1000 multi new split bams 1':          False,
             '2000':                                 False,
+            '3000 mirror 0':                        False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
