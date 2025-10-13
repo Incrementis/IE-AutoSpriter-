@@ -58,3 +58,4 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [Render 8 Direction Animated Sprites in Blender with Python](https://www.youtube.com/watch?v=l1Io7fLYV4o) by FozleCC
 * [Blender documentations](https://docs.blender.org) by Blender
 * [Blender Rendering Optimization Tips](https://whoisryosuke.com/blog/2024/blender-rendering-optimization-tips) by Ryo
+* [Expressions in Blender 3D](https://www.youtube.com/watch?v=5IMFSC5h0a4) by ukramedia

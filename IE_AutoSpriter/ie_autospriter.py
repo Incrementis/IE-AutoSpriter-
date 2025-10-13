@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 24, 2),
+    "version": (0, 25, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -684,7 +684,17 @@ class IEAS_AnimationTypes():
     
     def type3000_mirror0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Handles the logic for rendering and processing type 3000(mirror = 0)."""
-        if (typeParameters.exclude == False):
+        # ----- Deactivates/Activates collections      
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("type2000: Executing 'exclude' logic for 2000 type.")
+            print("typeParameters.CreatureCollectionName:",typeParameters.CreatureCollectionName)
+        else:
             pass
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
@@ -1106,7 +1116,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Walk:       bpy.props.StringProperty(name="WK", default="walk")
     # String property for unique effect animation(e.g. Ankheg)
     Emerge:     bpy.props.StringProperty(name="EMERGE", default="emerge")
-    Hide:       bpy.props.StringProperty(name="HDIDE",  default="hide")    
+    Hide:       bpy.props.StringProperty(name="HIDE",  default="hide")    
     # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
     Effect:     bpy.props.StringProperty(name="Effect", default="")   
     # String properties for names of various weapon animations based on the collection names.
@@ -1367,7 +1377,7 @@ class IEAS_OT_Final(Operator):
             prefixResref                = prefixResref,
             position_folder             = ""
         )
-        if (selectedType == 'E000' or selectedType == '2000'):
+        if (selectedType == 'E000' or selectedType == '2000' or selectedType == '3000 mirror 0'):
             # Get the method from the dictionary, defaulting to a general handler if not found
             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
             handler_method(typeParameters)
@@ -2071,12 +2081,12 @@ class IEAS_PT_Animation(Panel):
 # This panel defines which weapon animations (Blender Collection) should be rendered
 # and how their corresponding output folders/filenames will be named.
 # ----------------------------------------------------------------------------------
-class IEAS_PT_Weapons(Panel):
+class IEAS_PT_Collections(Panel):
     """This panel defines which weapon animations (Blender Collection) should be rendered and how they are named in the output."""
     
     # --- Blender specific class variables
-    bl_label        = "Weapon Collections"
-    bl_idname       = 'IEAS_PT_Weapons'
+    bl_label        = "Collections"
+    bl_idname       = 'IEAS_PT_Collections'
     bl_space_type   = 'VIEW_3D'
     bl_region_type  = 'UI'
     bl_category     = "IE AutoSpriter"
@@ -2143,6 +2153,9 @@ class IEAS_PT_Weapons(Panel):
                 row_input.prop(context.scene.IEAS_properties, weaponKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[weaponKey])
+        elif (animationTypesActive['3000 mirror 0']):
+            row = self.layout.row()
+            row.prop(context.scene.IEAS_properties, "Creature")
         else:
             pass # Show no weapon animation options
         
@@ -2186,7 +2199,7 @@ def register():
     bpy.utils.register_class(IEAS_PT_ShadingNodes)
     bpy.utils.register_class(IEAS_PT_Camera)
     bpy.utils.register_class(IEAS_PT_Animation)
-    bpy.utils.register_class(IEAS_PT_Weapons)
+    bpy.utils.register_class(IEAS_PT_Collections)
     bpy.utils.register_class(IEAS_PT_Final)
     
     # Pointers: Registers the PropertyGroup to the scene, making its properties accessible via `bpy.context.scene.IEAS_properties`.
@@ -2208,7 +2221,7 @@ def unregister():
     bpy.utils.unregister_class(IEAS_PT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_PT_Camera)
     bpy.utils.unregister_class(IEAS_PT_Animation)
-    bpy.utils.unregister_class(IEAS_PT_Weapons)
+    bpy.utils.unregister_class(IEAS_PT_Collections)
     bpy.utils.unregister_class(IEAS_PT_Final)
     
     # Deletes pointer
