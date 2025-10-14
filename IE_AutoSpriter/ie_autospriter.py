@@ -53,6 +53,7 @@ class IEAS_AnimationTypesParameters:
     """Contains parameters for the class IEAS_AnimationTypes"""
     exclude:                    bool    # Deactivates every collection and activates only creature collection.
     CreatureCollectionName:     str     # The name of the main creature's collection.
+    CreatureCollectionNameLP:   str     # The name of the creature's lower part collection.
     animationWeaponFolderNames: dict    # Maps weapon keys to collection names.
     animationWeaponToggles:     dict    # Toggles rendering for specific weapons.
     pathSaveAt:                 str     # The output file path for rendered sprites.
@@ -619,7 +620,8 @@ class IEAS_AnimationTypes():
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collectionName  = collection.name
-                # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
+                # Finds the corresponding weapon key for the collection name.
+                # "next" is used for a single, fast lookup with built-in error handling.
                 # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
                 wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
                 
@@ -692,10 +694,48 @@ class IEAS_AnimationTypes():
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
-            print("type2000: Executing 'exclude' logic for 2000 type.")
+            print("type3000: Executing 'exclude' logic for 3000 type.")
             print("typeParameters.CreatureCollectionName:",typeParameters.CreatureCollectionName)
         else:
-            pass
+            # Used to identify which sprite file is defined for which sequence.
+            sequences = {
+                'DE':'G1', 'TW':'G1', 'SD':'G1',
+                'SC':'G2', 'EMERGE':'G2', 'HIDE':'G2',
+                'A1':'G3', 'CA':'G3',
+            }
+            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
+                       
+            # TODO:Delete!
+            print("type3000: Executing complex logic for 3000 type.")
+            # Stores the initial 'holdout' state of the creature collection before modification.
+            # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
+#            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+#            
+#            # ----- Debugging
+#            # TODO: Delete print
+#            print("holdout:",holdout)
+#           
+#            # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
+#            # This ensures only weapon sprites are rendered when collections are toggled.
+#            if (holdout == False):
+#                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = True
+                
+                
+                
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
@@ -1120,17 +1160,18 @@ class IEAS_PGT_Inputs(PropertyGroup):
     # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
     Effect:     bpy.props.StringProperty(name="Effect", default="")   
     # String properties for names of various weapon animations based on the collection names.
-    Creature:   bpy.props.StringProperty(name="Creature Collection", default="")
-    Axe:        bpy.props.StringProperty(name="A", default="axe")
-    Bow:        bpy.props.StringProperty(name="B", default="bow")
-    Club:       bpy.props.StringProperty(name="C", default="club")
-    Dagger:     bpy.props.StringProperty(name="D", default="dagger")
-    Flail:      bpy.props.StringProperty(name="F", default="flail")
-    Halberd:    bpy.props.StringProperty(name="H", default="halberd")
-    Mace:       bpy.props.StringProperty(name="M", default="mace")
-    Sword:      bpy.props.StringProperty(name="S", default="sword")
-    Warhammer:  bpy.props.StringProperty(name="W", default="warhammer")
-    Quarterstaff: bpy.props.StringProperty(name="Q", default="quarterstaff")
+    Creature:           bpy.props.StringProperty(name="Creature Main", default="")
+    Creature_Lower:     bpy.props.StringProperty(name="Creature Lower", default="")
+    Axe:                bpy.props.StringProperty(name="A", default="axe")
+    Bow:                bpy.props.StringProperty(name="B", default="bow")
+    Club:               bpy.props.StringProperty(name="C", default="club")
+    Dagger:             bpy.props.StringProperty(name="D", default="dagger")
+    Flail:              bpy.props.StringProperty(name="F", default="flail")
+    Halberd:            bpy.props.StringProperty(name="H", default="halberd")
+    Mace:               bpy.props.StringProperty(name="M", default="mace")
+    Sword:              bpy.props.StringProperty(name="S", default="sword")
+    Warhammer:          bpy.props.StringProperty(name="W", default="warhammer")
+    Quarterstaff:       bpy.props.StringProperty(name="Q", default="quarterstaff")
     # Boolean toggles for rendering each animation.
     Use_A1:     bpy.props.BoolProperty(name="Use A1",   default=True)
     Use_A2:     bpy.props.BoolProperty(name="Use A2",   default=True)
@@ -1266,34 +1307,34 @@ class IEAS_OT_Final(Operator):
         # ---- Camera
         # Dictionaries mapping internal keys to user-defined subfolder names and toggle states for camera angles.
         cameraPosFolderNames = {
-            'south': context.scene.IEAS_properties.South,           'south_south_west': context.scene.IEAS_properties.South_South_West,
-            'south_west': context.scene.IEAS_properties.South_West, 'west_south_west':  context.scene.IEAS_properties.West_South_West,
-            'west': context.scene.IEAS_properties.West,             'west_north_west':  context.scene.IEAS_properties.West_North_West,
-            'north_west': context.scene.IEAS_properties.North_West, 'north_north_west': context.scene.IEAS_properties.North_North_West,
-            'north': context.scene.IEAS_properties.North,           'north_north_east': context.scene.IEAS_properties.North_North_East,
-            'north_east': context.scene.IEAS_properties.North_East, 'east_north_east':  context.scene.IEAS_properties.East_North_East,
-            'east': context.scene.IEAS_properties.East,             'east_south_east':  context.scene.IEAS_properties.East_South_East,
-            'south_east': context.scene.IEAS_properties.South_East, 'south_south_east': context.scene.IEAS_properties.South_South_East
+            'south':        context.scene.IEAS_properties.South,        'south_south_west': context.scene.IEAS_properties.South_South_West,
+            'south_west':   context.scene.IEAS_properties.South_West,   'west_south_west':  context.scene.IEAS_properties.West_South_West,
+            'west':         context.scene.IEAS_properties.West,         'west_north_west':  context.scene.IEAS_properties.West_North_West,
+            'north_west':   context.scene.IEAS_properties.North_West,   'north_north_west': context.scene.IEAS_properties.North_North_West,
+            'north':        context.scene.IEAS_properties.North,        'north_north_east': context.scene.IEAS_properties.North_North_East,
+            'north_east':   context.scene.IEAS_properties.North_East,   'east_north_east':  context.scene.IEAS_properties.East_North_East,
+            'east':         context.scene.IEAS_properties.East,         'east_south_east':  context.scene.IEAS_properties.East_South_East,
+            'south_east':   context.scene.IEAS_properties.South_East,   'south_south_east': context.scene.IEAS_properties.South_South_East
         }
         cameraPosToggles = {
-            'south': context.scene.IEAS_properties.Use_SO,      'south_south_west': context.scene.IEAS_properties.Use_SSW,
-            'south_west': context.scene.IEAS_properties.Use_SW, 'west_south_west': context.scene.IEAS_properties.Use_WSW,
-            'west': context.scene.IEAS_properties.Use_WE,       'west_north_west': context.scene.IEAS_properties.Use_WNW,
-            'north_west': context.scene.IEAS_properties.Use_NW, 'north_north_west': context.scene.IEAS_properties.Use_NNW,
-            'north': context.scene.IEAS_properties.Use_NO,      'north_north_east': context.scene.IEAS_properties.Use_NNE,
-            'north_east': context.scene.IEAS_properties.Use_NE, 'east_north_east': context.scene.IEAS_properties.Use_ENE,
-            'east': context.scene.IEAS_properties.Use_ES,       'east_south_east': context.scene.IEAS_properties.Use_ESE,
-            'south_east': context.scene.IEAS_properties.Use_SE, 'south_south_east': context.scene.IEAS_properties.Use_SSE
+            'south':        context.scene.IEAS_properties.Use_SO, 'south_south_west':   context.scene.IEAS_properties.Use_SSW,
+            'south_west':   context.scene.IEAS_properties.Use_SW, 'west_south_west':    context.scene.IEAS_properties.Use_WSW,
+            'west':         context.scene.IEAS_properties.Use_WE, 'west_north_west':    context.scene.IEAS_properties.Use_WNW,
+            'north_west':   context.scene.IEAS_properties.Use_NW, 'north_north_west':   context.scene.IEAS_properties.Use_NNW,
+            'north':        context.scene.IEAS_properties.Use_NO, 'north_north_east':   context.scene.IEAS_properties.Use_NNE,
+            'north_east':   context.scene.IEAS_properties.Use_NE, 'east_north_east':    context.scene.IEAS_properties.Use_ENE,
+            'east':         context.scene.IEAS_properties.Use_ES, 'east_south_east':    context.scene.IEAS_properties.Use_ESE,
+            'south_east':   context.scene.IEAS_properties.Use_SE, 'south_south_east':   context.scene.IEAS_properties.Use_SSE
         }
         # Dictionary mapping internal keys to rotation angles in degrees.
         cameraAngles = {
-            'south':        0,      'south_south_west': 337.5,     
+            'south':        0,      'south_south_west': 337.5,
             'south_west':   315,    'west_south_west':  292.5,
-            'west':         270,    'west_north_west':  247.5,   
+            'west':         270,    'west_north_west':  247.5,
             'north_west':   225,    'north_north_west': 202.5,
             'north':        180,    'north_north_east': 157.5,
             'north_east':   135,    'east_north_east':  112.5,
-            'east':         90,     'east_south_east':  67.5,  
+            'east':         90,     'east_south_east':  67.5,
             'south_east':   45,     'south_south_east': 22.5
         }
         
@@ -1308,7 +1349,7 @@ class IEAS_OT_Final(Operator):
             'SL':       context.scene.IEAS_properties.Sleep,      'SP': context.scene.IEAS_properties.Conjure,
             'TW':       context.scene.IEAS_properties.Dead,       'WK': context.scene.IEAS_properties.Walk,
             'Effect':   context.scene.IEAS_properties.Effect,     'EMERGE': context.scene.IEAS_properties.Emerge,
-            'Hide':     context.scene.IEAS_properties.Hide  
+            'HIDE':     context.scene.IEAS_properties.Hide  
         }
         animationToggles = {
             'A1':       context.scene.IEAS_properties.Use_A1,     'A2': context.scene.IEAS_properties.Use_A2,
@@ -1319,7 +1360,7 @@ class IEAS_OT_Final(Operator):
             'SL':       context.scene.IEAS_properties.Use_SL,     'SP': context.scene.IEAS_properties.Use_SP,
             'TW':       context.scene.IEAS_properties.Use_TW,     'WK': context.scene.IEAS_properties.Use_WK,
             'Effect':   context.scene.IEAS_properties.Use_Effect, 'EMERGE': context.scene.IEAS_properties.Use_Emerge,
-            'Hide':     context.scene.IEAS_properties.Use_Hide             
+            'HIDE':     context.scene.IEAS_properties.Use_Hide             
         }
         animationWeaponFolderNames = {
             'A': context.scene.IEAS_properties.Axe,     'B': context.scene.IEAS_properties.Bow,
@@ -1367,6 +1408,7 @@ class IEAS_OT_Final(Operator):
             exclude                     = True,
             # Retrieves the name of the creature collection from the UI settings.
             CreatureCollectionName      = context.scene.IEAS_properties.Creature,
+            CreatureCollectionNameLP    = context.scene.IEAS_properties.Creature_Lower,
             animationWeaponFolderNames  = animationWeaponFolderNames,
             animationWeaponToggles      = animationWeaponToggles,
             pathSaveAt                  = pathSaveAt,
@@ -1446,11 +1488,11 @@ class IEAS_OT_Final(Operator):
                             
                         # Rotates the active object (the character/model) around its Z-axis to face the current direction.
                         # The script rotates the subject, relying on a static camera to capture it, rather than rotating the camera itself.
-                        bpy.context.active_object.rotation_euler[axis_Z] = math.radians(cameraAngles[positionKey])
+                        bpy.context.active_object.rotation_euler[axis_Z] = math.radians(cameraAngles[positionKey]) 
                         
                         # ----- Debugging
                         # TODO: Delete print
-                        #print("\nbpy.context.active_object.rotation_euler:",bpy.context.active_object.rotation_euler)
+                         #print("\nbpy.context.active_object.rotation_euler:",bpy.context.active_object.rotation_euler)
                         # TODO: Delete print
                         #print("\nbpy.context.active_object.rotation_euler[2]:",bpy.context.active_object.rotation_euler[2])
                 
@@ -1703,7 +1745,7 @@ class IEAS_PT_Camera(Panel):
                 
         if (animationTypesActive['9000'] or animationTypesActive['B000'] or 
             animationTypesActive['C000'] or animationTypesActive['E000'] or
-            animationTypesActive['2000'] or animationTypesActive['3000 mirror 0']):
+            animationTypesActive['2000']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1717,7 +1759,8 @@ class IEAS_PT_Camera(Panel):
             
         if (animationTypesActive['D000'] or 
             animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
-            animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1']):
+            animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1'] or
+            animationTypesActive['3000 mirror 0'] ):
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2156,6 +2199,8 @@ class IEAS_PT_Collections(Panel):
         elif (animationTypesActive['3000 mirror 0']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
+            row = self.layout.row()
+            row.prop(context.scene.IEAS_properties, "Creature_Lower")
         else:
             pass # Show no weapon animation options
         
