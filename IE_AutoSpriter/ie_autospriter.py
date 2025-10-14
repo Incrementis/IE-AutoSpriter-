@@ -686,7 +686,10 @@ class IEAS_AnimationTypes():
     
     def type3000_mirror0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Handles the logic for rendering and processing type 3000(mirror = 0)."""
-        # ----- Deactivates/Activates collections      
+        # TODO:Delete!
+        print("type3000: Executing complex logic for 3000 type.")
+        
+        # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
@@ -705,11 +708,16 @@ class IEAS_AnimationTypes():
             }
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             
+            # Makes the main/upper creature collection visible for rendering.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render  = False
+            # Ensures the Lower Part collection remains excluded (invisible) on the View Layer.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = True
+            
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
-            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
             # This is the actual rendering process.
             # `animation=False` renders a single still image.
             # `write_still=True` saves the rendered image to the specified `filepath`.
@@ -718,24 +726,37 @@ class IEAS_AnimationTypes():
             renderFrame(  False,
                           animation     =False,
                           write_still   =True)
-                       
-            # TODO:Delete!
-            print("type3000: Executing complex logic for 3000 type.")
-            # Stores the initial 'holdout' state of the creature collection before modification.
-            # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
-#            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
-#            
-#            # ----- Debugging
-#            # TODO: Delete print
-#            print("holdout:",holdout)
-#           
-#            # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
-#            # This ensures only weapon sprites are rendered when collections are toggled.
-#            if (holdout == False):
-#                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = True
+                          
+            # ----- Setup for SECOND RENDER PASS: Lower Creature Part -----                                                 
+            # Constructs the output folder path for the creature's lower part.
+            lowerpart_folder            = os.path.join(typeParameters.pathSaveAt, typeParameters.CreatureCollectionNameLP)
+            lowerpart_animation_folder  = os.path.join(lowerpart_folder, typeParameters.animation)
+             # Creates a subfolder for the specific animation and position angle.
+            lowerpart_position_folder   = os.path.join(lowerpart_animation_folder, typeParameters.positionKey)
+            if not os.path.exists(lowerpart_position_folder):
+                os.makedirs(lowerpart_position_folder)
                 
-                
-                
+            # Hides the main/upper creature collection (makes it invisible for the next render).
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render = True             
+            # Un-excludes the Lower Part collection, making its LayerCollection enabled
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = False
+            
+            # Constructs the full filename for the current sprite (for the lower part), using the 'D' prefix.
+            fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            
+            # Sets Blender's render output filepath for the current lower-part image.
+            bpy.context.scene.render.filepath = os.path.join(lowerpart_position_folder, fileName)
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
+                          
+            # Restores the render visibility of the main/upper creature collection (visible for subsequent calls).
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render  = False
     
     def type4000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 4000 type logic."""
