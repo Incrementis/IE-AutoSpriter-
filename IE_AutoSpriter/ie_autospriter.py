@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 25, 0),
+    "version": (0, 26, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -686,9 +686,22 @@ class IEAS_AnimationTypes():
     
     def type3000_mirror0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Handles the logic for rendering and processing type 3000(mirror = 0)."""
-        # TODO:Delete!
-        print("type3000: Executing complex logic for 3000 type.")
-        
+         # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("type3000M0: Executing 'exclude' logic for 3000M0 type.")
+            print("typeParameters.CreatureCollectionName:",typeParameters.CreatureCollectionName)
+        else:
+            # TODO:Delete!
+            print("type3000M0: Executing complex logic for 3000M0 type.")  
+    
+    def type3000_mirror1(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Handles the logic for rendering and processing type 3000(mirror = 1)."""    
         # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
             # Deactivates every collection found.                   
@@ -697,9 +710,12 @@ class IEAS_AnimationTypes():
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
-            print("type3000: Executing 'exclude' logic for 3000 type.")
+            print("type3000M1: Executing 'exclude' logic for 3000M1 type.")
             print("typeParameters.CreatureCollectionName:",typeParameters.CreatureCollectionName)
         else:
+            # TODO:Delete!
+            print("type3000M1: Executing complex logic for 3000M1 type.")
+            
             # Used to identify which sprite file is defined for which sequence.
             sequences = {
                 'DE':'G1', 'TW':'G1', 'SD':'G1',
@@ -1084,15 +1100,16 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('1000 multi new split bams 1','1000 multi new split bams 1','','',5),
                                         ('2000','2000','','',6),
                                         ('3000 mirror 0','3000 mirror 0','','',7),
-                                        ('4000','4000','','',8),
-                                        ('9000','9000','','',9),
-                                        ('A000','A000','','',10),
-                                        ('B000','B000','','',11),
-                                        ('C000','C000','','',12),
-                                        ('D000','D000','','',13),
-                                        ('E000','E000','','',14),
+                                        ('3000 mirror 1','3000 mirror 1','','',8),
+                                        ('4000','4000','','',9),
+                                        ('9000','9000','','',10),
+                                        ('A000','A000','','',11),
+                                        ('B000','B000','','',12),
+                                        ('C000','C000','','',13),
+                                        ('D000','D000','','',14),
+                                        ('E000','E000','','',15),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 15),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 16),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -1315,6 +1332,7 @@ class IEAS_OT_Final(Operator):
             '1000 multi new split bams 1':          IEAS_AnimationTypes().type1000_multi_new_sp1,
             '2000':                                 IEAS_AnimationTypes().type2000,
             '3000 mirror 0':                        IEAS_AnimationTypes().type3000_mirror0,
+            '3000 mirror 1':                        IEAS_AnimationTypes().type3000_mirror1,
             '4000':                                 IEAS_AnimationTypes().type4000,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
@@ -1440,7 +1458,8 @@ class IEAS_OT_Final(Operator):
             prefixResref                = prefixResref,
             position_folder             = ""
         )
-        if (selectedType == 'E000' or selectedType == '2000' or selectedType == '3000 mirror 0'):
+        if (selectedType == 'E000' or selectedType == '2000' or 
+            selectedType == '3000 mirror 0' or selectedType == '3000 mirror 1'):
             # Get the method from the dictionary, defaulting to a general handler if not found
             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
             handler_method(typeParameters)
@@ -1475,8 +1494,7 @@ class IEAS_OT_Final(Operator):
             currentAction = bpy.context.active_object.animation_data.action
             
             # Proceeds only if the animation is enabled by the user and the action exists in Blender. 
-            if(animationToggles[animationKey] == True and currentAction != None):
-               
+            if(animationToggles[animationKey] == True and currentAction != None):               
                 # Assigns the current animation action to the active object's animation data.
                 bpy.context.active_object.animation_data.action = bpy.data.actions.get(animation)               
                 # Sets the scene's end frame to match the animation's end frame, converted to an integer
@@ -1686,6 +1704,7 @@ class IEAS_PT_Camera(Panel):
             '1000 multi new split bams 1':          False,
             '2000':                                 False,
             '3000 mirror 0':                        False,
+            '3000 mirror 1':                        False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1766,7 +1785,7 @@ class IEAS_PT_Camera(Panel):
                 
         if (animationTypesActive['9000'] or animationTypesActive['B000'] or 
             animationTypesActive['C000'] or animationTypesActive['E000'] or
-            animationTypesActive['2000']):
+            animationTypesActive['2000'] or animationTypesActive['3000 mirror 0']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1781,7 +1800,7 @@ class IEAS_PT_Camera(Panel):
         if (animationTypesActive['D000'] or 
             animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
             animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1'] or
-            animationTypesActive['3000 mirror 0'] ):
+            animationTypesActive['3000 mirror 1'] ):
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1824,6 +1843,7 @@ class IEAS_PT_Animation(Panel):
             '1000 multi new split bams 1':          False,
             '2000':                                 False,
             '3000 mirror 0':                        False,
+            '3000 mirror 1':                        False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -1888,6 +1908,12 @@ class IEAS_PT_Animation(Panel):
             'Cast':     context.scene.IEAS_properties.Use_CA,
         }
         Toggles3000_mirror0 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1,       'Death':    context.scene.IEAS_properties.Use_DE,
+            'Ready':    context.scene.IEAS_properties.Use_SC,       'Idle':     context.scene.IEAS_properties.Use_SD, 
+            'Dead':     context.scene.IEAS_properties.Use_TW,       'Cast':     context.scene.IEAS_properties.Use_CA,
+            'Emerge':   context.scene.IEAS_properties.Use_Emerge,   'Hide':     context.scene.IEAS_properties.Use_Hide,
+        }
+        Toggles3000_mirror1 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1,       'Death':    context.scene.IEAS_properties.Use_DE,
             'Ready':    context.scene.IEAS_properties.Use_SC,       'Idle':     context.scene.IEAS_properties.Use_SD, 
             'Dead':     context.scene.IEAS_properties.Use_TW,       'Cast':     context.scene.IEAS_properties.Use_CA,
@@ -2054,6 +2080,18 @@ class IEAS_PT_Animation(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
         
+        if (animationTypesActive['3000 mirror 1']):
+            for animationKey, toggle in Toggles3000_mirror1.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+        
         if (animationTypesActive['4000']):
             for animationKey, toggle in Toggles4000.items():
                 # Splits row into two columns            
@@ -2169,6 +2207,7 @@ class IEAS_PT_Collections(Panel):
             '1000 multi new split bams 1':          False,
             '2000':                                 False,
             '3000 mirror 0':                        False,
+            '3000 mirror 1':                        False,
             '4000':                                 False,
             '9000':                                 False,
             'A000':                                 False,
@@ -2217,7 +2256,7 @@ class IEAS_PT_Collections(Panel):
                 row_input.prop(context.scene.IEAS_properties, weaponKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[weaponKey])
-        elif (animationTypesActive['3000 mirror 0']):
+        elif (animationTypesActive['3000 mirror 0'] or animationTypesActive['3000 mirror 1']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
             row = self.layout.row()
