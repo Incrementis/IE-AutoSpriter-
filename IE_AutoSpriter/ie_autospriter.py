@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 26, 5),
+    "version": (0, 27, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -855,6 +855,11 @@ class IEAS_AnimationTypes():
                           animation     =False,
                           write_still   =True)
     
+    # TODO: define method              
+    def type7000_monster_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling 4000 type logic."""
+        pass
+    
     def type9000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 9000 type logic."""
         if (typeParameters.exclude == False):
@@ -1090,7 +1095,7 @@ class IEAS_AnimationTypes():
         
     def typeNone(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling no type logic."""
-        print("No type.")
+        print("No animation type found. This shouldn't happen!")
 
 
 # --------
@@ -1166,15 +1171,16 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('2000','2000','','',6),
                                         ('3000 mirror 0','3000 mirror 0','','',7),
                                         ('3000 mirror 1','3000 mirror 1','','',8),
-                                        ('4000','4000','','',9),
-                                        ('9000','9000','','',10),
-                                        ('A000','A000','','',11),
-                                        ('B000','B000','','',12),
-                                        ('C000','C000','','',13),
-                                        ('D000','D000','','',14),
-                                        ('E000','E000','','',15),
+                                        ('7000 monster split bams 0','7000 monster split bams 0','','',9),
+                                        ('4000','4000','','',10),
+                                        ('9000','9000','','',11),
+                                        ('A000','A000','','',12),
+                                        ('B000','B000','','',13),
+                                        ('C000','C000','','',14),
+                                        ('D000','D000','','',15),
+                                        ('E000','E000','','',16),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 16),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 17),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -1399,6 +1405,7 @@ class IEAS_OT_Final(Operator):
             '3000 mirror 0':                        IEAS_AnimationTypes().type3000_mirror0,
             '3000 mirror 1':                        IEAS_AnimationTypes().type3000_mirror1,
             '4000':                                 IEAS_AnimationTypes().type4000,
+            '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
             'B000':                                 IEAS_AnimationTypes().typeB000,
@@ -1771,6 +1778,7 @@ class IEAS_PT_Camera(Panel):
             '3000 mirror 0':                        False,
             '3000 mirror 1':                        False,
             '4000':                                 False,
+            '7000 monster split bams 0':            False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -1865,7 +1873,7 @@ class IEAS_PT_Camera(Panel):
         if (animationTypesActive['D000'] or 
             animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
             animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1'] or
-            animationTypesActive['3000 mirror 1'] ):
+            animationTypesActive['3000 mirror 1'] or animationTypesActive['7000 monster split bams 0']):
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -1910,6 +1918,7 @@ class IEAS_PT_Animation(Panel):
             '3000 mirror 0':                        False,
             '3000 mirror 1':                        False,
             '4000':                                 False,
+            '7000 monster split bams 0':            False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -1987,7 +1996,17 @@ class IEAS_PT_Animation(Panel):
         Toggles4000 = {
             'Death':    context.scene.IEAS_properties.Use_DE, 'Get_Hit':  context.scene.IEAS_properties.Use_GH,
             'Ready':    context.scene.IEAS_properties.Use_SC, 'Idle':     context.scene.IEAS_properties.Use_SD,
-            'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
+        }
+        Toggles7000_monster_sp0 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
+            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Attack4':  context.scene.IEAS_properties.Use_A4,
+            'Attack5':  context.scene.IEAS_properties.Use_A5, 'Conjure':  context.scene.IEAS_properties.Use_SP, 
+            'Cast':     context.scene.IEAS_properties.Use_CA, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
+            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Get_Up':   context.scene.IEAS_properties.Use_GU, 'Sleep':    context.scene.IEAS_properties.Use_SL,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles9000 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
@@ -2169,6 +2188,18 @@ class IEAS_PT_Animation(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
+        if (animationTypesActive['7000 monster split bams 0']):
+            for animationKey, toggle in Toggles7000_monster_sp0.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+                
         if (animationTypesActive['9000']):
             for animationKey, toggle in Toggles9000.items():
                 # Splits row into two columns            
@@ -2274,6 +2305,7 @@ class IEAS_PT_Collections(Panel):
             '3000 mirror 0':                        False,
             '3000 mirror 1':                        False,
             '4000':                                 False,
+            '7000 monster split bams 0':            False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
