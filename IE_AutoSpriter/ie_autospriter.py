@@ -875,7 +875,7 @@ class IEAS_AnimationTypes():
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{animationKey}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
@@ -928,7 +928,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName = f"{typeParameters.prefixResref}{animationKey}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -987,7 +987,7 @@ class IEAS_AnimationTypes():
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{animationKey}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
@@ -1081,7 +1081,30 @@ class IEAS_AnimationTypes():
                 
     def type7000_monster_old(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 7000 monster_old type logic."""
-        pass
+        if (typeParameters.exclude == False):
+             # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1','DE':'G1', 'TW':'G1',
+                'A1':'G2', 'CA':'G2', 'A3':'G3'
+            }
+            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                       
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
     
     def type9000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 9000 type logic."""
