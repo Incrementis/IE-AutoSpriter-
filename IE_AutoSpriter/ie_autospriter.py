@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 27, 0),
+    "version": (0, 28, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -966,6 +966,11 @@ class IEAS_AnimationTypes():
             if (holdout == False):
                 # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
                 bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False
+                
+    def type7000_monster_sp1(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling 7000 monster split bams 1 type logic."""
+        pass
+    
     
     def type9000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 9000 type logic."""
@@ -1281,15 +1286,16 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('3000 mirror 0','3000 mirror 0','','',7),
                                         ('3000 mirror 1','3000 mirror 1','','',8),
                                         ('7000 monster split bams 0','7000 monster split bams 0','','',9),
-                                        ('4000','4000','','',10),
-                                        ('9000','9000','','',11),
-                                        ('A000','A000','','',12),
-                                        ('B000','B000','','',13),
-                                        ('C000','C000','','',14),
-                                        ('D000','D000','','',15),
-                                        ('E000','E000','','',16),
+                                        ('7000 monster split bams 1','7000 monster split bams 1','','',10),
+                                        ('4000','4000','','',11),
+                                        ('9000','9000','','',12),
+                                        ('A000','A000','','',13),
+                                        ('B000','B000','','',14),
+                                        ('C000','C000','','',15),
+                                        ('D000','D000','','',16),
+                                        ('E000','E000','','',17),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 17),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 18),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -1515,6 +1521,7 @@ class IEAS_OT_Final(Operator):
             '3000 mirror 1':                        IEAS_AnimationTypes().type3000_mirror1,
             '4000':                                 IEAS_AnimationTypes().type4000,
             '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
+            '7000 monster split bams 1':            IEAS_AnimationTypes().type7000_monster_sp1,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
             'B000':                                 IEAS_AnimationTypes().typeB000,
@@ -1641,7 +1648,7 @@ class IEAS_OT_Final(Operator):
         )
         if (selectedType == 'E000' or selectedType == '2000' or 
             selectedType == '3000 mirror 0' or selectedType == '3000 mirror 1' or
-            selectedType == '7000 monster split bams 0'):
+            selectedType == '7000 monster split bams 0' or selectedType == '7000 monster split bams 1'):
             # Get the method from the dictionary, defaulting to a general handler if not found
             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
             handler_method(typeParameters)
@@ -1889,6 +1896,7 @@ class IEAS_PT_Camera(Panel):
             '3000 mirror 1':                        False,
             '4000':                                 False,
             '7000 monster split bams 0':            False,
+            '7000 monster split bams 1':            False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -1983,7 +1991,8 @@ class IEAS_PT_Camera(Panel):
         if (animationTypesActive['D000'] or 
             animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
             animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1'] or
-            animationTypesActive['3000 mirror 1'] or animationTypesActive['7000 monster split bams 0']):
+            animationTypesActive['3000 mirror 1'] or animationTypesActive['7000 monster split bams 0'] or 
+            animationTypesActive['7000 monster split bams 1']):
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2029,6 +2038,7 @@ class IEAS_PT_Animation(Panel):
             '3000 mirror 1':                        False,
             '4000':                                 False,
             '7000 monster split bams 0':            False,
+            '7000 monster split bams 1':            False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -2109,6 +2119,16 @@ class IEAS_PT_Animation(Panel):
             'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles7000_monster_sp0 = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
+            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Attack4':  context.scene.IEAS_properties.Use_A4,
+            'Attack5':  context.scene.IEAS_properties.Use_A5, 'Conjure':  context.scene.IEAS_properties.Use_SP, 
+            'Cast':     context.scene.IEAS_properties.Use_CA, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
+            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Get_Up':   context.scene.IEAS_properties.Use_GU, 'Sleep':    context.scene.IEAS_properties.Use_SL,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
+        }
+        Toggles7000_monster_sp1 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
             'Attack3':  context.scene.IEAS_properties.Use_A3, 'Attack4':  context.scene.IEAS_properties.Use_A4,
             'Attack5':  context.scene.IEAS_properties.Use_A5, 'Conjure':  context.scene.IEAS_properties.Use_SP, 
@@ -2310,6 +2330,18 @@ class IEAS_PT_Animation(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
+        if (animationTypesActive['7000 monster split bams 1']):
+            for animationKey, toggle in Toggles7000_monster_sp1.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+                
         if (animationTypesActive['9000']):
             for animationKey, toggle in Toggles9000.items():
                 # Splits row into two columns            
@@ -2416,6 +2448,7 @@ class IEAS_PT_Collections(Panel):
             '3000 mirror 1':                        False,
             '4000':                                 False,
             '7000 monster split bams 0':            False,
+            '7000 monster split bams 1':            False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -2450,7 +2483,7 @@ class IEAS_PT_Collections(Panel):
             
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
         if (animationTypesActive['E000'] or animationTypesActive['2000'] or
-            animationTypesActive['7000 monster split bams 0']):
+            animationTypesActive['7000 monster split bams 0'] or animationTypesActive['7000 monster split bams 1']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
             
