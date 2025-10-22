@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 28, 0),
+    "version": (0, 29, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -928,7 +928,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{animationKey}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -987,7 +987,7 @@ class IEAS_AnimationTypes():
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{animationKey}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
@@ -1079,7 +1079,9 @@ class IEAS_AnimationTypes():
                 # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
                 bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False
                 
-    
+    def type7000_monster_old(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling 7000 monster_old type logic."""
+        pass
     
     def type9000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 9000 type logic."""
@@ -1396,15 +1398,16 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('3000 mirror 1','3000 mirror 1','','',8),
                                         ('7000 monster split bams 0','7000 monster split bams 0','','',9),
                                         ('7000 monster split bams 1','7000 monster split bams 1','','',10),
-                                        ('4000','4000','','',11),
-                                        ('9000','9000','','',12),
-                                        ('A000','A000','','',13),
-                                        ('B000','B000','','',14),
-                                        ('C000','C000','','',15),
-                                        ('D000','D000','','',16),
-                                        ('E000','E000','','',17),
+                                        ('7000 monster old','7000 monster old','','',11),
+                                        ('4000','4000','','',12),
+                                        ('9000','9000','','',13),
+                                        ('A000','A000','','',14),
+                                        ('B000','B000','','',15),
+                                        ('C000','C000','','',16),
+                                        ('D000','D000','','',17),
+                                        ('E000','E000','','',18),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 18),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 19),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -1631,6 +1634,7 @@ class IEAS_OT_Final(Operator):
             '4000':                                 IEAS_AnimationTypes().type4000,
             '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
             '7000 monster split bams 1':            IEAS_AnimationTypes().type7000_monster_sp1,
+            '7000 monster old':                     IEAS_AnimationTypes().type7000_monster_old,
             '9000':                                 IEAS_AnimationTypes().type9000,
             'A000':                                 IEAS_AnimationTypes().typeA000,
             'B000':                                 IEAS_AnimationTypes().typeB000,
@@ -2006,6 +2010,7 @@ class IEAS_PT_Camera(Panel):
             '4000':                                 False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
+            '7000 monster old':                     False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -2085,7 +2090,8 @@ class IEAS_PT_Camera(Panel):
                 
         if (animationTypesActive['9000'] or animationTypesActive['B000'] or 
             animationTypesActive['C000'] or animationTypesActive['E000'] or
-            animationTypesActive['2000'] or animationTypesActive['3000 mirror 0']):
+            animationTypesActive['2000'] or animationTypesActive['3000 mirror 0'] or
+            animationTypesActive['7000 monster old']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2148,6 +2154,7 @@ class IEAS_PT_Animation(Panel):
             '4000':                                 False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
+            '7000 monster old':                     False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,
@@ -2245,6 +2252,13 @@ class IEAS_PT_Animation(Panel):
             'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
             'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
             'Get_Up':   context.scene.IEAS_properties.Use_GU, 'Sleep':    context.scene.IEAS_properties.Use_SL,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
+        }
+        Toggles7000_monster_old = {
+            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack3':  context.scene.IEAS_properties.Use_A3, 
+            'Cast':     context.scene.IEAS_properties.Use_CA, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
+            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW, 
             'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles9000 = {
@@ -2450,6 +2464,18 @@ class IEAS_PT_Animation(Panel):
                 row_input.prop(context.scene.IEAS_properties, animationKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+        
+        if (animationTypesActive['7000 monster old']):
+            for animationKey, toggle in Toggles7000_monster_old.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
         if (animationTypesActive['9000']):
             for animationKey, toggle in Toggles9000.items():
@@ -2558,6 +2584,7 @@ class IEAS_PT_Collections(Panel):
             '4000':                                 False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
+            '7000 monster old':                     False,
             '9000':                                 False,
             'A000':                                 False,
             'B000':                                 False,

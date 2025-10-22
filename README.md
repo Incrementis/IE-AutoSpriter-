@@ -14,6 +14,7 @@ This is also a learning project focused on my personal use and interest. Suggest
 * I am not a Blender or Blender API expert, so this may also cause issues.
 * Only Tested it with blender version 4.0(It may already work on higher versions)
 * The focus of the beta phase will be on bug fixing.
+* [Here](https://github.com/Incrementis/IE-AutoSpriter-/issues/52) you will find the currently known issues that will be fixed in the beta phase.
 ### Performance
 The 4.0 blend save files contain the appropriate settings.
 #### Render engine "Cycles": 
