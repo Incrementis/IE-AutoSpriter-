@@ -1108,7 +1108,122 @@ class IEAS_AnimationTypes():
 
     def type8000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 8000 monster_layered type logic."""
-        pass
+         # ----- Deactivates/Activates collections      
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("type8000: Executing 'exclude' logic for 8000 type.")
+        else:
+            # Used to identify which sprite file is defined for which sequence.
+            sequences = {
+                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+                'A1':'G2', 'A2':'G2', 'A3':'G2', 'SP':'G2', 'CA':'G2',
+            }
+            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            
+            # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
+            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            else:
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                          
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
+                       
+            # TODO:Delete!
+            print("type8000: Executing complex logic for 8000 type.")
+            # Stores the initial 'holdout' state of the creature collection before modification.
+            # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
+            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            
+            # ----- Debugging
+            # TODO: Delete print
+            print("holdout:",holdout)
+                                            
+            # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
+            # This ensures only weapon sprites are rendered when collections are toggled.
+            if (holdout == False):
+                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = True
+            
+            # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collectionName  = collection.name
+                # Finds the corresponding weapon key for the collection name.
+                # "next" is used for a single, fast lookup with built-in error handling.
+                # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
+                wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
+                
+                # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
+                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                    # All other weapon collections remain excluded (invisible) by default.
+                    collection.exclude=False
+                    
+                    # Constructs the base output folder path for the current weapon.
+                    weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
+                    weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
+                    
+                    # Creates a subfolder for the specific weapon and camera angle.
+                    weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
+                    if not os.path.exists(weapon_position_folder):
+                        os.makedirs(weapon_position_folder)
+                    
+                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                    if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    else:
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        
+                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                    bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
+                    # This is the actual rendering process.
+                    # `animation=False` renders a single still image.
+                    # `write_still=True` saves the rendered image to the specified `filepath`.
+                    # The first `False` argument disables undo support for the operation.
+                    renderFrame = bpy.ops.render.render
+                    renderFrame(  False,
+                                  animation     =False,
+                                  write_still   =True)
+
+                    # ----- Debugging
+                    # TODO: Delete print
+                    #print("position_folder:",position_folder)
+                    # TODO: Delete print
+                    print("fileName:",fileName)
+                    # TODO: Delete print
+                    print("weapon_folder:",weapon_folder)
+                    # TODO: Delete print
+                    print("weapon_position_folder:",weapon_position_folder)
+                       
+                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                    # This ensures only one weapon collection is active at any given time for subsequent renders.
+                    collection.exclude = True
+ 
+                # ----- Debugging
+                # TODO: Delete print
+                print("collectionName:",collectionName)
+                # TODO: Delete print
+                print("wovl:",wovl)
+            
+            # Resets the 'holdout' state of the creature collection to its original value.
+            # This ensures the creature is visible again after weapon rendering is complete, if it was originally visible.
+            if (holdout == False):
+                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False
     
     def type9000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 9000 type logic."""
