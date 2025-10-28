@@ -1459,6 +1459,9 @@ class IEAS_AnimationTypes():
             if (holdout == False):
                 # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
                 bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False                  
+    
+    def typeF000(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling F000 type logic.""" 
         
     def typeNone(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling no type logic."""
@@ -1483,9 +1486,23 @@ class IEAS_PGT_Inputs(PropertyGroup):
             'Use_ES', 'Use_ESE', 'Use_SE', 'Use_SSE'
         ]
         animationToggles = [
-            'Use_A1', 'Use_A2', 'Use_A3', 'Use_A4', 'Use_A5', 'Use_CA', 'Use_DE',
-            'Use_GH', 'Use_GU', 'Use_SC', 'Use_SD', 'Use_SL', 'Use_SP',
-            'Use_TW', 'Use_WK', 'Use_Effect', 'Use_Emerge', 'Use_Hide',
+        'Use_A1', 'Use_A2', 'Use_A3', 'Use_A4', 'Use_A5', 'Use_CA', 'Use_DE',
+        'Use_GH', 'Use_GU', 'Use_SC', 'Use_SD', 'Use_SL', 'Use_SP',
+        'Use_TW', 'Use_WK', 'Use_Effect', 'Use_Emerge', 'Use_Hide',
+        # Based on PST_... properties
+        'Use_AT1', 'Use_AT2', 'Use_AT3',              # Attack Toggles
+        'Use_HIT', 'Use_RUN', 'Use_WLK',              # Movement/Hit Toggles
+        'Use_SP1', 'Use_SP2', 'Use_SP3',              # Spell Toggles
+        'Use_GUP',                                    # Get Up Toggle
+        'Use_DFB1', 'Use_DFB2', 'Use_DFB3',           # Death Toggles
+        'Use_TK1', 'Use_TK2', 'Use_TK3',              # Talk Toggles
+        'Use_STD', 'Use_STDF1', 'Use_STDF2',          # Stand Toggles
+        'Use_STC', 'Use_STCF1', 'Use_STCF2',          # Stance Toggles
+        'Use_STCtoSTD', 'Use_STDtoSTC',               # Stance Transition Toggles
+        'Use_MISC1', 'Use_MISC2', 'Use_MISC3', 'Use_MISC4', 'Use_MISC5', 
+        'Use_MISC6', 'Use_MISC7', 'Use_MISC8', 'Use_MISC9', 'Use_MISC10', 
+        'Use_MISC11', 'Use_MISC12', 'Use_MISC13', 'Use_MISC14', 'Use_MISC15', 
+        'Use_MISC16', 'Use_MISC17', 'Use_MISC18', 'Use_MISC19', 'Use_MISC20',
         ]
         weaponToggles = [
             'Use_A', 'Use_B', 'Use_C', 'Use_D', 'Use_F', 'Use_H',
@@ -1549,8 +1566,9 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('C000','C000','','',17),
                                         ('D000','D000','','',18),
                                         ('E000','E000','','',19),
+                                        ('F000','F000','','',20),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 20),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 21),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -1633,6 +1651,51 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Conjure:    bpy.props.StringProperty(name="SP", default="conjure")
     Dead:       bpy.props.StringProperty(name="TW", default="dead")
     Walk:       bpy.props.StringProperty(name="WK", default="walk")
+    # String properties for names of various animation actions in PST.
+    PST_Attack1:        bpy.props.StringProperty(name="AT1", default="slash")
+    PST_Attack2:        bpy.props.StringProperty(name="AT2", default="stab")
+    PST_Attack3:        bpy.props.StringProperty(name="AT3", default="strike")
+    PST_Get_Hit:        bpy.props.StringProperty(name="HIT", default="get hit")
+    PST_Run:            bpy.props.StringProperty(name="RUN", default="run")
+    PST_Walk:           bpy.props.StringProperty(name="WLK", default="walk")
+    PST_Spell1:         bpy.props.StringProperty(name="SP1", default="spell1")
+    PST_Spell2:         bpy.props.StringProperty(name="SP2", default="spell2")
+    PST_Spell3:         bpy.props.StringProperty(name="SP3", default="spell3")
+    PST_Get_Up:         bpy.props.StringProperty(name="GUP", default="get up")
+    PST_Death1:         bpy.props.StringProperty(name="DFB1",default="dieforward")
+    PST_Death2:         bpy.props.StringProperty(name="DFB2",default="diebackward")
+    PST_Death3:         bpy.props.StringProperty(name="DFB3",default="diecollapse")
+    PST_Talk1:          bpy.props.StringProperty(name="TK1", default="Talk1")
+    PST_Talk2:          bpy.props.StringProperty(name="TK2", default="Talk2")
+    PST_Talk3:          bpy.props.StringProperty(name="TK3", default="Talk3")
+    PST_Stand:          bpy.props.StringProperty(name="STD", default="stand")
+    PST_StandF1:        bpy.props.StringProperty(name="STDF1", default="standfidget1")
+    PST_StandF2:        bpy.props.StringProperty(name="STDF2", default="standfidget2")
+    PST_Stance:         bpy.props.StringProperty(name="STC", default="stance")
+    PST_StanceF1:       bpy.props.StringProperty(name="STCF1", default="stancefidget1")
+    PST_StanceF2:       bpy.props.StringProperty(name="STCF2", default="stancefidget2")
+    PST_Stance_to_Stand:bpy.props.StringProperty(name="STCtoSTD",default="stance to stand")
+    PST_Stand_to_Stance:bpy.props.StringProperty(name="STDtoSTC",default="stand to stance")
+    PST_Misc1:          bpy.props.StringProperty(name="MISC1",default="misc 1")
+    PST_Misc2:          bpy.props.StringProperty(name="MISC2",default="misc 2")
+    PST_Misc3:          bpy.props.StringProperty(name="MISC3",default="misc 3")
+    PST_Misc4:          bpy.props.StringProperty(name="MISC4",default="misc 4")
+    PST_Misc5:          bpy.props.StringProperty(name="MISC5",default="misc 5")
+    PST_Misc6:          bpy.props.StringProperty(name="MISC6",default="misc 6")
+    PST_Misc7:          bpy.props.StringProperty(name="MISC7",default="misc 7")
+    PST_Misc8:          bpy.props.StringProperty(name="MISC8",default="misc 8")
+    PST_Misc9:          bpy.props.StringProperty(name="MISC9",default="misc 9")
+    PST_Misc10:         bpy.props.StringProperty(name="MISC10",default="misc 10")
+    PST_Misc11:         bpy.props.StringProperty(name="MISC11",default="misc 11")
+    PST_Misc12:         bpy.props.StringProperty(name="MISC12",default="misc 12")
+    PST_Misc13:         bpy.props.StringProperty(name="MISC13",default="misc 13")
+    PST_Misc14:         bpy.props.StringProperty(name="MISC14",default="misc 14")
+    PST_Misc15:         bpy.props.StringProperty(name="MISC15",default="misc 15")
+    PST_Misc16:         bpy.props.StringProperty(name="MISC16",default="misc 16")
+    PST_Misc17:         bpy.props.StringProperty(name="MISC17",default="misc 17")
+    PST_Misc18:         bpy.props.StringProperty(name="MISC18",default="misc 18")
+    PST_Misc19:         bpy.props.StringProperty(name="MISC19",default="misc 19")
+    PST_Misc20:         bpy.props.StringProperty(name="MISC20",default="misc 20")
     # String property for unique effect animation(e.g. Ankheg)
     Emerge:     bpy.props.StringProperty(name="EMERGE", default="emerge")
     Hide:       bpy.props.StringProperty(name="HIDE",  default="hide")    
@@ -1683,7 +1746,51 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_S:      bpy.props.BoolProperty(name="Use S",    default=False)
     Use_W:      bpy.props.BoolProperty(name="Use W",    default=False)
     Use_Q:      bpy.props.BoolProperty(name="Use Q",    default=False)
-    
+    # Boolean toggles for rendering each animation for PST.
+    Use_AT1:        bpy.props.BoolProperty(name="Use AT1",      default=False)
+    Use_AT2:        bpy.props.BoolProperty(name="Use AT2",      default=False)
+    Use_AT3:        bpy.props.BoolProperty(name="Use AT3",      default=False)
+    Use_HIT:        bpy.props.BoolProperty(name="Use HIT",      default=False)  
+    Use_RUN:        bpy.props.BoolProperty(name="Use RUN",      default=False) 
+    Use_WLK:        bpy.props.BoolProperty(name="Use WLK",      default=False)
+    Use_SP1:        bpy.props.BoolProperty(name="Use SP1",      default=False) 
+    Use_SP2:        bpy.props.BoolProperty(name="Use SP2",      default=False)
+    Use_SP3:        bpy.props.BoolProperty(name="Use SP3",      default=False)
+    Use_GUP:        bpy.props.BoolProperty(name="Use GUP",      default=False)
+    Use_DFB1:       bpy.props.BoolProperty(name="Use DFB1",     default=False)
+    Use_DFB2:       bpy.props.BoolProperty(name="Use DFB2",     default=False)
+    Use_DFB3:       bpy.props.BoolProperty(name="Use DFB3",     default=False)
+    Use_TK1:        bpy.props.BoolProperty(name="Use TK1",      default=False)
+    Use_TK2:        bpy.props.BoolProperty(name="Use TK2",      default=False)
+    Use_TK3:        bpy.props.BoolProperty(name="Use TK3",      default=False)
+    Use_STD:        bpy.props.BoolProperty(name="Use STD",      default=False)
+    Use_STDF1:      bpy.props.BoolProperty(name="Use STDF1",    default=False)
+    Use_STDF2:      bpy.props.BoolProperty(name="Use STDF2",    default=False)
+    Use_STC:        bpy.props.BoolProperty(name="Use STC",      default=False)
+    Use_STCF1:      bpy.props.BoolProperty(name="Use STCF1",    default=False)
+    Use_STCF2:      bpy.props.BoolProperty(name="Use STCF2",    default=False)
+    Use_STCtoSTD:   bpy.props.BoolProperty(name="Use STCtoSTD", default=False)
+    Use_STDtoSTC:   bpy.props.BoolProperty(name="Use STDtoSTC", default=False)
+    Use_MISC1:      bpy.props.BoolProperty(name="Use MISC1",    default=False)
+    Use_MISC2:      bpy.props.BoolProperty(name="Use MISC2",    default=False)
+    Use_MISC3:      bpy.props.BoolProperty(name="Use MISC3",    default=False)
+    Use_MISC4:      bpy.props.BoolProperty(name="Use MISC4",    default=False)
+    Use_MISC5:      bpy.props.BoolProperty(name="Use MISC5",    default=False)
+    Use_MISC6:      bpy.props.BoolProperty(name="Use MISC6",    default=False)
+    Use_MISC7:      bpy.props.BoolProperty(name="Use MISC7",    default=False)
+    Use_MISC8:      bpy.props.BoolProperty(name="Use MISC8",    default=False)
+    Use_MISC9:      bpy.props.BoolProperty(name="Use MISC9",    default=False)
+    Use_MISC10:     bpy.props.BoolProperty(name="Use MISC10",   default=False)
+    Use_MISC11:     bpy.props.BoolProperty(name="Use MISC11",   default=False)
+    Use_MISC12:     bpy.props.BoolProperty(name="Use MISC12",   default=False)
+    Use_MISC13:     bpy.props.BoolProperty(name="Use MISC13",   default=False)
+    Use_MISC14:     bpy.props.BoolProperty(name="Use MISC14",   default=False)
+    Use_MISC15:     bpy.props.BoolProperty(name="Use MISC15",   default=False)
+    Use_MISC16:     bpy.props.BoolProperty(name="Use MISC16",   default=False)
+    Use_MISC17:     bpy.props.BoolProperty(name="Use MISC17",   default=False)
+    Use_MISC18:     bpy.props.BoolProperty(name="Use MISC18",   default=False)
+    Use_MISC19:     bpy.props.BoolProperty(name="Use MISC19",   default=False)
+    Use_MISC20:     bpy.props.BoolProperty(name="Use MISC20",   default=False)
     # --- Step 5: Render
     # Reserved/None
 
@@ -1785,6 +1892,7 @@ class IEAS_OT_Final(Operator):
             'C000':                                 IEAS_AnimationTypes().typeC000,
             'D000':                                 IEAS_AnimationTypes().typeD000,
             'E000':                                 IEAS_AnimationTypes().typeE000,
+            'F000':                                 IEAS_AnimationTypes().typeF000,
             'unique identifier':                    False, # TODO: delete 'unique identifier'
         }
                    
@@ -1825,26 +1933,73 @@ class IEAS_OT_Final(Operator):
         # ----- Animation
         # Dictionaries mapping internal keys to user-defined animation names and toggle states.
         animationFolderNames = {
-            'A1':       context.scene.IEAS_properties.Attack1,    'A2': context.scene.IEAS_properties.Attack2,
-            'A3':       context.scene.IEAS_properties.Attack3,    'A4': context.scene.IEAS_properties.Attack4,
-            'CA':       context.scene.IEAS_properties.Cast,       'DE': context.scene.IEAS_properties.Death,
-            'GH':       context.scene.IEAS_properties.Get_Hit,    'GU': context.scene.IEAS_properties.Get_Up,
-            'SC':       context.scene.IEAS_properties.Ready,      'SD': context.scene.IEAS_properties.Idle,
-            'SL':       context.scene.IEAS_properties.Sleep,      'SP': context.scene.IEAS_properties.Conjure,
-            'TW':       context.scene.IEAS_properties.Dead,       'WK': context.scene.IEAS_properties.Walk,
-            'Effect':   context.scene.IEAS_properties.Effect,     'EMERGE': context.scene.IEAS_properties.Emerge,
-            'HIDE':     context.scene.IEAS_properties.Hide  
+            'A1':       context.scene.IEAS_properties.Attack1,      'A2': context.scene.IEAS_properties.Attack2,
+            'A3':       context.scene.IEAS_properties.Attack3,      'A4': context.scene.IEAS_properties.Attack4,
+            'CA':       context.scene.IEAS_properties.Cast,         'DE': context.scene.IEAS_properties.Death,
+            'GH':       context.scene.IEAS_properties.Get_Hit,      'GU': context.scene.IEAS_properties.Get_Up,
+            'SC':       context.scene.IEAS_properties.Ready,        'SD': context.scene.IEAS_properties.Idle,
+            'SL':       context.scene.IEAS_properties.Sleep,        'SP': context.scene.IEAS_properties.Conjure,
+            'TW':       context.scene.IEAS_properties.Dead,         'WK': context.scene.IEAS_properties.Walk,
+            'Effect':   context.scene.IEAS_properties.Effect,       'EMERGE': context.scene.IEAS_properties.Emerge,
+            'HIDE':     context.scene.IEAS_properties.Hide,
+            # PST String Properties
+            'AT1':      context.scene.IEAS_properties.PST_Attack1,  'AT2': context.scene.IEAS_properties.PST_Attack2,
+            'AT3':      context.scene.IEAS_properties.PST_Attack3,  'HIT': context.scene.IEAS_properties.PST_Get_Hit,
+            'RUN':      context.scene.IEAS_properties.PST_Run,      'WLK': context.scene.IEAS_properties.PST_Walk,
+            'SP1':      context.scene.IEAS_properties.PST_Spell1,   'SP2': context.scene.IEAS_properties.PST_Spell2,
+            'SP3':      context.scene.IEAS_properties.PST_Spell3,   'GUP': context.scene.IEAS_properties.PST_Get_Up,
+            'DFB1':     context.scene.IEAS_properties.PST_Death1,   'DFB2': context.scene.IEAS_properties.PST_Death2,
+            'DFB3':     context.scene.IEAS_properties.PST_Death3,   'TK1': context.scene.IEAS_properties.PST_Talk1,
+            'TK2':      context.scene.IEAS_properties.PST_Talk2,    'TK3': context.scene.IEAS_properties.PST_Talk3,
+            'STD':      context.scene.IEAS_properties.PST_Stand,    'STDF1': context.scene.IEAS_properties.PST_StandF1,
+            'STDF2':    context.scene.IEAS_properties.PST_StandF2,  'STC': context.scene.IEAS_properties.PST_Stance,
+            'STCF1':    context.scene.IEAS_properties.PST_StanceF1, 'STCF2': context.scene.IEAS_properties.PST_StanceF2,
+            'STCtoSTD': context.scene.IEAS_properties.PST_Stance_to_Stand, 
+            'STDtoSTC': context.scene.IEAS_properties.PST_Stand_to_Stance,
+            'MISC1':    context.scene.IEAS_properties.PST_Misc1,    'MISC2': context.scene.IEAS_properties.PST_Misc2,
+            'MISC3':    context.scene.IEAS_properties.PST_Misc3,    'MISC4': context.scene.IEAS_properties.PST_Misc4,
+            'MISC5':    context.scene.IEAS_properties.PST_Misc5,    'MISC6': context.scene.IEAS_properties.PST_Misc6,
+            'MISC7':    context.scene.IEAS_properties.PST_Misc7,    'MISC8': context.scene.IEAS_properties.PST_Misc8,
+            'MISC9':    context.scene.IEAS_properties.PST_Misc9,    'MISC10': context.scene.IEAS_properties.PST_Misc10,
+            'MISC11':   context.scene.IEAS_properties.PST_Misc11,   'MISC12': context.scene.IEAS_properties.PST_Misc12,
+            'MISC13':   context.scene.IEAS_properties.PST_Misc13,   'MISC14': context.scene.IEAS_properties.PST_Misc14,
+            'MISC15':   context.scene.IEAS_properties.PST_Misc15,   'MISC16': context.scene.IEAS_properties.PST_Misc16,
+            'MISC17':   context.scene.IEAS_properties.PST_Misc17,   'MISC18': context.scene.IEAS_properties.PST_Misc18,
+            'MISC19':   context.scene.IEAS_properties.PST_Misc19,   'MISC20': context.scene.IEAS_properties.PST_Misc20
         }
         animationToggles = {
-            'A1':       context.scene.IEAS_properties.Use_A1,     'A2': context.scene.IEAS_properties.Use_A2,
-            'A3':       context.scene.IEAS_properties.Use_A3,     'A4': context.scene.IEAS_properties.Use_A4,
-            'CA':       context.scene.IEAS_properties.Use_CA,     'DE': context.scene.IEAS_properties.Use_DE,
-            'GH':       context.scene.IEAS_properties.Use_GH,     'GU': context.scene.IEAS_properties.Use_GU,
-            'SC':       context.scene.IEAS_properties.Use_SC,     'SD': context.scene.IEAS_properties.Use_SD,
-            'SL':       context.scene.IEAS_properties.Use_SL,     'SP': context.scene.IEAS_properties.Use_SP,
-            'TW':       context.scene.IEAS_properties.Use_TW,     'WK': context.scene.IEAS_properties.Use_WK,
-            'Effect':   context.scene.IEAS_properties.Use_Effect, 'EMERGE': context.scene.IEAS_properties.Use_Emerge,
-            'HIDE':     context.scene.IEAS_properties.Use_Hide             
+            'A1':       context.scene.IEAS_properties.Use_A1,       'A2': context.scene.IEAS_properties.Use_A2,
+            'A3':       context.scene.IEAS_properties.Use_A3,       'A4': context.scene.IEAS_properties.Use_A4,
+            'CA':       context.scene.IEAS_properties.Use_CA,       'DE': context.scene.IEAS_properties.Use_DE,
+            'GH':       context.scene.IEAS_properties.Use_GH,       'GU': context.scene.IEAS_properties.Use_GU,
+            'SC':       context.scene.IEAS_properties.Use_SC,       'SD': context.scene.IEAS_properties.Use_SD,
+            'SL':       context.scene.IEAS_properties.Use_SL,       'SP': context.scene.IEAS_properties.Use_SP,
+            'TW':       context.scene.IEAS_properties.Use_TW,       'WK': context.scene.IEAS_properties.Use_WK,
+            'Effect':   context.scene.IEAS_properties.Use_Effect,   'EMERGE': context.scene.IEAS_properties.Use_Emerge,
+            'HIDE':     context.scene.IEAS_properties.Use_Hide,
+            # PST Boolean Properties
+            'AT1':      context.scene.IEAS_properties.Use_AT1,      'AT2': context.scene.IEAS_properties.Use_AT2,
+            'AT3':      context.scene.IEAS_properties.Use_AT3,      'HIT': context.scene.IEAS_properties.Use_Get_Hit,
+            'RUN':      context.scene.IEAS_properties.Use_Run,      'WLK': context.scene.IEAS_properties.Use_Walk,
+            'SP1':      context.scene.IEAS_properties.Use_Spell1,   'SP2': context.scene.IEAS_properties.Use_Spell2,
+            'SP3':      context.scene.IEAS_properties.Use_Spell3,   'GUP': context.scene.IEAS_properties.Use_Get_Up,
+            'DFB1':     context.scene.IEAS_properties.Use_Death1,   'DFB2': context.scene.IEAS_properties.Use_Death2,
+            'DFB3':     context.scene.IEAS_properties.Use_Death3,   'TK1': context.scene.IEAS_properties.Use_Talk1,
+            'TK2':      context.scene.IEAS_properties.Use_Talk2,    'TK3': context.scene.IEAS_properties.Use_Talk3,
+            'STD':      context.scene.IEAS_properties.Use_Stand,    'STDF1': context.scene.IEAS_properties.Use_StandF1,
+            'STDF2':    context.scene.IEAS_properties.Use_StandF2,  'STC': context.scene.IEAS_properties.Use_Stance,
+            'STCF1':    context.scene.IEAS_properties.Use_StanceF1, 'STCF2': context.scene.IEAS_properties.Use_StanceF2,
+            'STCtoSTD': context.scene.IEAS_properties.Use_Stance_to_Stand, 'STDtoSTC': context.scene.IEAS_properties.Use_Stand_to_Stance,
+            'MISC1':    context.scene.IEAS_properties.Use_Misc1,    'MISC2': context.scene.IEAS_properties.Use_Misc2,
+            'MISC3':    context.scene.IEAS_properties.Use_Misc3,    'MISC4': context.scene.IEAS_properties.Use_Misc4,
+            'MISC5':    context.scene.IEAS_properties.Use_Misc5,    'MISC6': context.scene.IEAS_properties.Use_Misc6,
+            'MISC7':    context.scene.IEAS_properties.Use_Misc7,    'MISC8': context.scene.IEAS_properties.Use_Misc8,
+            'MISC9':    context.scene.IEAS_properties.Use_Misc9,    'MISC10': context.scene.IEAS_properties.Use_Misc10,
+            'MISC11':   context.scene.IEAS_properties.Use_Misc11,   'MISC12': context.scene.IEAS_properties.Use_Misc12,
+            'MISC13':   context.scene.IEAS_properties.Use_Misc13,   'MISC14': context.scene.IEAS_properties.Use_Misc14,
+            'MISC15':   context.scene.IEAS_properties.Use_Misc15,   'MISC16': context.scene.IEAS_properties.Use_Misc16,
+            'MISC17':   context.scene.IEAS_properties.Use_Misc17,   'MISC18': context.scene.IEAS_properties.Use_Misc18,
+            'MISC19':   context.scene.IEAS_properties.Use_Misc19,   'MISC20': context.scene.IEAS_properties.Use_Misc20
         }
         animationWeaponFolderNames = {
             'A': context.scene.IEAS_properties.Axe,     'B': context.scene.IEAS_properties.Bow,
@@ -2163,6 +2318,7 @@ class IEAS_PT_Camera(Panel):
             'C000':                                 False,
             'D000':                                 False,
             'E000':                                 False,
+            'F000':                                 False,
             'unique identifier':                    False,# TODO: Delete unique identifier!
         }
         Toggles1 = {'South': context.scene.IEAS_properties.Use_SO}
@@ -2249,7 +2405,7 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
             
-        if (animationTypesActive['D000'] or 
+        if (animationTypesActive['D000'] or animationTypesActive['8000'] or
             animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
             animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1'] or
             animationTypesActive['3000 mirror 1'] or animationTypesActive['7000 monster split bams 0'] or 
@@ -2308,6 +2464,7 @@ class IEAS_PT_Animation(Panel):
             'C000':                                 False,
             'D000':                                 False,
             'E000':                                 False,
+            'F000':                                 False,
             'unique identifier':                    False,# TODO: Delete unique identifier!
         }
         Toggles0000 = {
@@ -2455,16 +2612,64 @@ class IEAS_PT_Animation(Panel):
             'Sleep':    context.scene.IEAS_properties.Use_SL, 'Conjure':  context.scene.IEAS_properties.Use_SP,
             'Dead':     context.scene.IEAS_properties.Use_TW, 'Walk':     context.scene.IEAS_properties.Use_WK,
         }
+        TogglesF000 = {
+            'PST_Attack1':           context.scene.IEAS_properties.Use_AT1,        'PST_Attack2':           context.scene.IEAS_properties.Use_AT2,
+            'PST_Attack3':           context.scene.IEAS_properties.Use_AT3,        'PST_Get_Hit':           context.scene.IEAS_properties.Use_HIT,
+            'PST_Run':               context.scene.IEAS_properties.Use_RUN,        'PST_Walk':              context.scene.IEAS_properties.Use_WLK,
+            'PST_Spell1':            context.scene.IEAS_properties.Use_SP1,        'PST_Spell2':            context.scene.IEAS_properties.Use_SP2,
+            'PST_Spell3':            context.scene.IEAS_properties.Use_SP3,        'PST_Get_Up':            context.scene.IEAS_properties.Use_GUP,
+            'PST_Death1':            context.scene.IEAS_properties.Use_DFB1,       'PST_Death2':            context.scene.IEAS_properties.Use_DFB2,
+            'PST_Death3':            context.scene.IEAS_properties.Use_DFB3,       'PST_Talk1':             context.scene.IEAS_properties.Use_TK1,
+            'PST_Talk2':             context.scene.IEAS_properties.Use_TK2,        'PST_Talk3':             context.scene.IEAS_properties.Use_TK3,
+            'PST_Stand':             context.scene.IEAS_properties.Use_STD,        'PST_StandF1':           context.scene.IEAS_properties.Use_STDF1,
+            'PST_StandF2':           context.scene.IEAS_properties.Use_STDF2,      'PST_Stance':            context.scene.IEAS_properties.Use_STC,
+            'PST_StanceF1':          context.scene.IEAS_properties.Use_STCF1,      'PST_StanceF2':          context.scene.IEAS_properties.Use_STCF2,
+            'PST_Stance_to_Stand':   context.scene.IEAS_properties.Use_STCtoSTD,   'PST_Stand_to_Stance':   context.scene.IEAS_properties.Use_STDtoSTC,
+            'PST_Misc1':             context.scene.IEAS_properties.Use_MISC1,      'PST_Misc2':             context.scene.IEAS_properties.Use_MISC2,
+            'PST_Misc3':             context.scene.IEAS_properties.Use_MISC3,      'PST_Misc4':             context.scene.IEAS_properties.Use_MISC4,
+            'PST_Misc5':             context.scene.IEAS_properties.Use_MISC5,      'PST_Misc6':             context.scene.IEAS_properties.Use_MISC6,
+            'PST_Misc7':             context.scene.IEAS_properties.Use_MISC7,      'PST_Misc8':             context.scene.IEAS_properties.Use_MISC8,
+            'PST_Misc9':             context.scene.IEAS_properties.Use_MISC9,      'PST_Misc10':            context.scene.IEAS_properties.Use_MISC10,
+            'PST_Misc11':            context.scene.IEAS_properties.Use_MISC11,     'PST_Misc12':            context.scene.IEAS_properties.Use_MISC12,
+            'PST_Misc13':            context.scene.IEAS_properties.Use_MISC13,     'PST_Misc14':            context.scene.IEAS_properties.Use_MISC14,
+            'PST_Misc15':            context.scene.IEAS_properties.Use_MISC15,     'PST_Misc16':            context.scene.IEAS_properties.Use_MISC16,
+            'PST_Misc17':            context.scene.IEAS_properties.Use_MISC17,     'PST_Misc18':            context.scene.IEAS_properties.Use_MISC18,
+            'PST_Misc19':            context.scene.IEAS_properties.Use_MISC19,     'PST_Misc20':            context.scene.IEAS_properties.Use_MISC20
+        }
         ToggleNames = {
-            'Attack1':  'Use_A1',       'Attack2':  'Use_A2',
-            'Attack3':  'Use_A3',       'Attack4':  'Use_A4',
-            'Attack5':  'Use_A5',       'Cast':     'Use_CA', 
-            'Death':    'Use_DE',       'Get_Hit':  'Use_GH', 
-            'Get_Up':   'Use_GU',       'Ready':    'Use_SC', 
-            'Idle':     'Use_SD',       'Sleep':    'Use_SL',
-            'Conjure':  'Use_SP',       'Dead':     'Use_TW', 
-            'Walk':     'Use_WK',       'Effect':   'Use_Effect',
-            'Emerge':   'Use_Emerge',   'Hide':     'Use_Hide',
+            # Existing entries (kept for context, assuming 'A1', 'CA', etc. are already uppercase shorthands)
+            'Attack1': 'Use_A1',          'Attack2': 'Use_A2',
+            'Attack3': 'Use_A3',          'Attack4': 'Use_A4',
+            'Attack5': 'Use_A5',          'Cast':    'Use_CA',
+            'Death':   'Use_DE',          'Get_Hit': 'Use_GH',
+            'Get_Up':  'Use_GU',          'Ready':   'Use_SC',
+            'Idle':    'Use_SD',          'Sleep':   'Use_SL',
+            'Conjure': 'Use_SP',          'Dead':    'Use_TW',
+            'Walk':    'Use_WK',          'Effect':  'Use_Effect',
+            'Emerge':  'Use_Emerge',      'Hide':    'Use_Hide',      
+            # PST properties
+            'PST_Attack1':           'Use_AT1',           'PST_Attack2':           'Use_AT2',
+            'PST_Attack3':           'Use_AT3',           'PST_Get_Hit':           'Use_HIT',
+            'PST_Run':               'Use_RUN',           'PST_Walk':              'Use_WLK',
+            'PST_Spell1':            'Use_SP1',           'PST_Spell2':            'Use_SP2',
+            'PST_Spell3':            'Use_SP3',           'PST_Get_Up':            'Use_GUP',
+            'PST_Death1':            'Use_DFB1',          'PST_Death2':            'Use_DFB2',
+            'PST_Death3':            'Use_DFB3',          'PST_Talk1':             'Use_TK1',
+            'PST_Talk2':             'Use_TK2',           'PST_Talk3':             'Use_TK3',
+            'PST_Stand':             'Use_STD',           'PST_StandF1':           'Use_STDF1',
+            'PST_StandF2':           'Use_STDF2',         'PST_Stance':            'Use_STC',
+            'PST_StanceF1':          'Use_STCF1',         'PST_StanceF2':          'Use_STCF2',
+            'PST_Stance_to_Stand':   'Use_STCtoSTD',      'PST_Stand_to_Stance':   'Use_STDtoSTC',
+            'PST_Misc1':             'Use_MISC1',         'PST_Misc2':             'Use_MISC2',
+            'PST_Misc3':             'Use_MISC3',         'PST_Misc4':             'Use_MISC4',
+            'PST_Misc5':             'Use_MISC5',         'PST_Misc6':             'Use_MISC6',
+            'PST_Misc7':             'Use_MISC7',         'PST_Misc8':             'Use_MISC8',
+            'PST_Misc9':             'Use_MISC9',         'PST_Misc10':            'Use_MISC10',
+            'PST_Misc11':            'Use_MISC11',        'PST_Misc12':            'Use_MISC12',
+            'PST_Misc13':            'Use_MISC13',        'PST_Misc14':            'Use_MISC14',
+            'PST_Misc15':            'Use_MISC15',        'PST_Misc16':            'Use_MISC16',
+            'PST_Misc17':            'Use_MISC17',        'PST_Misc18':            'Use_MISC18',
+            'PST_Misc19':            'Use_MISC19',        'PST_Misc20':            'Use_MISC20'
         }
         
         # --- Reset and activate
@@ -2715,6 +2920,18 @@ class IEAS_PT_Animation(Panel):
                 row_input.prop(context.scene.IEAS_properties, animationKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+        
+        if (animationTypesActive['F000']):
+            for animationKey, toggle in TogglesF000.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
 
 # --------
@@ -2759,6 +2976,7 @@ class IEAS_PT_Collections(Panel):
             'C000':                                 False,
             'D000':                                 False,
             'E000':                                 False,
+            'F000':                                 False,
             'unique identifier':                    False,# TODO: Delete unique identifier!
         }        
         ToggleWeapons = {
