@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 30, 0),
+    "version": (0, 31, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1461,7 +1461,20 @@ class IEAS_AnimationTypes():
                 bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = False                  
     
     def typeF000(self, typeParameters:IEAS_AnimationTypesParameters):
-        """Method for handling F000 type logic.""" 
+        """Method for handling F000 type logic."""
+        if (typeParameters.exclude == False):
+            # Constructs the filename for the current sprite, including prefix,resref and padded frame number.
+            fileName = f"{typeParameters.prefixResref}_PST_{typeParameters.animationKey}_{str(typeParameters.frame).zfill(5)}.png"                    
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)         
+            # This is the actual rendering process.
+            # `animation=False` renders a single still image.
+            # `write_still=True` saves the rendered image to the specified `filepath`.
+            # The first `False` argument disables undo support for the operation.
+            renderFrame = bpy.ops.render.render
+            renderFrame(  False,
+                          animation     =False,
+                          write_still   =True)
         
     def typeNone(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling no type logic."""
@@ -1979,27 +1992,27 @@ class IEAS_OT_Final(Operator):
             'HIDE':     context.scene.IEAS_properties.Use_Hide,
             # PST Boolean Properties
             'AT1':      context.scene.IEAS_properties.Use_AT1,      'AT2': context.scene.IEAS_properties.Use_AT2,
-            'AT3':      context.scene.IEAS_properties.Use_AT3,      'HIT': context.scene.IEAS_properties.Use_Get_Hit,
-            'RUN':      context.scene.IEAS_properties.Use_Run,      'WLK': context.scene.IEAS_properties.Use_Walk,
-            'SP1':      context.scene.IEAS_properties.Use_Spell1,   'SP2': context.scene.IEAS_properties.Use_Spell2,
-            'SP3':      context.scene.IEAS_properties.Use_Spell3,   'GUP': context.scene.IEAS_properties.Use_Get_Up,
-            'DFB1':     context.scene.IEAS_properties.Use_Death1,   'DFB2': context.scene.IEAS_properties.Use_Death2,
-            'DFB3':     context.scene.IEAS_properties.Use_Death3,   'TK1': context.scene.IEAS_properties.Use_Talk1,
-            'TK2':      context.scene.IEAS_properties.Use_Talk2,    'TK3': context.scene.IEAS_properties.Use_Talk3,
-            'STD':      context.scene.IEAS_properties.Use_Stand,    'STDF1': context.scene.IEAS_properties.Use_StandF1,
-            'STDF2':    context.scene.IEAS_properties.Use_StandF2,  'STC': context.scene.IEAS_properties.Use_Stance,
-            'STCF1':    context.scene.IEAS_properties.Use_StanceF1, 'STCF2': context.scene.IEAS_properties.Use_StanceF2,
-            'STCtoSTD': context.scene.IEAS_properties.Use_Stance_to_Stand, 'STDtoSTC': context.scene.IEAS_properties.Use_Stand_to_Stance,
-            'MISC1':    context.scene.IEAS_properties.Use_Misc1,    'MISC2': context.scene.IEAS_properties.Use_Misc2,
-            'MISC3':    context.scene.IEAS_properties.Use_Misc3,    'MISC4': context.scene.IEAS_properties.Use_Misc4,
-            'MISC5':    context.scene.IEAS_properties.Use_Misc5,    'MISC6': context.scene.IEAS_properties.Use_Misc6,
-            'MISC7':    context.scene.IEAS_properties.Use_Misc7,    'MISC8': context.scene.IEAS_properties.Use_Misc8,
-            'MISC9':    context.scene.IEAS_properties.Use_Misc9,    'MISC10': context.scene.IEAS_properties.Use_Misc10,
-            'MISC11':   context.scene.IEAS_properties.Use_Misc11,   'MISC12': context.scene.IEAS_properties.Use_Misc12,
-            'MISC13':   context.scene.IEAS_properties.Use_Misc13,   'MISC14': context.scene.IEAS_properties.Use_Misc14,
-            'MISC15':   context.scene.IEAS_properties.Use_Misc15,   'MISC16': context.scene.IEAS_properties.Use_Misc16,
-            'MISC17':   context.scene.IEAS_properties.Use_Misc17,   'MISC18': context.scene.IEAS_properties.Use_Misc18,
-            'MISC19':   context.scene.IEAS_properties.Use_Misc19,   'MISC20': context.scene.IEAS_properties.Use_Misc20
+            'AT3':      context.scene.IEAS_properties.Use_AT3,      'HIT': context.scene.IEAS_properties.Use_HIT,
+            'RUN':      context.scene.IEAS_properties.Use_RUN,      'WLK': context.scene.IEAS_properties.Use_WLK,
+            'SP1':      context.scene.IEAS_properties.Use_SP1,      'SP2': context.scene.IEAS_properties.Use_SP2,
+            'SP3':      context.scene.IEAS_properties.Use_SP3,      'GUP': context.scene.IEAS_properties.Use_GUP,
+            'DFB1':     context.scene.IEAS_properties.Use_DFB1,     'DFB2': context.scene.IEAS_properties.Use_DFB2,
+            'DFB3':     context.scene.IEAS_properties.Use_DFB3,     'TK1': context.scene.IEAS_properties.Use_TK1,
+            'TK2':      context.scene.IEAS_properties.Use_TK2,      'TK3': context.scene.IEAS_properties.Use_TK3,
+            'STD':      context.scene.IEAS_properties.Use_STD,      'STDF1': context.scene.IEAS_properties.Use_STDF1,
+            'STDF2':    context.scene.IEAS_properties.Use_STDF2,    'STC': context.scene.IEAS_properties.Use_STC,
+            'STCF1':    context.scene.IEAS_properties.Use_STCF1,    'STCF2': context.scene.IEAS_properties.Use_STCF2,
+            'STCtoSTD': context.scene.IEAS_properties.Use_STCtoSTD, 'STDtoSTC': context.scene.IEAS_properties.Use_STDtoSTC,
+            'MISC1':    context.scene.IEAS_properties.Use_MISC1,    'MISC2': context.scene.IEAS_properties.Use_MISC2,
+            'MISC3':    context.scene.IEAS_properties.Use_MISC3,    'MISC4': context.scene.IEAS_properties.Use_MISC4,
+            'MISC5':    context.scene.IEAS_properties.Use_MISC5,    'MISC6': context.scene.IEAS_properties.Use_MISC6,
+            'MISC7':    context.scene.IEAS_properties.Use_MISC7,    'MISC8': context.scene.IEAS_properties.Use_MISC8,
+            'MISC9':    context.scene.IEAS_properties.Use_MISC9,    'MISC10': context.scene.IEAS_properties.Use_MISC10,
+            'MISC11':   context.scene.IEAS_properties.Use_MISC11,   'MISC12': context.scene.IEAS_properties.Use_MISC12,
+            'MISC13':   context.scene.IEAS_properties.Use_MISC13,   'MISC14': context.scene.IEAS_properties.Use_MISC14,
+            'MISC15':   context.scene.IEAS_properties.Use_MISC15,   'MISC16': context.scene.IEAS_properties.Use_MISC16,
+            'MISC17':   context.scene.IEAS_properties.Use_MISC17,   'MISC18': context.scene.IEAS_properties.Use_MISC18,
+            'MISC19':   context.scene.IEAS_properties.Use_MISC19,   'MISC20': context.scene.IEAS_properties.Use_MISC20
         }
         animationWeaponFolderNames = {
             'A': context.scene.IEAS_properties.Axe,     'B': context.scene.IEAS_properties.Bow,
@@ -2405,7 +2418,7 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
             
-        if (animationTypesActive['D000'] or animationTypesActive['8000'] or
+        if (animationTypesActive['D000'] or animationTypesActive['F000'] or
             animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
             animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1'] or
             animationTypesActive['3000 mirror 1'] or animationTypesActive['7000 monster split bams 0'] or 
