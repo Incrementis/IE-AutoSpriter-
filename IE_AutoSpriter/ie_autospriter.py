@@ -2,9 +2,9 @@
 
 # Used source:
 # ------------
+# https://developer.blender.org/docs/release_notes/2.80/python_api/addons/#Naming
 # https://docs.blender.org/manual/en/latest/advanced/scripting/addon_tutorial.html#your-first-add-onimport bpy
 # https://docs.blender.org/api/current/bpy.types.Operator.html
-# https://developer.blender.org/docs/release_notes/2.80/python_api/addons/#Naming
 # https://docs.blender.org/api/current/bpy.props.html#bpy.props.PointerProperty
 # https://docs.blender.org/api/current/bpy.ops.object.html#bpy.ops.object.select_all
 # https://docs.blender.org/api/current/bpy.ops.render.html#bpy.ops.render.render
@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 31, 0),
+    "version": (0, 32, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -80,7 +80,7 @@ class IEAS_AnimationTypes():
             # Constructs the filename for the current sprite, including prefix,resref and padded frame number.
             fileName = f"{typeParameters.prefixResref}_{str(typeParameters.frame).zfill(5)}.png"                    
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
-            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)         
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
             # This is the actual rendering process.
             # `animation=False` renders a single still image.
             # `write_still=True` saves the rendered image to the specified `filepath`.
@@ -100,7 +100,6 @@ class IEAS_AnimationTypes():
                 'A1':'G3', 'A2':'G3', 'A3':'G3',
             }
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            # TODO: Don't forget to apply resolution in step 1 to blender renderer(Those lines are key lines).
             width           = bpy.context.scene.render.resolution_x
             height          = bpy.context.scene.render.resolution_y
             fileName        = "temp.png"
@@ -854,6 +853,10 @@ class IEAS_AnimationTypes():
             renderFrame(  False,
                           animation     =False,
                           write_still   =True)
+    
+    def type5000and6000_character_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling 5000/6000 character split bams 0 type logic."""
+        pass
                 
     def type7000_monster_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 7000 monster split bams 0 type logic."""
@@ -1499,23 +1502,30 @@ class IEAS_PGT_Inputs(PropertyGroup):
             'Use_ES', 'Use_ESE', 'Use_SE', 'Use_SSE'
         ]
         animationToggles = [
-        'Use_A1', 'Use_A2', 'Use_A3', 'Use_A4', 'Use_A5', 'Use_CA', 'Use_DE',
-        'Use_GH', 'Use_GU', 'Use_SC', 'Use_SD', 'Use_SL', 'Use_SP',
-        'Use_TW', 'Use_WK', 'Use_Effect', 'Use_Emerge', 'Use_Hide',
-        # Based on PST_... properties
-        'Use_AT1', 'Use_AT2', 'Use_AT3',              # Attack Toggles
-        'Use_HIT', 'Use_RUN', 'Use_WLK',              # Movement/Hit Toggles
-        'Use_SP1', 'Use_SP2', 'Use_SP3',              # Spell Toggles
-        'Use_GUP',                                    # Get Up Toggle
-        'Use_DFB1', 'Use_DFB2', 'Use_DFB3',           # Death Toggles
-        'Use_TK1', 'Use_TK2', 'Use_TK3',              # Talk Toggles
-        'Use_STD', 'Use_STDF1', 'Use_STDF2',          # Stand Toggles
-        'Use_STC', 'Use_STCF1', 'Use_STCF2',          # Stance Toggles
-        'Use_STCtoSTD', 'Use_STDtoSTC',               # Stance Transition Toggles
-        'Use_MISC1', 'Use_MISC2', 'Use_MISC3', 'Use_MISC4', 'Use_MISC5', 
-        'Use_MISC6', 'Use_MISC7', 'Use_MISC8', 'Use_MISC9', 'Use_MISC10', 
-        'Use_MISC11', 'Use_MISC12', 'Use_MISC13', 'Use_MISC14', 'Use_MISC15', 
-        'Use_MISC16', 'Use_MISC17', 'Use_MISC18', 'Use_MISC19', 'Use_MISC20',
+            'Use_A1', 'Use_A2', 'Use_A3', 'Use_A4', 'Use_A5', 'Use_CA', 'Use_DE',
+            'Use_GH', 'Use_GU', 'Use_SC', 'Use_SD', 'Use_SL', 'Use_SP',
+            'Use_TW', 'Use_WK', 'Use_Effect', 'Use_Emerge', 'Use_Hide',
+            # Type 5000/6000
+            'Use_A6', 'Use_A7', 'Use_A8', 'Use_A9', 'Use_A10', 'Use_A11', 'Use_A12',
+            'Use_CA1', 'Use_CA2', 'Use_CA3', 'Use_CA4',
+            'Use_SP1', 'Use_SP2', 'Use_SP3', 'Use_SP4',
+            'Use_SC1', 'Use_SC2',
+            'Use_SD1', 'Use_SD2', 'Use_SD3',
+            'Use_SL1', 'Use_SL2',
+            # PST 
+            'Use_AT1', 'Use_AT2', 'Use_AT3',              # Attack Toggles
+            'Use_HIT', 'Use_RUN', 'Use_WLK',              # Movement/Hit Toggles
+            'Use_SP1', 'Use_SP2', 'Use_SP3',              # Spell Toggles
+            'Use_GUP',                                    # Get Up Toggle
+            'Use_DFB1', 'Use_DFB2', 'Use_DFB3',           # Death Toggles
+            'Use_TK1', 'Use_TK2', 'Use_TK3',              # Talk Toggles
+            'Use_STD', 'Use_STDF1', 'Use_STDF2',          # Stand Toggles
+            'Use_STC', 'Use_STCF1', 'Use_STCF2',          # Stance Toggles
+            'Use_STCtoSTD', 'Use_STDtoSTC',               # Stance Transition Toggles
+            'Use_MISC1', 'Use_MISC2', 'Use_MISC3', 'Use_MISC4', 'Use_MISC5', 
+            'Use_MISC6', 'Use_MISC7', 'Use_MISC8', 'Use_MISC9', 'Use_MISC10', 
+            'Use_MISC11', 'Use_MISC12', 'Use_MISC13', 'Use_MISC14', 'Use_MISC15', 
+            'Use_MISC16', 'Use_MISC17', 'Use_MISC18', 'Use_MISC19', 'Use_MISC20',
         ]
         weaponToggles = [
             'Use_A', 'Use_B', 'Use_C', 'Use_D', 'Use_F', 'Use_H',
@@ -1568,20 +1578,21 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('2000','2000','','',6),
                                         ('3000 mirror 0','3000 mirror 0','','',7),
                                         ('3000 mirror 1','3000 mirror 1','','',8),
-                                        ('7000 monster split bams 0','7000 monster split bams 0','','',9),
-                                        ('7000 monster split bams 1','7000 monster split bams 1','','',10),
-                                        ('7000 monster old','7000 monster old','','',11),
-                                        ('8000','8000','','',12),
-                                        ('4000','4000','','',13),
-                                        ('9000','9000','','',14),
-                                        ('A000','A000','','',15),
-                                        ('B000','B000','','',16),
-                                        ('C000','C000','','',17),
-                                        ('D000','D000','','',18),
-                                        ('E000','E000','','',19),
-                                        ('F000','F000','','',20),
+                                        ('4000','4000','','',9),
+                                        ('5000/6000 character split bams 0','5000/6000 character split bams 0','','',10),
+                                        ('7000 monster split bams 0','7000 monster split bams 0','','',11),
+                                        ('7000 monster split bams 1','7000 monster split bams 1','','',12),
+                                        ('7000 monster old','7000 monster old','','',13),
+                                        ('8000','8000','','',14),                                       
+                                        ('9000','9000','','',15),
+                                        ('A000','A000','','',16),
+                                        ('B000','B000','','',17),
+                                        ('C000','C000','','',18),
+                                        ('D000','D000','','',19),
+                                        ('E000','E000','','',20),
+                                        ('F000','F000','','',21),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 21),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 22),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -1664,6 +1675,29 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Conjure:    bpy.props.StringProperty(name="SP", default="conjure")
     Dead:       bpy.props.StringProperty(name="TW", default="dead")
     Walk:       bpy.props.StringProperty(name="WK", default="walk")
+    # Additional string properties for names of various animation actions of type 5000/6000.
+    Attack6:    bpy.props.StringProperty(name="A6", default="2h-thrust")
+    Attack7:    bpy.props.StringProperty(name="A7", default="2weapon-v1")
+    Attack8:    bpy.props.StringProperty(name="A8", default="throwing?")
+    Attack9:    bpy.props.StringProperty(name="A9", default="2weapon-v2")
+    Attack10:   bpy.props.StringProperty(name="SA", default="shoot with bow")
+    Attack11:   bpy.props.StringProperty(name="SS", default="shoot with sling")
+    Attack12:   bpy.props.StringProperty(name="SX", default="shoot with crossbow")
+    Cast1:      bpy.props.StringProperty(name="CA1", default="cast1")
+    Cast2:      bpy.props.StringProperty(name="CA2", default="cast2")
+    Cast3:      bpy.props.StringProperty(name="CA3", default="cast3")
+    Cast4:      bpy.props.StringProperty(name="CA4", default="cast4")
+    Conjure1:   bpy.props.StringProperty(name="SP1", default="conjure1")
+    Conjure2:   bpy.props.StringProperty(name="SP2", default="conjure2")
+    Conjure3:   bpy.props.StringProperty(name="SP3", default="conjure3")
+    Conjure4:   bpy.props.StringProperty(name="SP4", default="conjure4")
+    Ready1:     bpy.props.StringProperty(name="SC1", default="ready with 1-h weapon?")
+    Ready2:     bpy.props.StringProperty(name="SC2", default="ready with 2-h weapon?")
+    Idle1:      bpy.props.StringProperty(name="SD1", default="idle with 1-h weapon?")
+    Idle2:      bpy.props.StringProperty(name="SD2", default="idle with 2-h weapon?")
+    Idle3:      bpy.props.StringProperty(name="SD3", default="idle with which weapon?")
+    Sleep1:     bpy.props.StringProperty(name="SL1", default="sleep1")
+    Sleep2:     bpy.props.StringProperty(name="SL2", default="sleep2")
     # String properties for names of various animation actions in PST.
     PST_Attack1:        bpy.props.StringProperty(name="AT1", default="slash")
     PST_Attack2:        bpy.props.StringProperty(name="AT2", default="stab")
@@ -1743,6 +1777,29 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_SP:     bpy.props.BoolProperty(name="Use SP",   default=True)
     Use_TW:     bpy.props.BoolProperty(name="Use TW",   default=True)
     Use_WK:     bpy.props.BoolProperty(name="Use WK",   default=True)
+    # Boolean toggles for various animation actions of type 5000/6000.
+    Use_A6:     bpy.props.BoolProperty(name="Use A6",   default=True)
+    Use_A7:     bpy.props.BoolProperty(name="Use A7",   default=True)
+    Use_A8:     bpy.props.BoolProperty(name="Use A8",   default=True)
+    Use_A9:     bpy.props.BoolProperty(name="Use A9",   default=True)
+    Use_A10:    bpy.props.BoolProperty(name="Use A10",  default=True)
+    Use_A11:    bpy.props.BoolProperty(name="Use A11",  default=True)
+    Use_A12:    bpy.props.BoolProperty(name="Use A12",  default=True)
+    Use_CA1:    bpy.props.BoolProperty(name="Use CA1",  default=True)
+    Use_CA2:    bpy.props.BoolProperty(name="Use CA2",  default=True)
+    Use_CA3:    bpy.props.BoolProperty(name="Use CA3",  default=True)
+    Use_CA4:    bpy.props.BoolProperty(name="Use CA4",  default=True)
+    Use_SP1:    bpy.props.BoolProperty(name="Use SP1",  default=True)
+    Use_SP2:    bpy.props.BoolProperty(name="Use SP2",  default=True)
+    Use_SP3:    bpy.props.BoolProperty(name="Use SP3",  default=True)
+    Use_SP4:    bpy.props.BoolProperty(name="Use SP4",  default=True)
+    Use_SC1:    bpy.props.BoolProperty(name="Use SC1",  default=True)
+    Use_SC2:    bpy.props.BoolProperty(name="Use SC2",  default=True)
+    Use_SD1:    bpy.props.BoolProperty(name="Use SD1",  default=True)
+    Use_SD2:    bpy.props.BoolProperty(name="Use SD2",  default=True)
+    Use_SD3:    bpy.props.BoolProperty(name="Use SD3",  default=True)
+    Use_SL1:    bpy.props.BoolProperty(name="Use SL1",  default=True)
+    Use_SL2:    bpy.props.BoolProperty(name="Use SL2",  default=True)
     # Boolean toggles for unique effect animation(e.g. Ankheg)
     Use_Emerge: bpy.props.BoolProperty(name="Use EMERGE", default=True)
     Use_Hide:   bpy.props.BoolProperty(name="Use HIDE",   default=True)
@@ -1895,6 +1952,7 @@ class IEAS_OT_Final(Operator):
             '3000 mirror 0':                        IEAS_AnimationTypes().type3000_mirror0,
             '3000 mirror 1':                        IEAS_AnimationTypes().type3000_mirror1,
             '4000':                                 IEAS_AnimationTypes().type4000,
+            '5000/6000 character split bams 0':     IEAS_AnimationTypes().type5000and6000_character_sp0,
             '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
             '7000 monster split bams 1':            IEAS_AnimationTypes().type7000_monster_sp1,
             '7000 monster old':                     IEAS_AnimationTypes().type7000_monster_old,
@@ -1955,6 +2013,18 @@ class IEAS_OT_Final(Operator):
             'TW':       context.scene.IEAS_properties.Dead,         'WK': context.scene.IEAS_properties.Walk,
             'Effect':   context.scene.IEAS_properties.Effect,       'EMERGE': context.scene.IEAS_properties.Emerge,
             'HIDE':     context.scene.IEAS_properties.Hide,
+            # Type 5000/6000 Properties
+            'A6':       context.scene.IEAS_properties.Attack6,      'A7': context.scene.IEAS_properties.Attack7,
+            'A8':       context.scene.IEAS_properties.Attack8,      'A9': context.scene.IEAS_properties.Attack9,
+            'A10':      context.scene.IEAS_properties.Attack10,     'A11': context.scene.IEAS_properties.Attack11,
+            'A12':      context.scene.IEAS_properties.Attack12,     'CA1': context.scene.IEAS_properties.Cast1,
+            'CA2':      context.scene.IEAS_properties.Cast2,        'CA3': context.scene.IEAS_properties.Cast3,
+            'CA4':      context.scene.IEAS_properties.Cast4,        'SP1': context.scene.IEAS_properties.Conjure1,
+            'SP2':      context.scene.IEAS_properties.Conjure2,     'SP3': context.scene.IEAS_properties.Conjure3,
+            'SP4':      context.scene.IEAS_properties.Conjure4,     'SC1': context.scene.IEAS_properties.Ready1,
+            'SC2':      context.scene.IEAS_properties.Ready2,       'SD1': context.scene.IEAS_properties.Idle1,
+            'SD2':      context.scene.IEAS_properties.Idle2,        'SD3': context.scene.IEAS_properties.Idle3,
+            'SL1':      context.scene.IEAS_properties.Sleep1,       'SL2': context.scene.IEAS_properties.Sleep2,
             # PST String Properties
             'AT1':      context.scene.IEAS_properties.PST_Attack1,  'AT2': context.scene.IEAS_properties.PST_Attack2,
             'AT3':      context.scene.IEAS_properties.PST_Attack3,  'HIT': context.scene.IEAS_properties.PST_Get_Hit,
@@ -1989,7 +2059,19 @@ class IEAS_OT_Final(Operator):
             'SL':       context.scene.IEAS_properties.Use_SL,       'SP': context.scene.IEAS_properties.Use_SP,
             'TW':       context.scene.IEAS_properties.Use_TW,       'WK': context.scene.IEAS_properties.Use_WK,
             'Effect':   context.scene.IEAS_properties.Use_Effect,   'EMERGE': context.scene.IEAS_properties.Use_Emerge,
-            'HIDE':     context.scene.IEAS_properties.Use_Hide,
+            'HIDE':     context.scene.IEAS_properties.Use_Hide,            
+            # Type 5000/6000 Boolean Properties
+            'A6':       context.scene.IEAS_properties.Use_A6,       'A7': context.scene.IEAS_properties.Use_A7,
+            'A8':       context.scene.IEAS_properties.Use_A8,       'A9': context.scene.IEAS_properties.Use_A9,
+            'A10':      context.scene.IEAS_properties.Use_A10,      'A11': context.scene.IEAS_properties.Use_A11,
+            'A12':      context.scene.IEAS_properties.Use_A12,      'CA1': context.scene.IEAS_properties.Use_CA1,
+            'CA2':      context.scene.IEAS_properties.Use_CA2,      'CA3': context.scene.IEAS_properties.Use_CA3,
+            'CA4':      context.scene.IEAS_properties.Use_CA4,      'SP1': context.scene.IEAS_properties.Use_SP1,
+            'SP2':      context.scene.IEAS_properties.Use_SP2,      'SP3': context.scene.IEAS_properties.Use_SP3,
+            'SP4':      context.scene.IEAS_properties.Use_SP4,      'SC1': context.scene.IEAS_properties.Use_SC1,
+            'SC2':      context.scene.IEAS_properties.Use_SC2,      'SD1': context.scene.IEAS_properties.Use_SD1,
+            'SD2':      context.scene.IEAS_properties.Use_SD2,      'SD3': context.scene.IEAS_properties.Use_SD3,
+            'SL1':      context.scene.IEAS_properties.Use_SL1,      'SL2': context.scene.IEAS_properties.Use_SL2,
             # PST Boolean Properties
             'AT1':      context.scene.IEAS_properties.Use_AT1,      'AT2': context.scene.IEAS_properties.Use_AT2,
             'AT3':      context.scene.IEAS_properties.Use_AT3,      'HIT': context.scene.IEAS_properties.Use_HIT,
@@ -2321,6 +2403,7 @@ class IEAS_PT_Camera(Panel):
             '3000 mirror 0':                        False,
             '3000 mirror 1':                        False,
             '4000':                                 False,
+            '5000/6000 character split bams 0':     False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
             '7000 monster old':                     False,
@@ -2403,10 +2486,10 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
                 
-        if (animationTypesActive['9000'] or animationTypesActive['B000'] or 
-            animationTypesActive['C000'] or animationTypesActive['E000'] or
-            animationTypesActive['2000'] or animationTypesActive['3000 mirror 0'] or
-            animationTypesActive['7000 monster old'] or animationTypesActive['8000']):
+        if (animationTypesActive['9000']                or animationTypesActive['B000']         or 
+            animationTypesActive['C000']                or animationTypesActive['E000']         or
+            animationTypesActive['2000']                or animationTypesActive['3000 mirror 0']or
+            animationTypesActive['7000 monster old']    or animationTypesActive['8000']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2418,11 +2501,11 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
             
-        if (animationTypesActive['D000'] or animationTypesActive['F000'] or
-            animationTypesActive['1000 monster multi split bams 0'] or animationTypesActive['1000 monster multi split bams 1'] or 
-            animationTypesActive['1000 multi new split bams 0']     or animationTypesActive['1000 multi new split bams 1'] or
-            animationTypesActive['3000 mirror 1'] or animationTypesActive['7000 monster split bams 0'] or 
-            animationTypesActive['7000 monster split bams 1']):
+        if (animationTypesActive['D000']                                    or animationTypesActive['F000']                             or
+            animationTypesActive['1000 monster multi split bams 0']         or animationTypesActive['1000 monster multi split bams 1']  or 
+            animationTypesActive['1000 multi new split bams 0']             or animationTypesActive['1000 multi new split bams 1']      or
+            animationTypesActive['3000 mirror 1']                           or animationTypesActive['7000 monster split bams 0']        or 
+            animationTypesActive['7000 monster split bams 1'])              or animationTypesActive['5000/6000 character split bams 0']:
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2467,6 +2550,7 @@ class IEAS_PT_Animation(Panel):
             '3000 mirror 0':                        False,
             '3000 mirror 1':                        False,
             '4000':                                 False,
+            '5000/6000 character split bams 0':     False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
             '7000 monster old':                     False,
@@ -2550,6 +2634,22 @@ class IEAS_PT_Animation(Panel):
             'Death':    context.scene.IEAS_properties.Use_DE, 'Get_Hit':  context.scene.IEAS_properties.Use_GH,
             'Ready':    context.scene.IEAS_properties.Use_SC, 'Idle':     context.scene.IEAS_properties.Use_SD,
             'Walk':     context.scene.IEAS_properties.Use_WK,
+        }
+        Toggles5000and6000_character_sp0 = {
+            'Attack1':   context.scene.IEAS_properties.Use_A1, 'Attack2':   context.scene.IEAS_properties.Use_A2,
+            'Attack3':   context.scene.IEAS_properties.Use_A3, 'Attack4':   context.scene.IEAS_properties.Use_A4,
+            'Attack5':   context.scene.IEAS_properties.Use_A5, 'Attack6':   context.scene.IEAS_properties.Use_A6, 
+            'Attack7':   context.scene.IEAS_properties.Use_A7, 'Attack8':   context.scene.IEAS_properties.Use_A8, 
+            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_A10,
+            'Attack11':  context.scene.IEAS_properties.Use_A11,'Attack12':  context.scene.IEAS_properties.Use_A12,
+            'Cast1':     context.scene.IEAS_properties.Use_CA1,'Cast2':     context.scene.IEAS_properties.Use_CA2,
+            'Cast3':     context.scene.IEAS_properties.Use_CA3,'Cast4':     context.scene.IEAS_properties.Use_CA4,
+            'Conjure1':  context.scene.IEAS_properties.Use_SP1,'Conjure2':  context.scene.IEAS_properties.Use_SP2,
+            'Conjure3':  context.scene.IEAS_properties.Use_SP3,'Conjure4':  context.scene.IEAS_properties.Use_SP4,
+            'Ready1':    context.scene.IEAS_properties.Use_SC1,'Ready2':    context.scene.IEAS_properties.Use_SC2,
+            'Idle1':     context.scene.IEAS_properties.Use_SD1,'Idle2':     context.scene.IEAS_properties.Use_SD2,
+            'Idle3':     context.scene.IEAS_properties.Use_SD3,'Sleep1':    context.scene.IEAS_properties.Use_SL1,
+            'Sleep2':    context.scene.IEAS_properties.Use_SL2,
         }
         Toggles7000_monster_sp0 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
@@ -2659,7 +2759,19 @@ class IEAS_PT_Animation(Panel):
             'Idle':    'Use_SD',          'Sleep':   'Use_SL',
             'Conjure': 'Use_SP',          'Dead':    'Use_TW',
             'Walk':    'Use_WK',          'Effect':  'Use_Effect',
-            'Emerge':  'Use_Emerge',      'Hide':    'Use_Hide',      
+            'Emerge':  'Use_Emerge',      'Hide':    'Use_Hide',
+            # New Type 5000/6000 Toggle Names
+            'Attack6':      'Use_A6',           'Attack7':      'Use_A7',
+            'Attack8':      'Use_A8',           'Attack9':      'Use_A9',
+            'Attack10':     'Use_A10',          'Attack11':     'Use_A11',
+            'Attack12':     'Use_A12',          'Cast1':        'Use_CA1',
+            'Cast2':        'Use_CA2',          'Cast3':        'Use_CA3',
+            'Cast4':        'Use_CA4',          'Conjure1':     'Use_SP1',
+            'Conjure2':     'Use_SP2',          'Conjure3':     'Use_SP3',
+            'Conjure4':     'Use_SP4',          'Ready1':       'Use_SC1',
+            'Ready2':       'Use_SC2',          'Idle1':        'Use_SD1',
+            'Idle2':        'Use_SD2',          'Idle3':        'Use_SD3',
+            'Sleep1':       'Use_SL1',          'Sleep2':       'Use_SL2',
             # PST properties
             'PST_Attack1':           'Use_AT1',           'PST_Attack2':           'Use_AT2',
             'PST_Attack3':           'Use_AT3',           'PST_Get_Hit':           'Use_HIT',
@@ -2804,6 +2916,18 @@ class IEAS_PT_Animation(Panel):
         
         if (animationTypesActive['4000']):
             for animationKey, toggle in Toggles4000.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+            
+        if (animationTypesActive['5000/6000 character split bams 0']):
+            for animationKey, toggle in Toggles5000and6000_character_sp0.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
                 row_input   = split.row() # Left/first column  
@@ -2979,6 +3103,7 @@ class IEAS_PT_Collections(Panel):
             '3000 mirror 0':                        False,
             '3000 mirror 1':                        False,
             '4000':                                 False,
+            '5000/6000 character split bams 0':     False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
             '7000 monster old':                     False,
@@ -3017,9 +3142,9 @@ class IEAS_PT_Collections(Panel):
         animationTypesActive[activeType] = True
             
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
-        if (animationTypesActive['E000'] or animationTypesActive['2000'] or
-            animationTypesActive['7000 monster split bams 0'] or animationTypesActive['7000 monster split bams 1'] or
-            animationTypesActive['8000']):
+        if (animationTypesActive['E000']                                or animationTypesActive['2000']                         or 
+            animationTypesActive['5000/6000 character split bams 0']    or animationTypesActive['7000 monster split bams 0']    or 
+            animationTypesActive['7000 monster split bams 1']           or animationTypesActive['8000']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
             
