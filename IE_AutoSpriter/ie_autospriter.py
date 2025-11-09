@@ -1743,7 +1743,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     PST_Misc18:         bpy.props.StringProperty(name="MISC18",default="misc 18")
     PST_Misc19:         bpy.props.StringProperty(name="MISC19",default="misc 19")
     PST_Misc20:         bpy.props.StringProperty(name="MISC20",default="misc 20")
-    # String property for unique effect animation(e.g. Ankheg)
+    # String property for unique effect animation(e.g. Ankheg).
     Emerge:     bpy.props.StringProperty(name="EMERGE", default="emerge")
     Hide:       bpy.props.StringProperty(name="HIDE",  default="hide")    
     # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
@@ -1761,6 +1761,11 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Sword:              bpy.props.StringProperty(name="S", default="sword")
     Warhammer:          bpy.props.StringProperty(name="W", default="warhammer")
     Quarterstaff:       bpy.props.StringProperty(name="Q", default="quarterstaff")
+    # String properties for various armour collection names(used for e.g. Typ 5000/6000).
+    No_Armour:          bpy.props.StringProperty(name="No Armour",  default="no armour")
+    Leather:            bpy.props.StringProperty(name="Leather",    default="leather")
+    Chain_Robe:         bpy.props.StringProperty(name="Chain/Robe", default="chain/robe")
+    Plate:              bpy.props.StringProperty(name="Plate",      default="plate")
     # Boolean toggles for rendering each animation.
     Use_A1:     bpy.props.BoolProperty(name="Use A1",   default=True)
     Use_A2:     bpy.props.BoolProperty(name="Use A2",   default=True)
@@ -1800,11 +1805,16 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_SD3:    bpy.props.BoolProperty(name="Use SD3",  default=True)
     Use_SL1:    bpy.props.BoolProperty(name="Use SL1",  default=True)
     Use_SL2:    bpy.props.BoolProperty(name="Use SL2",  default=True)
-    # Boolean toggles for unique effect animation(e.g. Ankheg)
+    # Boolean toggles for unique effect animation(e.g. Ankheg).
     Use_Emerge: bpy.props.BoolProperty(name="Use EMERGE", default=True)
     Use_Hide:   bpy.props.BoolProperty(name="Use HIDE",   default=True)
-    # Boolean toggles for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
-    Use_Effect: bpy.props.BoolProperty(name="Use Effect", default=False)
+    # Boolean toggles for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures).
+    Use_Effect:     bpy.props.BoolProperty(name="Use Effect", default=False)
+    # Boolean toggles for character in armour animation(type 5000/6000).
+    Use_No_Armour:  bpy.props.BoolProperty(name="Use NO ARMOUR",    default=False)
+    Use_Leather:    bpy.props.BoolProperty(name="Use LEATHER",      default=False)
+    Use_Chain_Robe: bpy.props.BoolProperty(name="Use CHAIN/ROBE",   default=False)
+    Use_Plate:      bpy.props.BoolProperty(name="Use PLATE",        default=False)
     # Boolean toggles to render each weapon animation with the selected creature animation.
     Use_A:      bpy.props.BoolProperty(name="Use A",    default=False)
     Use_B:      bpy.props.BoolProperty(name="Use B",    default=False)
@@ -2153,9 +2163,13 @@ class IEAS_OT_Final(Operator):
             prefixResref                = prefixResref,
             position_folder             = ""
         )
-        if (selectedType == 'E000' or selectedType == '2000' or 
-            selectedType == '3000 mirror 0' or selectedType == '3000 mirror 1' or
-            selectedType == '7000 monster split bams 0' or selectedType == '7000 monster split bams 1' or
+        if (selectedType == 'E000' or 
+            selectedType == '2000' or 
+            selectedType == '3000 mirror 0' or 
+            selectedType == '3000 mirror 1' or
+            selectedType == '5000/6000 character split bams 0' or
+            selectedType == '7000 monster split bams 0' or 
+            selectedType == '7000 monster split bams 1' or
             selectedType == '8000'):
             # Get the method from the dictionary, defaulting to a general handler if not found
             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
@@ -2501,11 +2515,11 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
             
-        if (animationTypesActive['D000']                                    or animationTypesActive['F000']                             or
-            animationTypesActive['1000 monster multi split bams 0']         or animationTypesActive['1000 monster multi split bams 1']  or 
-            animationTypesActive['1000 multi new split bams 0']             or animationTypesActive['1000 multi new split bams 1']      or
-            animationTypesActive['3000 mirror 1']                           or animationTypesActive['7000 monster split bams 0']        or 
-            animationTypesActive['7000 monster split bams 1'])              or animationTypesActive['5000/6000 character split bams 0']:
+        if (animationTypesActive['D000']                                or animationTypesActive['F000']                             or
+            animationTypesActive['1000 monster multi split bams 0']     or animationTypesActive['1000 monster multi split bams 1']  or 
+            animationTypesActive['1000 multi new split bams 0']         or animationTypesActive['1000 multi new split bams 1']      or
+            animationTypesActive['3000 mirror 1']                       or animationTypesActive['7000 monster split bams 0']        or 
+            animationTypesActive['7000 monster split bams 1'])          or animationTypesActive['5000/6000 character split bams 0']:
             for orientationKey, toggle in Toggles9.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -3124,12 +3138,18 @@ class IEAS_PT_Collections(Panel):
             'Mace':         context.scene.IEAS_properties.Use_M, 'Sword':        context.scene.IEAS_properties.Use_S,
             'Warhammer':    context.scene.IEAS_properties.Use_W, 'Quarterstaff': context.scene.IEAS_properties.Use_Q,
         }
+        ToggleArmour = {
+            'No_Armour':    context.scene.IEAS_properties.Use_No_Armour, 'Leather':   context.scene.IEAS_properties.Use_Leather,
+            'Chain_Robe':   context.scene.IEAS_properties.Use_Chain_Robe,'Plate':     context.scene.IEAS_properties.Use_Plate,
+        }
         ToggleNames = {
-            'Axe':          'Use_A',        'Bow':          'Use_B',
-            'Club':         'Use_C',        'Dagger':       'Use_D',
-            'Flail':        'Use_F',        'Halberd':      'Use_H',
-            'Mace':         'Use_M',        'Sword':        'Use_S',
-            'Warhammer':    'Use_W',        'Quarterstaff': 'Use_Q',
+            'Axe':          'Use_A',            'Bow':          'Use_B',
+            'Club':         'Use_C',            'Dagger':       'Use_D',
+            'Flail':        'Use_F',            'Halberd':      'Use_H',
+            'Mace':         'Use_M',            'Sword':        'Use_S',
+            'Warhammer':    'Use_W',            'Quarterstaff': 'Use_Q',
+            'No_Armour':    'Use_No_Armour',    'Leather':      'Use_Leather',
+            'Chain_Robe':   'Use_Chain_Robe',   'Plate':        'Use_Plate',
             'Effect':       'Use_Effect',
         }
         
@@ -3142,12 +3162,11 @@ class IEAS_PT_Collections(Panel):
         animationTypesActive[activeType] = True
             
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
-        if (animationTypesActive['E000']                                or animationTypesActive['2000']                         or 
-            animationTypesActive['5000/6000 character split bams 0']    or animationTypesActive['7000 monster split bams 0']    or 
-            animationTypesActive['7000 monster split bams 1']           or animationTypesActive['8000']):
+        if (animationTypesActive['E000']                       or animationTypesActive['2000'] or 
+            animationTypesActive['7000 monster split bams 0']  or 
+            animationTypesActive['7000 monster split bams 1']  or animationTypesActive['8000']):
             row = self.layout.row()
-            row.prop(context.scene.IEAS_properties, "Creature")
-            
+            row.prop(context.scene.IEAS_properties, "Creature")            
             for weaponKey, toggle in ToggleWeapons.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -3158,11 +3177,27 @@ class IEAS_PT_Collections(Panel):
                 row_input.prop(context.scene.IEAS_properties, weaponKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[weaponKey])
+                
         elif (animationTypesActive['3000 mirror 0'] or animationTypesActive['3000 mirror 1']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature_Lower")
+            
+        elif (animationTypesActive['5000/6000 character split bams 0']):
+            row = self.layout.row()
+            row.prop(context.scene.IEAS_properties, "Creature")
+            for armourKey, toggle in ToggleArmour.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, armourKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[armourKey])     
+                      
         else:
             pass # Show no weapon animation options
         

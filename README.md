@@ -53,6 +53,7 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 
 ## Sources(Learning Materials)
 * [INI file format: Creature Animations](https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm)
+* [Avatar Naming Schemes](https://gibberlings3.github.io/iesdp/appendices/avatarnaming.htm)
 * [IE-Animations](https://github.com/ArtemiusI/IE-Animations) by Artemiusl
 * [education/175-Blender-Properties](https://github.com/pagekey/education/tree/main/175-Blender-Properties) by PageKey
 * [Your Own Operator | Scripting for Artists [8]](https://www.youtube.com/watch?v=xscQ9tcN4GI&list=LL) by Blender
