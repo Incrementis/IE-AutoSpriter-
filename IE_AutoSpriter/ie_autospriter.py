@@ -56,6 +56,8 @@ class IEAS_AnimationTypesParameters:
     CreatureCollectionNameLP:   str     # The name of the creature's lower part collection.
     animationWeaponFolderNames: dict    # Maps weapon keys to collection names.
     animationWeaponToggles:     dict    # Toggles rendering for specific weapons.
+    animationArmorToggles:      dict    # Toggles rendering for specific armor.
+    animationArmorFolderNames:   dict    # Maps armot keys to collection names.
     pathSaveAt:                 str     # The output file path for rendered sprites.
     animation:                  str     # The current animation name (e.g., "dead").
     positionKey:                str     # The camera angle/direction key (e.g., "south").
@@ -856,8 +858,91 @@ class IEAS_AnimationTypes():
     
     def type5000and6000_character_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 5000/6000 character split bams 0 type logic."""
-        pass
+        # ----- Deactivates/Activates collections      
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("type5000/6000: Executing 'exclude' logic for 5000/6000 character split bams 0 type.")
+        else:
+            # For no armor type
+            if(typeParameters.animationArmorToggles['ARMOR1'] == True):
+                armor       = typeParameters.animationArmorFolderNames['ARMOR1']
+                fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
+                # Constructs the base output folder path for the current weapon.
+                armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
+                armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
+                
+                # Creates a subfolder for the specific weapon and camera angle.
+                armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)                  
+                if not os.path.exists(armor_position_folder):
+                    os.makedirs(armor_position_folder)
+                                           
+                # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+                bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)            
+                # This is the actual rendering process.
+                # `animation=False` renders a single still image.
+                # `write_still=True` saves the rendered image to the specified `filepath`.
+                # The first `False` argument disables undo support for the operation.
+                renderFrame = bpy.ops.render.render
+                renderFrame(  False,
+                              animation     =False,
+                              write_still   =True)
+                
+            # TODO: For any other armor type.
+            # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collectionName  = collection.name
+                # Finds the corresponding armor key for the collection name.
+                armor = next((key for key,value in typeParameters.animationArmorFolderNames.items() if value == collectionName), None)
+                
+                # Checks if the collection corresponds to a recognized armor animation and if that armor is enabled for rendering.
+                if ( (armor != None) and (typeParameters.animationArmorToggles[armor] == True) ):
+                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                    # All other weapon collections remain excluded (invisible) by default.
+                    collection.exclude=False
+                    
+                    # Constructs the base output folder path for the current weapon.
+                    armor_folder            = os.path.join(typeParameters.pathSaveAt, collectionName)
+                    armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
+                    
+                    # Creates a subfolder for the specific weapon and camera angle.
+                    armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)                  
+                    if not os.path.exists(armor_position_folder):
+                        os.makedirs(armor_position_folder)
+                    
+                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    fileName = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        
+                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                    bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)                
+                    # This is the actual rendering process.
+                    # `animation=False` renders a single still image.
+                    # `write_still=True` saves the rendered image to the specified `filepath`.
+                    # The first `False` argument disables undo support for the operation.
+                    renderFrame = bpy.ops.render.render
+                    renderFrame(  False,
+                                  animation     =False,
+                                  write_still   =True)
+
+                    # ----- Debugging
+                    # TODO: Delete print
+                    #print("position_folder:",position_folder)
+                    # TODO: Delete print
+                    print("fileName:",fileName)
+                    # TODO: Delete print
+                    print("weapon_folder:",armor_folder)
+                    # TODO: Delete print
+                    print("weapon_position_folder:",armor_position_folder)
+                       
+                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                    # This ensures only one weapon collection is active at any given time for subsequent renders.
+                    collection.exclude = True
+            
     def type7000_monster_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 7000 monster split bams 0 type logic."""
          # ----- Deactivates/Activates collections      
@@ -1394,7 +1479,7 @@ class IEAS_AnimationTypes():
             # Activates 'holdout' (invisibility for rendering) specifically for the creature collection.
             # This ensures only weapon sprites are rendered when collections are toggled.
             if (holdout == False):
-                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner.
+                # WARNING: This change to 'holdout' status will not be visibly reflected in the Blender GUI's Outliner(?!).
                 bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout = True
             
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
@@ -1761,11 +1846,11 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Sword:              bpy.props.StringProperty(name="S", default="sword")
     Warhammer:          bpy.props.StringProperty(name="W", default="warhammer")
     Quarterstaff:       bpy.props.StringProperty(name="Q", default="quarterstaff")
-    # String properties for various armour collection names(used for e.g. Typ 5000/6000).
-    No_Armour:          bpy.props.StringProperty(name="No Armour",  default="no armour")
-    Leather:            bpy.props.StringProperty(name="Leather",    default="leather")
-    Chain_Robe:         bpy.props.StringProperty(name="Chain/Robe", default="chain/robe")
-    Plate:              bpy.props.StringProperty(name="Plate",      default="plate")
+    # String properties for various armor collection names(used for e.g. Typ 5000/6000).
+    Armor1:             bpy.props.StringProperty(name="ARMOR1", default="no_armor")
+    Armor2:             bpy.props.StringProperty(name="ARMOR2", default="leather")
+    Armor3:             bpy.props.StringProperty(name="ARMOR3", default="chain_robe")
+    Armor4:             bpy.props.StringProperty(name="ARMOR4", default="plate")
     # Boolean toggles for rendering each animation.
     Use_A1:     bpy.props.BoolProperty(name="Use A1",   default=True)
     Use_A2:     bpy.props.BoolProperty(name="Use A2",   default=True)
@@ -1810,11 +1895,11 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_Hide:   bpy.props.BoolProperty(name="Use HIDE",   default=True)
     # Boolean toggles for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures).
     Use_Effect:     bpy.props.BoolProperty(name="Use Effect", default=False)
-    # Boolean toggles for character in armour animation(type 5000/6000).
-    Use_No_Armour:  bpy.props.BoolProperty(name="Use NO ARMOUR",    default=False)
-    Use_Leather:    bpy.props.BoolProperty(name="Use LEATHER",      default=False)
-    Use_Chain_Robe: bpy.props.BoolProperty(name="Use CHAIN/ROBE",   default=False)
-    Use_Plate:      bpy.props.BoolProperty(name="Use PLATE",        default=False)
+    # Boolean toggles for character in armor animation(type 5000/6000).
+    Use_ARMOR1: bpy.props.BoolProperty(name="Use ARMOR 1",  default=False)
+    Use_ARMOR2: bpy.props.BoolProperty(name="Use ARMOR 2",  default=False)
+    Use_ARMOR3: bpy.props.BoolProperty(name="Use ARMOR 3",  default=False)
+    Use_ARMOR4: bpy.props.BoolProperty(name="Use ARMOR 4",  default=False)
     # Boolean toggles to render each weapon animation with the selected creature animation.
     Use_A:      bpy.props.BoolProperty(name="Use A",    default=False)
     Use_B:      bpy.props.BoolProperty(name="Use B",    default=False)
@@ -2120,6 +2205,14 @@ class IEAS_OT_Final(Operator):
             'M': context.scene.IEAS_properties.Use_M,   'S': context.scene.IEAS_properties.Use_S,
             'W': context.scene.IEAS_properties.Use_W,   'Q': context.scene.IEAS_properties.Use_Q,          
         }
+        animationArmorToggles = {
+            'ARMOR1': context.scene.IEAS_properties.Use_ARMOR1,   'ARMOR2': context.scene.IEAS_properties.Use_ARMOR2,
+            'ARMOR3': context.scene.IEAS_properties.Use_ARMOR3,   'ARMOR4': context.scene.IEAS_properties.Use_ARMOR4,        
+        }
+        animationArmorFolderNames = {
+            'ARMOR1': context.scene.IEAS_properties.Armor1,   'ARMOR2': context.scene.IEAS_properties.Armor2,
+            'ARMOR3': context.scene.IEAS_properties.Armor3,   'ARMOR4': context.scene.IEAS_properties.Armor4,        
+        }
         
         # ----- Resolution balancing in Blender and IE AutoSpriter, with Blender taking priority here.
         if (context.scene.IEAS_properties.Resolution_X != bpy.context.scene.render.resolution_x):
@@ -2137,17 +2230,17 @@ class IEAS_OT_Final(Operator):
         # ----- Init varibales(order is relevant)
         # Retrieves the animation type name of the type list from the UI settings.
         selectedType    = context.window_manager.IEAS_properties.Type
-        # Retrieves the name of the object selected in the UI.       
+        # Retrieves the name of the object selected in the UI.
         objectName      = context.scene.IEAS_properties.Object_List.name
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
         # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
         bpy.context.view_layer.objects.active = bpy.data.objects[objectName]
-        # The index '2' corresponds to the Z-axis in Blender's rotation_euler tuple.        
+        # The index '2' corresponds to the Z-axis in Blender's rotation_euler tuple.
         axis_Z                  = 2
         # Stores the object's initial Z-axis rotation to be restored at the end of the method.
         originalLocation        = bpy.context.active_object.rotation_euler[axis_Z]
-        # Initilaizes the all parameters.
+        # Initilaizes all the parameters.
         typeParameters          = IEAS_AnimationTypesParameters(
             exclude                     = True,
             # Retrieves the name of the creature collection from the UI settings.
@@ -2155,6 +2248,8 @@ class IEAS_OT_Final(Operator):
             CreatureCollectionNameLP    = context.scene.IEAS_properties.Creature_Lower,
             animationWeaponFolderNames  = animationWeaponFolderNames,
             animationWeaponToggles      = animationWeaponToggles,
+            animationArmorToggles       = animationArmorToggles,
+            animationArmorFolderNames   = animationArmorFolderNames,
             pathSaveAt                  = pathSaveAt,
             animation                   = "",
             positionKey                 = "",
@@ -2163,12 +2258,12 @@ class IEAS_OT_Final(Operator):
             prefixResref                = prefixResref,
             position_folder             = ""
         )
-        if (selectedType == 'E000' or 
-            selectedType == '2000' or 
-            selectedType == '3000 mirror 0' or 
+        if (selectedType == 'E000' or
+            selectedType == '2000' or
+            selectedType == '3000 mirror 0' or
             selectedType == '3000 mirror 1' or
             selectedType == '5000/6000 character split bams 0' or
-            selectedType == '7000 monster split bams 0' or 
+            selectedType == '7000 monster split bams 0' or
             selectedType == '7000 monster split bams 1' or
             selectedType == '8000'):
             # Get the method from the dictionary, defaulting to a general handler if not found
@@ -2183,7 +2278,7 @@ class IEAS_OT_Final(Operator):
         # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
         bpy.context.view_layer.objects.active = bpy.data.objects[objectName]
         
-        # ----- Debugging 
+        # ----- Debugging
         # TODO: Delete print
         print("--------IEAS_OT_Final----------")
         # TODO: Delete print
@@ -2210,10 +2305,15 @@ class IEAS_OT_Final(Operator):
                 bpy.context.active_object.animation_data.action = bpy.data.actions.get(animation)               
                 # Sets the scene's end frame to match the animation's end frame, converted to an integer
                 # to prevent rendering empty frames beyond the action's actual length.
-                bpy.context.scene.frame_end = int(bpy.context.active_object.animation_data.action.frame_range[1])     
+                bpy.context.scene.frame_end = int(bpy.context.active_object.animation_data.action.frame_range[1])
+                                
                 # Constructs the base folder path for the current animation.
                 animation_folder = os.path.join(pathSaveAt, "00-"+animation)
-                
+                if(selectedType != '5000/6000 character split bams 0'): 
+                    # Creates the animation-specific subfolder if it doesn't already exist.
+                    if not os.path.exists(animation_folder):
+                        os.makedirs(animation_folder)
+                                     
                 # ----- Debugging
                 # TODO: Delete print
                 print("animation:",animation)
@@ -2221,20 +2321,17 @@ class IEAS_OT_Final(Operator):
                 print("action:",bpy.context.active_object.animation_data.action)
                 # TODO: Delte print
                 print("Frame End:",bpy.context.scene.frame_end)
-                
-                # Creates the animation-specific subfolder if it doesn't already exist.
-                if not os.path.exists(animation_folder):
-                    os.makedirs(animation_folder)
-                    
+                                    
                 #  ----- Nested/Middle loop
                 # Iterates through each defined camera position/direction.
                 for positionKey, position in cameraPosFolderNames.items():
                     # Uses only the camera positions that are selected by the user.
                     if(cameraPosToggles[positionKey] == True):
                         # Creates a subfolder for the specific angle/direction.
-                        position_folder = os.path.join(animation_folder, positionKey)                  
-                        if not os.path.exists(position_folder):
-                            os.makedirs(position_folder)
+                        position_folder = os.path.join(animation_folder, positionKey)
+                        if(selectedType != '5000/6000 character split bams 0'):                  
+                            if not os.path.exists(position_folder):
+                                os.makedirs(position_folder)
                             
                         # Rotates the active object (the character/model) around its Z-axis to face the current direction.
                         # The script rotates the subject, relying on a static camera to capture it, rather than rotating the camera itself.
@@ -2663,7 +2760,8 @@ class IEAS_PT_Animation(Panel):
             'Ready1':    context.scene.IEAS_properties.Use_SC1,'Ready2':    context.scene.IEAS_properties.Use_SC2,
             'Idle1':     context.scene.IEAS_properties.Use_SD1,'Idle2':     context.scene.IEAS_properties.Use_SD2,
             'Idle3':     context.scene.IEAS_properties.Use_SD3,'Sleep1':    context.scene.IEAS_properties.Use_SL1,
-            'Sleep2':    context.scene.IEAS_properties.Use_SL2,
+            'Sleep2':    context.scene.IEAS_properties.Use_SL2,'Death':     context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':   context.scene.IEAS_properties.Use_GH, 'Dead':      context.scene.IEAS_properties.Use_TW,
         }
         Toggles7000_monster_sp0 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
@@ -3138,9 +3236,9 @@ class IEAS_PT_Collections(Panel):
             'Mace':         context.scene.IEAS_properties.Use_M, 'Sword':        context.scene.IEAS_properties.Use_S,
             'Warhammer':    context.scene.IEAS_properties.Use_W, 'Quarterstaff': context.scene.IEAS_properties.Use_Q,
         }
-        ToggleArmour = {
-            'No_Armour':    context.scene.IEAS_properties.Use_No_Armour, 'Leather':   context.scene.IEAS_properties.Use_Leather,
-            'Chain_Robe':   context.scene.IEAS_properties.Use_Chain_Robe,'Plate':     context.scene.IEAS_properties.Use_Plate,
+        Togglearmor = {
+            'Armor1':   context.scene.IEAS_properties.Use_ARMOR1,  'Armor2':   context.scene.IEAS_properties.Use_ARMOR2,
+            'Armor3':   context.scene.IEAS_properties.Use_ARMOR3,  'Armor4':   context.scene.IEAS_properties.Use_ARMOR4,
         }
         ToggleNames = {
             'Axe':          'Use_A',            'Bow':          'Use_B',
@@ -3148,8 +3246,8 @@ class IEAS_PT_Collections(Panel):
             'Flail':        'Use_F',            'Halberd':      'Use_H',
             'Mace':         'Use_M',            'Sword':        'Use_S',
             'Warhammer':    'Use_W',            'Quarterstaff': 'Use_Q',
-            'No_Armour':    'Use_No_Armour',    'Leather':      'Use_Leather',
-            'Chain_Robe':   'Use_Chain_Robe',   'Plate':        'Use_Plate',
+            'Armor1':       'Use_ARMOR1',       'Armor2':       'Use_ARMOR2',
+            'Armor3':       'Use_ARMOR3',       'Armor4':       'Use_ARMOR4',
             'Effect':       'Use_Effect',
         }
         
@@ -3187,16 +3285,16 @@ class IEAS_PT_Collections(Panel):
         elif (animationTypesActive['5000/6000 character split bams 0']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
-            for armourKey, toggle in ToggleArmour.items():
+            for armorKey, toggle in Togglearmor.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
                 row_input   = split.row() # Left/first column  
                 row_toggle  = split.row() # Right/second column 
                 # The text input is on the disabled row
                 row_input.enabled = toggle
-                row_input.prop(context.scene.IEAS_properties, armourKey)
+                row_input.prop(context.scene.IEAS_properties, armorKey)
                 # The toggle is on the enabled row
-                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[armourKey])     
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[armorKey])     
                       
         else:
             pass # Show no weapon animation options
