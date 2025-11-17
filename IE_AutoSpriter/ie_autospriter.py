@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 32, 0),
+    "version": (0, 32, 1),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -57,7 +57,7 @@ class IEAS_AnimationTypesParameters:
     animationWeaponFolderNames: dict    # Maps weapon keys to collection names.
     animationWeaponToggles:     dict    # Toggles rendering for specific weapons.
     animationArmorToggles:      dict    # Toggles rendering for specific armor.
-    animationArmorFolderNames:   dict    # Maps armot keys to collection names.
+    animationArmorFolderNames:  dict    # Maps armot keys to collection names.
     pathSaveAt:                 str     # The output file path for rendered sprites.
     animation:                  str     # The current animation name (e.g., "dead").
     positionKey:                str     # The camera angle/direction key (e.g., "south").
@@ -868,11 +868,24 @@ class IEAS_AnimationTypes():
             # TODO:Delete!
             print("type5000/6000: Executing 'exclude' logic for 5000/6000 character split bams 0 type.")
         else:
+            # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'SD':'G1', 'SC1':'G1', 'SD1':'G1', 'SC2':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1', 
+                'SD2':'G1','SD3':'G1', 'SL1':'G1', 'SL2':'G1',
+                'A1':'A1', 'A2':'A2', 'A3':'A3', 'A4':'A4', 'A5':'A5', 'A6':'A6', 'A7':'A7',
+                'A8':'A8', 'A9':'A9',
+                'CA1':'CA','SP1':'CA','CA2':'CA','SP2':'CA','CA3':'CA','SP3':'CA','CA4':'CA',
+                'SP4':'CA',
+            }
+            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            
             # For no armor type
             if(typeParameters.animationArmorToggles['ARMOR1'] == True):
                 armor       = typeParameters.animationArmorFolderNames['ARMOR1']
-                fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                
+                if (animationKey != typeParameters.animationKey):
+                    fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                else:
+                    fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 # Constructs the base output folder path for the current weapon.
                 armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
                 armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
@@ -916,7 +929,10 @@ class IEAS_AnimationTypes():
                         os.makedirs(armor_position_folder)
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                    fileName = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    if (animationKey != typeParameters.animationKey):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    else:
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)                
