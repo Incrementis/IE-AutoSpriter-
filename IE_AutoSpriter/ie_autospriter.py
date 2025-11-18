@@ -870,7 +870,7 @@ class IEAS_AnimationTypes():
         else:
             # Used to identify which sprite file is defined for which sequence
             sequences = {
-                'SD':'G1', 'SC1':'G1', 'SD1':'G1', 'SC2':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1', 
+                'WK':'G1', 'SC1':'G1', 'SD1':'G1', 'SC2':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1', 
                 'SD2':'G1','SD3':'G1', 'SL1':'G1', 'SL2':'G1',
                 'A1':'A1', 'A2':'A2', 'A3':'A3', 'A4':'A4', 'A5':'A5', 'A6':'A6', 'A7':'A7',
                 'A8':'A8', 'A9':'A9',
@@ -971,7 +971,70 @@ class IEAS_AnimationTypes():
             # TODO:Delete!
             print("type5000/6000: Executing 'exclude' logic for 5000/6000 character split bams 1 type.")
         else:
-            pass
+             # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'SC1':'G1', 'WK':'G11', 'SD1':'G12', 'SC2':'G13', 'GH':'G14and15', 'DE':'G15', 'TW':'G16', 
+                'SD2':'G17','SD3':'G18', 'SL1':'G19', 'SL2':'G19',
+                'A1':'A1', 'A2':'A2', 'A3':'A3', 'A4':'A4', 'A5':'A5', 'A6':'A6', 'A7':'A7',
+                'A8':'A8', 'A9':'A9',
+                'CA1':'CA','SP1':'CA','CA2':'CA','SP2':'CA','CA3':'CA','SP3':'CA','CA4':'CA',
+                'SP4':'CA',
+            }
+            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            
+            # TODO: For any other armor type.
+            # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collectionName  = collection.name
+                # Finds the corresponding armor key for the collection name.
+                armor = next((key for key,value in typeParameters.animationArmorFolderNames.items() if value == collectionName), None)
+                
+                # Checks if the collection corresponds to a recognized armor animation and if that armor is enabled for rendering.
+                if ( (armor != None) and (typeParameters.animationArmorToggles[armor] == True) ):
+                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                    # All other weapon collections remain excluded (invisible) by default.
+                    collection.exclude=False
+                    
+                    # Constructs the base output folder path for the current weapon.
+                    armor_folder            = os.path.join(typeParameters.pathSaveAt, collectionName)
+                    armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
+                    
+                    # Creates a subfolder for the specific weapon and camera angle.
+                    armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)                  
+                    if not os.path.exists(armor_position_folder):
+                        os.makedirs(armor_position_folder)
+                    
+                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    if (animationKey != typeParameters.animationKey):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    else:
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        
+                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                    bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)                
+                    # This is the actual rendering process.
+                    # `animation=False` renders a single still image.
+                    # `write_still=True` saves the rendered image to the specified `filepath`.
+                    # The first `False` argument disables undo support for the operation.
+                    renderFrame = bpy.ops.render.render
+                    renderFrame(  False,
+                                  animation     =False,
+                                  write_still   =True)
+
+                    # ----- Debugging
+                    # TODO: Delete print
+                    #print("position_folder:",position_folder)
+                    # TODO: Delete print
+                    print("fileName:",fileName)
+                    # TODO: Delete print
+                    print("weapon_folder:",armor_folder)
+                    # TODO: Delete print
+                    print("weapon_position_folder:",armor_position_folder)
+                       
+                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                    # This ensures only one weapon collection is active at any given time for subsequent renders.
+                    collection.exclude = True
+            
             
     def type7000_monster_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 7000 monster split bams 0 type logic."""
@@ -2099,7 +2162,7 @@ class IEAS_OT_Final(Operator):
             'F000':                                 IEAS_AnimationTypes().typeF000,
             'unique identifier':                    False, # TODO: delete 'unique identifier'
         }
-                   
+        excludedAnimationTypes = ['5000/6000 character split bams 0', '5000/6000 character split bams 1']           
         # ---- Camera
         # Dictionaries mapping internal keys to user-defined subfolder names and toggle states for camera angles.
         cameraPosFolderNames = {
@@ -2348,7 +2411,7 @@ class IEAS_OT_Final(Operator):
                                 
                 # Constructs the base folder path for the current animation.
                 animation_folder = os.path.join(pathSaveAt, "00-"+animation)
-                if(selectedType != '5000/6000 character split bams 0'): 
+                if(selectedType not in excludedAnimationTypes):
                     # Creates the animation-specific subfolder if it doesn't already exist.
                     if not os.path.exists(animation_folder):
                         os.makedirs(animation_folder)
@@ -2368,7 +2431,7 @@ class IEAS_OT_Final(Operator):
                     if(cameraPosToggles[positionKey] == True):
                         # Creates a subfolder for the specific angle/direction.
                         position_folder = os.path.join(animation_folder, positionKey)
-                        if(selectedType != '5000/6000 character split bams 0'):                  
+                        if(selectedType not in excludedAnimationTypes):                  
                             if not os.path.exists(position_folder):
                                 os.makedirs(position_folder)
                             
@@ -3332,13 +3395,13 @@ class IEAS_PT_Collections(Panel):
         animationTypesActive[activeType] = True
             
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
-        if (animationTypesActive['E000']                       or animationTypesActive['2000'] or 
-            animationTypesActive['7000 monster split bams 0']  or 
-            animationTypesActive['7000 monster split bams 1']  or animationTypesActive['8000']):
+        if (animationTypesActive['2000']                        or  animationTypesActive['7000 monster split bams 0']   or 
+            animationTypesActive['7000 monster split bams 1']   or  animationTypesActive['8000']                        or
+            animationTypesActive['E000']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")            
             for weaponKey, toggle in ToggleWeapons.items():
-                # Splits row into two columns            
+                # Splits row into two columns
                 split       = self.layout.split(factor=0.7)
                 row_input   = split.row() # Left/first column  
                 row_toggle  = split.row() # Right/second column 
@@ -3358,15 +3421,15 @@ class IEAS_PT_Collections(Panel):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
             for armorKey, toggle in Togglearmor.items():
-                # Splits row into two columns            
+                # Splits row into two columns
                 split       = self.layout.split(factor=0.7)
-                row_input   = split.row() # Left/first column  
-                row_toggle  = split.row() # Right/second column 
+                row_input   = split.row() # Left/first column
+                row_toggle  = split.row() # Right/second column
                 # The text input is on the disabled row
                 row_input.enabled = toggle
                 row_input.prop(context.scene.IEAS_properties, armorKey)
                 # The toggle is on the enabled row
-                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[armorKey])     
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[armorKey])
                       
         else:
             pass # Show no weapon animation options
