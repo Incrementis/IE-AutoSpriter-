@@ -35,7 +35,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 33, 0),
+    "version": (0, 34, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1035,7 +1035,20 @@ class IEAS_AnimationTypes():
                     # This ensures only one weapon collection is active at any given time for subsequent renders.
                     collection.exclude = True
             
-            
+    def type5000and6000_character_old(self, typeParameters:IEAS_AnimationTypesParameters):
+        """Method for handling 5000/6000 character old type logic."""
+        # ----- Deactivates/Activates collections      
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("type5000/6000: Executing 'exclude' logic for 5000/6000 character old type.")
+        else:
+            pass
+        
     def type7000_monster_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 7000 monster split bams 0 type logic."""
          # ----- Deactivates/Activates collections      
@@ -1765,19 +1778,20 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                         ('4000','4000','','',9),
                                         ('5000/6000 character split bams 0','5000/6000 character split bams 0','','',10),
                                         ('5000/6000 character split bams 1','5000/6000 character split bams 1','','',11),
-                                        ('7000 monster split bams 0','7000 monster split bams 0','','',12),
-                                        ('7000 monster split bams 1','7000 monster split bams 1','','',13),
-                                        ('7000 monster old','7000 monster old','','',14),
-                                        ('8000','8000','','',15),                                       
-                                        ('9000','9000','','',16),
-                                        ('A000','A000','','',17),
-                                        ('B000','B000','','',18),
-                                        ('C000','C000','','',19),
-                                        ('D000','D000','','',20),
-                                        ('E000','E000','','',21),
-                                        ('F000','F000','','',22),
+                                        ('5000/6000 character old','5000/6000 character old','','',12),
+                                        ('7000 monster split bams 0','7000 monster split bams 0','','',13),
+                                        ('7000 monster split bams 1','7000 monster split bams 1','','',14),
+                                        ('7000 monster old','7000 monster old','','',15),
+                                        ('8000','8000','','',16),                                       
+                                        ('9000','9000','','',17),
+                                        ('A000','A000','','',18),
+                                        ('B000','B000','','',19),
+                                        ('C000','C000','','',20),
+                                        ('D000','D000','','',21),
+                                        ('E000','E000','','',22),
+                                        ('F000','F000','','',23),
                                         # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 23),
+                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 24),
                                     ],
                                     name            = "Animationtype",
                                     description     = "TODO: Enum Name Description",
@@ -2149,6 +2163,7 @@ class IEAS_OT_Final(Operator):
             '4000':                                 IEAS_AnimationTypes().type4000,
             '5000/6000 character split bams 0':     IEAS_AnimationTypes().type5000and6000_character_sp0,
             '5000/6000 character split bams 1':     IEAS_AnimationTypes().type5000and6000_character_sp1,
+            '5000/6000 character old':              IEAS_AnimationTypes().type5000and6000_character_old,
             '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
             '7000 monster split bams 1':            IEAS_AnimationTypes().type7000_monster_sp1,
             '7000 monster old':                     IEAS_AnimationTypes().type7000_monster_old,
@@ -2618,6 +2633,7 @@ class IEAS_PT_Camera(Panel):
             '4000':                                 False,
             '5000/6000 character split bams 0':     False,
             '5000/6000 character split bams 1':     False,
+            '5000/6000 character old':              False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
             '7000 monster old':                     False,
@@ -2700,10 +2716,11 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
                 
-        if (animationTypesActive['9000']                or animationTypesActive['B000']         or 
-            animationTypesActive['C000']                or animationTypesActive['E000']         or
-            animationTypesActive['2000']                or animationTypesActive['3000 mirror 0']or
-            animationTypesActive['7000 monster old']    or animationTypesActive['8000']):
+        if (animationTypesActive['9000']                    or animationTypesActive['B000']             or 
+            animationTypesActive['C000']                    or animationTypesActive['E000']             or
+            animationTypesActive['2000']                    or animationTypesActive['3000 mirror 0']    or
+            animationTypesActive['5000/6000 character old'] or animationTypesActive['7000 monster old'] or
+            animationTypesActive['8000']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2869,6 +2886,23 @@ class IEAS_PT_Animation(Panel):
             'Get_Hit':   context.scene.IEAS_properties.Use_GH, 'Dead':      context.scene.IEAS_properties.Use_TW,
         }
         Toggles5000and6000_character_sp1 = {
+            'Attack1':   context.scene.IEAS_properties.Use_A1, 'Attack2':   context.scene.IEAS_properties.Use_A2,
+            'Attack3':   context.scene.IEAS_properties.Use_A3, 'Attack4':   context.scene.IEAS_properties.Use_A4,
+            'Attack5':   context.scene.IEAS_properties.Use_A5, 'Attack6':   context.scene.IEAS_properties.Use_A6, 
+            'Attack7':   context.scene.IEAS_properties.Use_A7, 'Attack8':   context.scene.IEAS_properties.Use_A8, 
+            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_A10,
+            'Attack11':  context.scene.IEAS_properties.Use_A11,'Attack12':  context.scene.IEAS_properties.Use_A12,
+            'Cast1':     context.scene.IEAS_properties.Use_CA1,'Cast2':     context.scene.IEAS_properties.Use_CA2,
+            'Cast3':     context.scene.IEAS_properties.Use_CA3,'Cast4':     context.scene.IEAS_properties.Use_CA4,
+            'Conjure1':  context.scene.IEAS_properties.Use_SP1,'Conjure2':  context.scene.IEAS_properties.Use_SP2,
+            'Conjure3':  context.scene.IEAS_properties.Use_SP3,'Conjure4':  context.scene.IEAS_properties.Use_SP4,
+            'Ready1':    context.scene.IEAS_properties.Use_SC1,'Ready2':    context.scene.IEAS_properties.Use_SC2,
+            'Idle1':     context.scene.IEAS_properties.Use_SD1,'Idle2':     context.scene.IEAS_properties.Use_SD2,
+            'Idle3':     context.scene.IEAS_properties.Use_SD3,'Sleep1':    context.scene.IEAS_properties.Use_SL1,
+            'Sleep2':    context.scene.IEAS_properties.Use_SL2,'Death':     context.scene.IEAS_properties.Use_DE,
+            'Get_Hit':   context.scene.IEAS_properties.Use_GH, 'Dead':      context.scene.IEAS_properties.Use_TW,
+        }
+        Toggles5000and6000_character_old = {
             'Attack1':   context.scene.IEAS_properties.Use_A1, 'Attack2':   context.scene.IEAS_properties.Use_A2,
             'Attack3':   context.scene.IEAS_properties.Use_A3, 'Attack4':   context.scene.IEAS_properties.Use_A4,
             'Attack5':   context.scene.IEAS_properties.Use_A5, 'Attack6':   context.scene.IEAS_properties.Use_A6, 
@@ -3183,6 +3217,18 @@ class IEAS_PT_Animation(Panel):
                 row_input.prop(context.scene.IEAS_properties, animationKey)
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
+        
+        if (animationTypesActive['5000/6000 character old']):
+            for animationKey, toggle in Toggles5000and6000_character_old.items():
+                # Splits row into two columns            
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, animationKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[animationKey])
                 
         if (animationTypesActive['7000 monster split bams 0']):
             for animationKey, toggle in Toggles7000_monster_sp0.items():
@@ -3351,6 +3397,7 @@ class IEAS_PT_Collections(Panel):
             '4000':                                 False,
             '5000/6000 character split bams 0':     False,
             '5000/6000 character split bams 1':     False,
+            '5000/6000 character old':              False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
             '7000 monster old':                     False,
@@ -3371,7 +3418,7 @@ class IEAS_PT_Collections(Panel):
             'Mace':         context.scene.IEAS_properties.Use_M, 'Sword':        context.scene.IEAS_properties.Use_S,
             'Warhammer':    context.scene.IEAS_properties.Use_W, 'Quarterstaff': context.scene.IEAS_properties.Use_Q,
         }
-        Togglearmor = {
+        ToggleArmor = {
             'Armor1':   context.scene.IEAS_properties.Use_ARMOR1,  'Armor2':   context.scene.IEAS_properties.Use_ARMOR2,
             'Armor3':   context.scene.IEAS_properties.Use_ARMOR3,  'Armor4':   context.scene.IEAS_properties.Use_ARMOR4,
         }
@@ -3417,10 +3464,11 @@ class IEAS_PT_Collections(Panel):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature_Lower")
             
-        elif (animationTypesActive['5000/6000 character split bams 0'] or animationTypesActive['5000/6000 character split bams 1']):
+        elif (animationTypesActive['5000/6000 character split bams 0'] or animationTypesActive['5000/6000 character split bams 1'] or
+              animationTypesActive['5000/6000 character old']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
-            for armorKey, toggle in Togglearmor.items():
+            for armorKey, toggle in ToggleArmor.items():
                 # Splits row into two columns
                 split       = self.layout.split(factor=0.7)
                 row_input   = split.row() # Left/first column
