@@ -58,6 +58,7 @@ class IEAS_AnimationTypesParameters:
     animationWeaponToggles:     dict    # Toggles rendering for specific weapons.
     animationArmorToggles:      dict    # Toggles rendering for specific armor.
     animationArmorFolderNames:  dict    # Maps armot keys to collection names.
+    cameraEasternPositions:     list    # List of all eastern model position as string.
     pathSaveAt:                 str     # The output file path for rendered sprites.
     animation:                  str     # The current animation name (e.g., "dead").
     positionKey:                str     # The camera angle/direction key (e.g., "south").
@@ -137,11 +138,11 @@ class IEAS_AnimationTypes():
             # Reshapes the 1D pixel array into a 3D array (height, width, channels).
             arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
             arrPixelsFlipped    = arrPixelsReshaped
-                        
+            
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
                 # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-                if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                     fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 else:
                     fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -586,7 +587,7 @@ class IEAS_AnimationTypes():
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -643,7 +644,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                         fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
                         fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -715,7 +716,7 @@ class IEAS_AnimationTypes():
             
             # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
             # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -747,7 +748,7 @@ class IEAS_AnimationTypes():
             
             # Constructs the full filename for the current sprite (for the lower part), using the 'D' prefix.
             # East-facing sprites get an 'E' suffix.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -874,6 +875,7 @@ class IEAS_AnimationTypes():
                 'SD2':'G1','SD3':'G1', 'SL1':'G1', 'SL2':'G1',
                 'A1':'A1', 'A2':'A2', 'A3':'A3', 'A4':'A4', 'A5':'A5', 'A6':'A6', 'A7':'A7',
                 'A8':'A8', 'A9':'A9',
+                'SA':'SA', 'SS':'SS', 'SX':'SX',
                 'CA1':'CA','SP1':'CA','CA2':'CA','SP2':'CA','CA3':'CA','SP3':'CA','CA4':'CA',
                 'SP4':'CA',
             }
@@ -929,6 +931,7 @@ class IEAS_AnimationTypes():
                         os.makedirs(armor_position_folder)
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    armor = typeParameters.animationArmorFolderNames[armor]
                     if (animationKey != typeParameters.animationKey):
                         fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
@@ -971,16 +974,44 @@ class IEAS_AnimationTypes():
             # TODO:Delete!
             print("type5000/6000: Executing 'exclude' logic for 5000/6000 character split bams 1 type.")
         else:
-             # Used to identify which sprite file is defined for which sequence
+            # Used to identify which sprite file is defined for which sequence
             sequences = {
                 'SC1':'G1', 'WK':'G11', 'SD1':'G12', 'SC2':'G13', 'GH':'G14and15', 'DE':'G15', 'TW':'G16', 
                 'SD2':'G17','SD3':'G18', 'SL1':'G19', 'SL2':'G19',
                 'A1':'A1', 'A2':'A2', 'A3':'A3', 'A4':'A4', 'A5':'A5', 'A6':'A6', 'A7':'A7',
                 'A8':'A8', 'A9':'A9',
+                'SA':'SA', 'SS':'SS', 'SX':'SX',
                 'CA1':'CA','SP1':'CA','CA2':'CA','SP2':'CA','CA3':'CA','SP3':'CA','CA4':'CA',
                 'SP4':'CA',
             }
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            
+            # For no armor type
+            if(typeParameters.animationArmorToggles['ARMOR1'] == True):
+                armor       = typeParameters.animationArmorFolderNames['ARMOR1']
+                if (animationKey != typeParameters.animationKey):
+                    fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                else:
+                    fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                # Constructs the base output folder path for the current weapon.
+                armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
+                armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
+                
+                # Creates a subfolder for the specific weapon and camera angle.
+                armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)                  
+                if not os.path.exists(armor_position_folder):
+                    os.makedirs(armor_position_folder)
+                                           
+                # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+                bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)            
+                # This is the actual rendering process.
+                # `animation=False` renders a single still image.
+                # `write_still=True` saves the rendered image to the specified `filepath`.
+                # The first `False` argument disables undo support for the operation.
+                renderFrame = bpy.ops.render.render
+                renderFrame(  False,
+                              animation     =False,
+                              write_still   =True)
             
             # TODO: For any other armor type.
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
@@ -1005,6 +1036,7 @@ class IEAS_AnimationTypes():
                         os.makedirs(armor_position_folder)
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    armor = typeParameters.animationArmorFolderNames[armor]
                     if (animationKey != typeParameters.animationKey):
                         fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
@@ -1047,7 +1079,120 @@ class IEAS_AnimationTypes():
             # TODO:Delete!
             print("type5000/6000: Executing 'exclude' logic for 5000/6000 character old type.")
         else:
-            pass
+            # Used to identify which sprite file is defined for which sequence
+            sequences = {
+                'SC1':'G1', 'WK':'G1', 'SD1':'G1', 'SC2':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1', 
+                'SD2':'G1','SD3':'G1', 'SL1':'G1', 'SL2':'G1',
+                'A1':'A1', 'A2':'A2', 'A3':'A3', 'A4':'A4', 'A5':'A5', 'A6':'A6', 'A7':'A7',
+                'A8':'A8', 'A9':'A9',
+                'SA':'SA', 'SS':'SS', 'SX':'SX',
+                'CA1':'CA','SP1':'CA','CA2':'CA','SP2':'CA','CA3':'CA','SP3':'CA','CA4':'CA',
+                'SP4':'CA',
+                'WK2':'W2',
+            }
+            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            # TODO: Fill array
+            excludePositionKeysWK2 = []
+            
+            # For no armor type
+            if(typeParameters.animationArmorToggles['ARMOR1'] == True):
+                armor = typeParameters.animationArmorFolderNames['ARMOR1']
+                # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                if (animationKey != typeParameters.animationKey):
+                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    else:
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
+                else:
+                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    else:
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                
+                # TODO
+                if (animationKey == 'W2'):
+                    pass
+                              
+                # Constructs the base output folder path for the current weapon.
+                armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
+                armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
+                
+                # Creates a subfolder for the specific weapon and camera angle.
+                armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)                  
+                if not os.path.exists(armor_position_folder):
+                    os.makedirs(armor_position_folder)
+                                           
+                # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
+                bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)            
+                # This is the actual rendering process.
+                # `animation=False` renders a single still image.
+                # `write_still=True` saves the rendered image to the specified `filepath`.
+                # The first `False` argument disables undo support for the operation.
+                renderFrame = bpy.ops.render.render
+                renderFrame(  False,
+                              animation     =False,
+                              write_still   =True)
+            
+            # TODO: For any other armor type.
+            # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collectionName  = collection.name
+                # Finds the corresponding armor key for the collection name.
+                armor = next((key for key,value in typeParameters.animationArmorFolderNames.items() if value == collectionName), None)
+                
+                # Checks if the collection corresponds to a recognized armor animation and if that armor is enabled for rendering.
+                if ( (armor != None) and (typeParameters.animationArmorToggles[armor] == True) ):
+                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                    # All other weapon collections remain excluded (invisible) by default.
+                    collection.exclude=False
+                    
+                    # Constructs the base output folder path for the current weapon.
+                    armor_folder            = os.path.join(typeParameters.pathSaveAt, collectionName)
+                    armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
+                    
+                    # Creates a subfolder for the specific weapon and camera angle.
+                    armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)                  
+                    if not os.path.exists(armor_position_folder):
+                        os.makedirs(armor_position_folder)
+                    
+                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                    armor = typeParameters.animationArmorFolderNames[armor]
+                    if (animationKey != typeParameters.animationKey):
+                        if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
+                            fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        else:
+                            fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
+                    else:
+                        if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
+                            fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        else:
+                            ffileName   = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
+                        
+                        
+                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                    bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)                
+                    # This is the actual rendering process.
+                    # `animation=False` renders a single still image.
+                    # `write_still=True` saves the rendered image to the specified `filepath`.
+                    # The first `False` argument disables undo support for the operation.
+                    renderFrame = bpy.ops.render.render
+                    renderFrame(  False,
+                                  animation     =False,
+                                  write_still   =True)
+
+                    # ----- Debugging
+                    # TODO: Delete print
+                    #print("position_folder:",position_folder)
+                    # TODO: Delete print
+                    print("fileName:",fileName)
+                    # TODO: Delete print
+                    print("weapon_folder:",armor_folder)
+                    # TODO: Delete print
+                    print("weapon_position_folder:",armor_position_folder)
+                       
+                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                    # This ensures only one weapon collection is active at any given time for subsequent renders.
+                    collection.exclude = True
         
     def type7000_monster_sp0(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 7000 monster split bams 0 type logic."""
@@ -1163,11 +1308,11 @@ class IEAS_AnimationTypes():
                 
     def type7000_monster_sp1(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling 7000 monster split bams 1 type logic."""
-         # ----- Deactivates/Activates collections      
+         # ----- Deactivates/Activates collections
         if (typeParameters.exclude == True):
-            # Deactivates every collection found.                   
+            # Deactivates every collection found.
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
+                collection.exclude = True
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1183,8 +1328,8 @@ class IEAS_AnimationTypes():
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             fileName = f"{typeParameters.prefixResref}{animationKey}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
-            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
-            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
+            # Sets the scene's render output file path. This tells Blender where to save the next rendered image.
+            bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
             # This is the actual rendering process.
             # `animation=False` renders a single still image.
             # `write_still=True` saves the rendered image to the specified `filepath`.
@@ -1197,7 +1342,7 @@ class IEAS_AnimationTypes():
             # TODO:Delete!
             print("type7000: Executing 'exclude' logic for type7000 monster sp1 type.")
             # Stores the initial 'holdout' state of the creature collection before modification.
-            # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
+            # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer.
             holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
             
             # ----- Debugging
@@ -1284,7 +1429,7 @@ class IEAS_AnimationTypes():
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1320,7 +1465,7 @@ class IEAS_AnimationTypes():
             animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1377,7 +1522,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                         fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
                         fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1431,7 +1576,7 @@ class IEAS_AnimationTypes():
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1459,7 +1604,7 @@ class IEAS_AnimationTypes():
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1485,7 +1630,7 @@ class IEAS_AnimationTypes():
             }
             animationKey = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1511,7 +1656,7 @@ class IEAS_AnimationTypes():
             }
             animationKey = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1556,7 +1701,7 @@ class IEAS_AnimationTypes():
             print("typeE000: Executing 'exclude' logic for E000 type.")
         else:
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+            if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1612,7 +1757,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    if(typeParameters.positionKey == 'east' or typeParameters.positionKey == 'south_east' or typeParameters.positionKey == 'north_east'):                     
+                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                         fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
                         fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -1697,7 +1842,8 @@ class IEAS_PGT_Inputs(PropertyGroup):
             'Use_GH', 'Use_GU', 'Use_SC', 'Use_SD', 'Use_SL', 'Use_SP',
             'Use_TW', 'Use_WK', 'Use_Effect', 'Use_Emerge', 'Use_Hide',
             # Type 5000/6000
-            'Use_A6', 'Use_A7', 'Use_A8', 'Use_A9', 'Use_A10', 'Use_A11', 'Use_A12',
+            'Use_WK2',
+            'Use_A6', 'Use_A7', 'Use_A8', 'Use_A9', 'Use_SA', 'Use_SS', 'Use_SX',
             'Use_CA1', 'Use_CA2', 'Use_CA3', 'Use_CA4',
             'Use_SP1', 'Use_SP2', 'Use_SP3', 'Use_SP4',
             'Use_SC1', 'Use_SC2',
@@ -1875,6 +2021,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Dead:       bpy.props.StringProperty(name="TW", default="dead")
     Walk:       bpy.props.StringProperty(name="WK", default="walk")
     # Additional string properties for names of various animation actions of type 5000/6000.
+    Walk2:      bpy.props.StringProperty(name="WK2", default="walk")
     Attack6:    bpy.props.StringProperty(name="A6", default="2h-thrust")
     Attack7:    bpy.props.StringProperty(name="A7", default="2weapon-v1")
     Attack8:    bpy.props.StringProperty(name="A8", default="throwing?")
@@ -1982,13 +2129,14 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_TW:     bpy.props.BoolProperty(name="Use TW",   default=True)
     Use_WK:     bpy.props.BoolProperty(name="Use WK",   default=True)
     # Boolean toggles for various animation actions of type 5000/6000.
+    Use_WK2:    bpy.props.BoolProperty(name="Use WK2",  default=True)
     Use_A6:     bpy.props.BoolProperty(name="Use A6",   default=True)
     Use_A7:     bpy.props.BoolProperty(name="Use A7",   default=True)
     Use_A8:     bpy.props.BoolProperty(name="Use A8",   default=True)
     Use_A9:     bpy.props.BoolProperty(name="Use A9",   default=True)
-    Use_A10:    bpy.props.BoolProperty(name="Use A10",  default=True)
-    Use_A11:    bpy.props.BoolProperty(name="Use A11",  default=True)
-    Use_A12:    bpy.props.BoolProperty(name="Use A12",  default=True)
+    Use_SA:     bpy.props.BoolProperty(name="Use SA",   default=True)
+    Use_SS:     bpy.props.BoolProperty(name="Use SS",   default=True)
+    Use_SX:     bpy.props.BoolProperty(name="Use SX",   default=True)
     Use_CA1:    bpy.props.BoolProperty(name="Use CA1",  default=True)
     Use_CA2:    bpy.props.BoolProperty(name="Use CA2",  default=True)
     Use_CA3:    bpy.props.BoolProperty(name="Use CA3",  default=True)
@@ -2177,7 +2325,9 @@ class IEAS_OT_Final(Operator):
             'F000':                                 IEAS_AnimationTypes().typeF000,
             'unique identifier':                    False, # TODO: delete 'unique identifier'
         }
-        excludedAnimationTypes = ['5000/6000 character split bams 0', '5000/6000 character split bams 1']           
+        excludedAnimationTypes = [  '5000/6000 character split bams 0', 
+                                    '5000/6000 character split bams 1', 
+                                    '5000/6000 character old']           
         # ---- Camera
         # Dictionaries mapping internal keys to user-defined subfolder names and toggle states for camera angles.
         cameraPosFolderNames = {
@@ -2211,6 +2361,8 @@ class IEAS_OT_Final(Operator):
             'east':         90,     'east_south_east':  67.5,
             'south_east':   45,     'south_south_east': 22.5
         }
+        cameraEasternPositions = [  'north_north_east',         'north_east', 'east_north_east', 
+                                    'east', 'east_south_east',  'south_east', 'south_south_east']
         
         # ----- Animation
         # Dictionaries mapping internal keys to user-defined animation names and toggle states.
@@ -2225,10 +2377,11 @@ class IEAS_OT_Final(Operator):
             'Effect':   context.scene.IEAS_properties.Effect,       'EMERGE': context.scene.IEAS_properties.Emerge,
             'HIDE':     context.scene.IEAS_properties.Hide,
             # Type 5000/6000 Properties
+            'WK2':      context.scene.IEAS_properties.Walk2,
             'A6':       context.scene.IEAS_properties.Attack6,      'A7': context.scene.IEAS_properties.Attack7,
             'A8':       context.scene.IEAS_properties.Attack8,      'A9': context.scene.IEAS_properties.Attack9,
-            'A10':      context.scene.IEAS_properties.Attack10,     'A11': context.scene.IEAS_properties.Attack11,
-            'A12':      context.scene.IEAS_properties.Attack12,     'CA1': context.scene.IEAS_properties.Cast1,
+            'SA':       context.scene.IEAS_properties.Attack10,     'SS': context.scene.IEAS_properties.Attack11,
+            'SX':       context.scene.IEAS_properties.Attack12,     'CA1': context.scene.IEAS_properties.Cast1,
             'CA2':      context.scene.IEAS_properties.Cast2,        'CA3': context.scene.IEAS_properties.Cast3,
             'CA4':      context.scene.IEAS_properties.Cast4,        'SP1': context.scene.IEAS_properties.Conjure1,
             'SP2':      context.scene.IEAS_properties.Conjure2,     'SP3': context.scene.IEAS_properties.Conjure3,
@@ -2272,10 +2425,11 @@ class IEAS_OT_Final(Operator):
             'Effect':   context.scene.IEAS_properties.Use_Effect,   'EMERGE': context.scene.IEAS_properties.Use_Emerge,
             'HIDE':     context.scene.IEAS_properties.Use_Hide,            
             # Type 5000/6000 Boolean Properties
+            'WK2': context.scene.IEAS_properties.Use_WK2,
             'A6':       context.scene.IEAS_properties.Use_A6,       'A7': context.scene.IEAS_properties.Use_A7,
             'A8':       context.scene.IEAS_properties.Use_A8,       'A9': context.scene.IEAS_properties.Use_A9,
-            'A10':      context.scene.IEAS_properties.Use_A10,      'A11': context.scene.IEAS_properties.Use_A11,
-            'A12':      context.scene.IEAS_properties.Use_A12,      'CA1': context.scene.IEAS_properties.Use_CA1,
+            'SA':       context.scene.IEAS_properties.Use_SA,       'SS': context.scene.IEAS_properties.Use_SS,
+            'SX':       context.scene.IEAS_properties.Use_SX,       'CA1': context.scene.IEAS_properties.Use_CA1,
             'CA2':      context.scene.IEAS_properties.Use_CA2,      'CA3': context.scene.IEAS_properties.Use_CA3,
             'CA4':      context.scene.IEAS_properties.Use_CA4,      'SP1': context.scene.IEAS_properties.Use_SP1,
             'SP2':      context.scene.IEAS_properties.Use_SP2,      'SP3': context.scene.IEAS_properties.Use_SP3,
@@ -2366,6 +2520,7 @@ class IEAS_OT_Final(Operator):
             animationWeaponToggles      = animationWeaponToggles,
             animationArmorToggles       = animationArmorToggles,
             animationArmorFolderNames   = animationArmorFolderNames,
+            cameraEasternPositions      = cameraEasternPositions,
             pathSaveAt                  = pathSaveAt,
             animation                   = "",
             positionKey                 = "",
@@ -2380,6 +2535,7 @@ class IEAS_OT_Final(Operator):
             selectedType == '3000 mirror 1' or
             selectedType == '5000/6000 character split bams 0' or
             selectedType == '5000/6000 character split bams 1' or
+            selectedType == '5000/6000 character old' or
             selectedType == '7000 monster split bams 0' or
             selectedType == '7000 monster split bams 1' or
             selectedType == '8000'):
@@ -2703,8 +2859,8 @@ class IEAS_PT_Camera(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[orientationKey])
                 
-        if (animationTypesActive['4000'] or animationTypesActive['A000'] or 
-            animationTypesActive['1000 monster quadrant']):
+        if (animationTypesActive['1000 monster quadrant']   or animationTypesActive['4000'] or 
+            animationTypesActive['5000/6000 character old'] or animationTypesActive['A000']):
             for orientationKey, toggle in Toggles16.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2719,8 +2875,7 @@ class IEAS_PT_Camera(Panel):
         if (animationTypesActive['9000']                    or animationTypesActive['B000']             or 
             animationTypesActive['C000']                    or animationTypesActive['E000']             or
             animationTypesActive['2000']                    or animationTypesActive['3000 mirror 0']    or
-            animationTypesActive['5000/6000 character old'] or animationTypesActive['7000 monster old'] or
-            animationTypesActive['8000']):
+            animationTypesActive['7000 monster old']        or animationTypesActive['8000']):
             for orientationKey, toggle in Toggles8.items():
                 # Splits row into two columns            
                 split       = self.layout.split(factor=0.7)
@@ -2784,6 +2939,7 @@ class IEAS_PT_Animation(Panel):
             '4000':                                 False,
             '5000/6000 character split bams 0':     False,
             '5000/6000 character split bams 1':     False,
+            '5000/6000 character old':              False,
             '7000 monster split bams 0':            False,
             '7000 monster split bams 1':            False,
             '7000 monster old':                     False,
@@ -2873,8 +3029,8 @@ class IEAS_PT_Animation(Panel):
             'Attack3':   context.scene.IEAS_properties.Use_A3, 'Attack4':   context.scene.IEAS_properties.Use_A4,
             'Attack5':   context.scene.IEAS_properties.Use_A5, 'Attack6':   context.scene.IEAS_properties.Use_A6, 
             'Attack7':   context.scene.IEAS_properties.Use_A7, 'Attack8':   context.scene.IEAS_properties.Use_A8, 
-            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_A10,
-            'Attack11':  context.scene.IEAS_properties.Use_A11,'Attack12':  context.scene.IEAS_properties.Use_A12,
+            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_SA,
+            'Attack11':  context.scene.IEAS_properties.Use_SS, 'Attack12':  context.scene.IEAS_properties.Use_SX,
             'Cast1':     context.scene.IEAS_properties.Use_CA1,'Cast2':     context.scene.IEAS_properties.Use_CA2,
             'Cast3':     context.scene.IEAS_properties.Use_CA3,'Cast4':     context.scene.IEAS_properties.Use_CA4,
             'Conjure1':  context.scene.IEAS_properties.Use_SP1,'Conjure2':  context.scene.IEAS_properties.Use_SP2,
@@ -2884,14 +3040,15 @@ class IEAS_PT_Animation(Panel):
             'Idle3':     context.scene.IEAS_properties.Use_SD3,'Sleep1':    context.scene.IEAS_properties.Use_SL1,
             'Sleep2':    context.scene.IEAS_properties.Use_SL2,'Death':     context.scene.IEAS_properties.Use_DE,
             'Get_Hit':   context.scene.IEAS_properties.Use_GH, 'Dead':      context.scene.IEAS_properties.Use_TW,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles5000and6000_character_sp1 = {
             'Attack1':   context.scene.IEAS_properties.Use_A1, 'Attack2':   context.scene.IEAS_properties.Use_A2,
             'Attack3':   context.scene.IEAS_properties.Use_A3, 'Attack4':   context.scene.IEAS_properties.Use_A4,
             'Attack5':   context.scene.IEAS_properties.Use_A5, 'Attack6':   context.scene.IEAS_properties.Use_A6, 
             'Attack7':   context.scene.IEAS_properties.Use_A7, 'Attack8':   context.scene.IEAS_properties.Use_A8, 
-            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_A10,
-            'Attack11':  context.scene.IEAS_properties.Use_A11,'Attack12':  context.scene.IEAS_properties.Use_A12,
+            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_SA,
+            'Attack11':  context.scene.IEAS_properties.Use_SS, 'Attack12':  context.scene.IEAS_properties.Use_SX,
             'Cast1':     context.scene.IEAS_properties.Use_CA1,'Cast2':     context.scene.IEAS_properties.Use_CA2,
             'Cast3':     context.scene.IEAS_properties.Use_CA3,'Cast4':     context.scene.IEAS_properties.Use_CA4,
             'Conjure1':  context.scene.IEAS_properties.Use_SP1,'Conjure2':  context.scene.IEAS_properties.Use_SP2,
@@ -2901,14 +3058,15 @@ class IEAS_PT_Animation(Panel):
             'Idle3':     context.scene.IEAS_properties.Use_SD3,'Sleep1':    context.scene.IEAS_properties.Use_SL1,
             'Sleep2':    context.scene.IEAS_properties.Use_SL2,'Death':     context.scene.IEAS_properties.Use_DE,
             'Get_Hit':   context.scene.IEAS_properties.Use_GH, 'Dead':      context.scene.IEAS_properties.Use_TW,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles5000and6000_character_old = {
             'Attack1':   context.scene.IEAS_properties.Use_A1, 'Attack2':   context.scene.IEAS_properties.Use_A2,
             'Attack3':   context.scene.IEAS_properties.Use_A3, 'Attack4':   context.scene.IEAS_properties.Use_A4,
             'Attack5':   context.scene.IEAS_properties.Use_A5, 'Attack6':   context.scene.IEAS_properties.Use_A6, 
             'Attack7':   context.scene.IEAS_properties.Use_A7, 'Attack8':   context.scene.IEAS_properties.Use_A8, 
-            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_A10,
-            'Attack11':  context.scene.IEAS_properties.Use_A11,'Attack12':  context.scene.IEAS_properties.Use_A12,
+            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_SA,
+            'Attack11':  context.scene.IEAS_properties.Use_SS, 'Attack12':  context.scene.IEAS_properties.Use_SX,
             'Cast1':     context.scene.IEAS_properties.Use_CA1,'Cast2':     context.scene.IEAS_properties.Use_CA2,
             'Cast3':     context.scene.IEAS_properties.Use_CA3,'Cast4':     context.scene.IEAS_properties.Use_CA4,
             'Conjure1':  context.scene.IEAS_properties.Use_SP1,'Conjure2':  context.scene.IEAS_properties.Use_SP2,
@@ -2918,6 +3076,7 @@ class IEAS_PT_Animation(Panel):
             'Idle3':     context.scene.IEAS_properties.Use_SD3,'Sleep1':    context.scene.IEAS_properties.Use_SL1,
             'Sleep2':    context.scene.IEAS_properties.Use_SL2,'Death':     context.scene.IEAS_properties.Use_DE,
             'Get_Hit':   context.scene.IEAS_properties.Use_GH, 'Dead':      context.scene.IEAS_properties.Use_TW,
+            'Walk':      context.scene.IEAS_properties.Use_WK, 'Walk2':     context.scene.IEAS_properties.Use_WK2,
         }
         Toggles7000_monster_sp0 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
@@ -3029,10 +3188,11 @@ class IEAS_PT_Animation(Panel):
             'Walk':    'Use_WK',          'Effect':  'Use_Effect',
             'Emerge':  'Use_Emerge',      'Hide':    'Use_Hide',
             # New Type 5000/6000 Toggle Names
+            'Walk2':        'Use_WK2',
             'Attack6':      'Use_A6',           'Attack7':      'Use_A7',
             'Attack8':      'Use_A8',           'Attack9':      'Use_A9',
-            'Attack10':     'Use_A10',          'Attack11':     'Use_A11',
-            'Attack12':     'Use_A12',          'Cast1':        'Use_CA1',
+            'Attack10':     'Use_SA',           'Attack11':     'Use_SS',
+            'Attack12':     'Use_SX',           'Cast1':        'Use_CA1',
             'Cast2':        'Use_CA2',          'Cast3':        'Use_CA3',
             'Cast4':        'Use_CA4',          'Conjure1':     'Use_SP1',
             'Conjure2':     'Use_SP2',          'Conjure3':     'Use_SP3',
