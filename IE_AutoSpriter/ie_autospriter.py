@@ -1091,50 +1091,71 @@ class IEAS_AnimationTypes():
                 'WK2':'W2',
             }
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
-            # TODO: Fill array
-            excludePositionKeysWK2 = []
             
-            # For no armor type
+            # Both lists are used to identify which sprite file is defined for which direction regarding walk2 as specified in iesdp. 
+            positionKeysWK2         = [ 'south_south_west', 'west_south_west', 
+                                        'west_north_west',   'north_north_west', 
+                                        'north_north_east']
+            positionKeysWK2East     = [ 'east_north_east', 'east_south_east', 
+                                        'south_south_east']
+            positionKeysCombinedWK2 = positionKeysWK2East + positionKeysWK2
+            # Prepares for simple if conditions
+            isNotWK2Position        = not any (typeParameters.positionKey == position for position in positionKeysCombinedWK2)
+            
+            # This is for no filename is defined
+            fileName = 0
+            # ----- Debugging
+            # TODO: Delete print
+            print("animationKey:",animationKey)
+            print("typeParameters.positionKey:",typeParameters.positionKey)
+            
+             # ----- For no armor type
             if(typeParameters.animationArmorToggles['ARMOR1'] == True):
-                armor = typeParameters.animationArmorFolderNames['ARMOR1']
+                armor = typeParameters.animationArmorFolderNames['ARMOR1']             
+                # If statement order is important!
                 # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                if (animationKey != typeParameters.animationKey):
-                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
+                if(animationKey == 'W2'):
+                    if any(typeParameters.positionKey == position for position in positionKeysWK2):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    elif any(typeParameters.positionKey == position for position in positionKeysWK2East):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                                   
+                elif(animationKey != typeParameters.animationKey and isNotWK2Position):                                                            
+                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):         
                         fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                    else:
-                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
-                else:
+                    else:        
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                elif(animationKey == typeParameters.animationKey and isNotWK2Position):
                     if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
                         fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
                         fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                
-                # TODO
-                if (animationKey == 'W2'):
-                    pass
-                              
-                # Constructs the base output folder path for the current weapon.
-                armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
-                armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
-                
-                # Creates a subfolder for the specific weapon and camera angle.
-                armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)                  
-                if not os.path.exists(armor_position_folder):
-                    os.makedirs(armor_position_folder)
-                                           
-                # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
-                bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)            
-                # This is the actual rendering process.
-                # `animation=False` renders a single still image.
-                # `write_still=True` saves the rendered image to the specified `filepath`.
-                # The first `False` argument disables undo support for the operation.
-                renderFrame = bpy.ops.render.render
-                renderFrame(  False,
-                              animation     =False,
-                              write_still   =True)
+                        
+                # A valid file name is found.
+                if(fileName != 0):
+                    # Constructs the base output folder path for the current weapon.
+                    armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
+                    armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
+                    
+                    # Creates a subfolder for the specific weapon and camera angle.
+                    armor_position_folder = os.path.join(armor_animation_folder, typeParameters.positionKey)
+                    if not os.path.exists(armor_position_folder):
+                        os.makedirs(armor_position_folder)
+                                               
+                    # Sets the scene's render output file path. This tells Blender where to save the next rendered image.
+                    bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)
+                    # This is the actual rendering process.
+                    # `animation=False` renders a single still image.
+                    # `write_still=True` saves the rendered image to the specified `filepath`.
+                    # The first `False` argument disables undo support for the operation.
+                    renderFrame = bpy.ops.render.render
+                    renderFrame(  False,
+                                  animation     =False,
+                                  write_still   =True)
+                else:
+                    print("No file name defined - fileName is ",fileName)
             
-            # TODO: For any other armor type.
-            # Iterates through all top-level collections in the current view layer to manage their visibility.                   
+            # ----- For any other armor type
+            # Iterates through all top-level collections in the current view layer to manage their visibility.
             for collection in bpy.context.view_layer.layer_collection.children:
                 collectionName  = collection.name
                 # Finds the corresponding armor key for the collection name.
@@ -3064,8 +3085,7 @@ class IEAS_PT_Animation(Panel):
             'Attack1':   context.scene.IEAS_properties.Use_A1, 'Attack2':   context.scene.IEAS_properties.Use_A2,
             'Attack3':   context.scene.IEAS_properties.Use_A3, 'Attack4':   context.scene.IEAS_properties.Use_A4,
             'Attack5':   context.scene.IEAS_properties.Use_A5, 'Attack6':   context.scene.IEAS_properties.Use_A6, 
-            'Attack7':   context.scene.IEAS_properties.Use_A7, 'Attack8':   context.scene.IEAS_properties.Use_A8, 
-            'Attack9':   context.scene.IEAS_properties.Use_A9, 'Attack10':  context.scene.IEAS_properties.Use_SA,
+            'Attack10':  context.scene.IEAS_properties.Use_SA,
             'Attack11':  context.scene.IEAS_properties.Use_SS, 'Attack12':  context.scene.IEAS_properties.Use_SX,
             'Cast1':     context.scene.IEAS_properties.Use_CA1,'Cast2':     context.scene.IEAS_properties.Use_CA2,
             'Cast3':     context.scene.IEAS_properties.Use_CA3,'Cast4':     context.scene.IEAS_properties.Use_CA4,
