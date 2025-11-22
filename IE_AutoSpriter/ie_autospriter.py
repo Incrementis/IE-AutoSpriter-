@@ -24,6 +24,7 @@ import os
 import shutil
 import math
 import time
+import webbrowser
 import numpy as np
 
 
@@ -35,7 +36,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 34, 2),
+    "version": (0, 35, 0),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1840,6 +1841,36 @@ class IEAS_AnimationTypes():
         """Method for handling no type logic."""
         print("No animation type found. This shouldn't happen!")
 
+# --------
+# Purpose:
+# --------
+# Operator to open the manual on GitHub in a web browser.
+# -------------------------------------------------------
+class IEAS_OT_Manual(Operator):
+    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class."""
+    bl_idname = "ieas.manual" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    bl_label = "MANUAL" 
+    
+    # Blender specific function which is executed in this case when MANUAL button is pressed
+    def execute(self, context):
+        webbrowser.open('https://github.com/Incrementis/IE-AutoSpriter-/blob/main/manual.pdf')     
+        return {'FINISHED'}
+
+# --------
+# Purpose:
+# --------
+# Operator to open the iesdp documentation in a web browser.
+# ----------------------------------------------------------
+class IEAS_OT_Iesdp(Operator):
+    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class."""
+    bl_idname = "ieas.iesdp" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    bl_label = "IESDP"
+    
+    # Blender specific function which is executed in this case when IESDP button is pressed
+    def execute(self, context):
+        webbrowser.open('https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm')
+        return {'FINISHED'}
+
 
 # --------
 # Purpose:
@@ -2724,6 +2755,9 @@ class IEAS_PT_GlobalParameters(Panel):
     # --- Blender specific function which places elements into GUI
     # This method draws the UI elements for global rendering parameters.
     def draw(self, context):
+        row = self.layout.row(align=True)
+        row.operator("ieas.manual", text="MANUAL")
+        row.operator("ieas.iesdp", text="IESDP") # selfdefined button functionality
         # Instances by pointers: Draws UI elements linked to the properties defined in IEAS_PGT_Inputs.
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Save_at")
@@ -3694,6 +3728,8 @@ class IEAS_PT_Final(Panel):
 # This makes them available for use in the Blender environment and within the add-on.
 # -----------------------------------------------------------------------------------
 def register():
+    bpy.utils.register_class(IEAS_OT_Manual)
+    bpy.utils.register_class(IEAS_OT_Iesdp)
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
     bpy.utils.register_class(IEAS_OT_Final)
     bpy.utils.register_class(IEAS_PGT_Inputs)
@@ -3716,6 +3752,8 @@ def register():
 # Unregisters all classes and cleans up custom properties when the add-on is disabled.
 # This prevents data remnants and potential conflicts if the add-on is re-enabled or other add-ons are used(??).
 def unregister():
+    bpy.utils.unregister_class(IEAS_OT_Manual)
+    bpy.utils.unregister_class(IEAS_OT_Iesdp)
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_OT_Final)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
