@@ -61,3 +61,4 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [Blender documentations](https://docs.blender.org) by Blender
 * [Blender Rendering Optimization Tips](https://whoisryosuke.com/blog/2024/blender-rendering-optimization-tips) by Ryo
 * [Expressions in Blender 3D](https://www.youtube.com/watch?v=5IMFSC5h0a4) by ukramedia
+* [https://b3d.interplanety.org/en/creating-radio-buttons-in-the-blender-add-ons-interface/](Creating radio buttons in the Blender add-ons interface) by Nikita

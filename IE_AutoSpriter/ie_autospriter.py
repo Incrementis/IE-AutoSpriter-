@@ -1847,11 +1847,11 @@ class IEAS_AnimationTypes():
 # Operator to open the manual on GitHub in a web browser.
 # -------------------------------------------------------
 class IEAS_OT_Manual(Operator):
-    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class."""
-    bl_idname = "ieas.manual" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    """This class offers a function which opens the manual on GitHub in a web browser."""
+    bl_idname = "ieas.manual" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>].
     bl_label = "MANUAL" 
     
-    # Blender specific function which is executed in this case when MANUAL button is pressed
+    # Blender specific function which is executed in this case when MANUAL button is pressed.
     def execute(self, context):
         webbrowser.open('https://github.com/Incrementis/IE-AutoSpriter-/blob/main/manual.pdf')     
         return {'FINISHED'}
@@ -1862,15 +1862,35 @@ class IEAS_OT_Manual(Operator):
 # Operator to open the iesdp documentation in a web browser.
 # ----------------------------------------------------------
 class IEAS_OT_Iesdp(Operator):
-    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class."""
-    bl_idname = "ieas.iesdp" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    """This class offers a function which opens the iesdp documentation in a web browser."""
+    bl_idname = "ieas.iesdp" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>].
     bl_label = "IESDP"
     
-    # Blender specific function which is executed in this case when IESDP button is pressed
+    # Blender specific function which is executed in this case when IESDP button is pressed.
     def execute(self, context):
         webbrowser.open('https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm')
         return {'FINISHED'}
 
+# --------
+# Purpose:
+# --------
+# Operator to rotate an object.
+# ----------------------------------------------------------
+class IEAS_OT_Rotation(Operator):
+    """This class offers a function which rotates an object"""
+    bl_idname = "ieas.rotation" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    bl_label = "ROTATE(Preview)"
+    
+    # Blender specific function which is executed in this case when a specific rotation radio button is pressed.
+    def execute(self, context):
+        # Converts string to float
+        rotationDegree = float(context.window_manager.IEAS_properties.Angles)
+        # Checks if the rotation is clockwise or counter-clockwise.
+        if context.window_manager.IEAS_properties.Direction == 'CCW':
+            rotationDegree = -rotationDegree
+        # Rotation on the z-axis in degrees.
+        bpy.ops.transform.rotate(value=rotationDegree*math.pi/180, orient_axis='Z')
+        return {'FINISHED'}
 
 # --------
 # Purpose:
@@ -1963,39 +1983,39 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                 )
     # (unique identifier, property name, property description, icon identifier, number)
     Type:   bpy.props.EnumProperty(
-                                    items=[
-                                        ('0000','0000','','',0),
-                                        ('1000 monster quadrant','1000 monster quadrant','','',1),
-                                        ('1000 monster multi split bams 0','1000 monster multi split bams 0','','',2),
-                                        ('1000 monster multi split bams 1','1000 monster multi split bams 1','','',3),
-                                        ('1000 multi new split bams 0','1000 multi new split bams 0','','',4),
-                                        ('1000 multi new split bams 1','1000 multi new split bams 1','','',5),
-                                        ('2000','2000','','',6),
-                                        ('3000 mirror 0','3000 mirror 0','','',7),
-                                        ('3000 mirror 1','3000 mirror 1','','',8),
-                                        ('4000','4000','','',9),
-                                        ('5000/6000 character split bams 0','5000/6000 character split bams 0','','',10),
-                                        ('5000/6000 character split bams 1','5000/6000 character split bams 1','','',11),
-                                        ('5000/6000 character old','5000/6000 character old','','',12),
-                                        ('7000 monster split bams 0','7000 monster split bams 0','','',13),
-                                        ('7000 monster split bams 1','7000 monster split bams 1','','',14),
-                                        ('7000 monster old','7000 monster old','','',15),
-                                        ('8000','8000','','',16),                                       
-                                        ('9000','9000','','',17),
-                                        ('A000','A000','','',18),
-                                        ('B000','B000','','',19),
-                                        ('C000','C000','','',20),
-                                        ('D000','D000','','',21),
-                                        ('E000','E000','','',22),
-                                        ('F000','F000','','',23),
-                                        # TODO: Delete unique identifier
-                                        ('unique identifier', 'property name', 'property description', 'icon identifier', 24),
-                                    ],
-                                    name            = "Animationtype",
-                                    description     = "TODO: Enum Name Description",
-                                    default         = 'E000',
-                                    update          = resetToggles
-                                    )
+                                        items=[
+                                            ('0000','0000','','',0),
+                                            ('1000 monster quadrant','1000 monster quadrant','','',1),
+                                            ('1000 monster multi split bams 0','1000 monster multi split bams 0','','',2),
+                                            ('1000 monster multi split bams 1','1000 monster multi split bams 1','','',3),
+                                            ('1000 multi new split bams 0','1000 multi new split bams 0','','',4),
+                                            ('1000 multi new split bams 1','1000 multi new split bams 1','','',5),
+                                            ('2000','2000','','',6),
+                                            ('3000 mirror 0','3000 mirror 0','','',7),
+                                            ('3000 mirror 1','3000 mirror 1','','',8),
+                                            ('4000','4000','','',9),
+                                            ('5000/6000 character split bams 0','5000/6000 character split bams 0','','',10),
+                                            ('5000/6000 character split bams 1','5000/6000 character split bams 1','','',11),
+                                            ('5000/6000 character old','5000/6000 character old','','',12),
+                                            ('7000 monster split bams 0','7000 monster split bams 0','','',13),
+                                            ('7000 monster split bams 1','7000 monster split bams 1','','',14),
+                                            ('7000 monster old','7000 monster old','','',15),
+                                            ('8000','8000','','',16),                                       
+                                            ('9000','9000','','',17),
+                                            ('A000','A000','','',18),
+                                            ('B000','B000','','',19),
+                                            ('C000','C000','','',20),
+                                            ('D000','D000','','',21),
+                                            ('E000','E000','','',22),
+                                            ('F000','F000','','',23),
+                                            # TODO: Delete unique identifier
+                                            ('unique identifier', 'property name', 'property description', 'icon identifier', 24),
+                                        ],
+                                        name            = "Animationtype",
+                                        description     = "TODO: Enum Name Description",
+                                        default         = 'E000',
+                                        update          = resetToggles
+                                  )
     # Integer property for the render resolution in X-dimension.
     Resolution_X:   bpy.props.IntProperty(  name    = "Resolution X",
                                             default = 256,
@@ -2019,9 +2039,31 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                     type=bpy.types.Material,# Crucially, specify the type of data block it points to
                                                     name="Material List", # Label for the UI element
                                                     description="Select the material to be used to apply shading nodes." # Tooltip
-                                                    )
+                                                 )
                                                     
     # --- Step 3: Camera (Subfolder Names and Toggles for each direction)
+    # (unique identifier, property name, property description, icon identifier, number)
+    Angles:   bpy.props.EnumProperty(
+                                        items=[
+                                            ('22.5','22.5','south south east/south south west','',0),
+                                            ('45','45','south east/south west','',1),
+                                            ('67.5','67.5','east south east/west south west','',2),
+                                            ('90','90','east/west','',3),
+                                            ('112.5','112.5','east north east/west north west','',4),
+                                            ('135','135','north east/north west','',5),
+                                            ('157.5','157.5','north north east/north north west','',6),
+                                            ('180','180','north/south','',7),
+                                        ],
+                                        name            = "Rotation",
+                                        description     = "TODO: Enum Name Description",
+                                    )
+    Direction: bpy.props.EnumProperty(
+        items=[
+            ('CW', '', 'Clockwise', 'LOOP_FORWARDS', 0),
+            ('CCW', '', 'Counter-Clockwise', 'LOOP_BACK', 1)
+        ],
+        default='CW'
+    )
     South:              bpy.props.StringProperty(name="Subfolder S", default="south")
     South_South_West:   bpy.props.StringProperty(name="Subfolder SSW", default="south_south_west")
     South_West:         bpy.props.StringProperty(name="Subfolder SW", default="south_west")
@@ -2029,7 +2071,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     West:               bpy.props.StringProperty(name="Subfolder W", default="west")
     West_North_West:    bpy.props.StringProperty(name="Subfolder WNW", default="west_north_west")
     North_West:         bpy.props.StringProperty(name="Subfolder NW", default="noth_west")
-    North_North_West:   bpy.props.StringProperty(name="Subfolder NNW", default="north_noth_west")
+    North_North_West:   bpy.props.StringProperty(name="Subfolder NNW", default="north_north_west")
     North:              bpy.props.StringProperty(name="Subfolder N", default="north")
     North_North_East:   bpy.props.StringProperty(name="Subfolder NNE", default="north_north_east")
     North_East:         bpy.props.StringProperty(name="Subfolder NE", default="north_east")
@@ -2901,6 +2943,13 @@ class IEAS_PT_Camera(Panel):
         # Set active type to true
         animationTypesActive[activeType] = True
         
+        # --- Creates buttons for rotation 
+        row = self.layout.row(align=True)
+        row.prop(context.window_manager.IEAS_properties, 'Angles', expand=True)
+        row.prop(context.window_manager.IEAS_properties, 'Direction', expand=True)
+        row = self.layout.row(align=True)
+        row.operator("ieas.rotation") # selfdefined button functionality
+        
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
         if (animationTypesActive['0000']):
             for orientationKey, toggle in Toggles1.items():
@@ -3730,6 +3779,7 @@ class IEAS_PT_Final(Panel):
 def register():
     bpy.utils.register_class(IEAS_OT_Manual)
     bpy.utils.register_class(IEAS_OT_Iesdp)
+    bpy.utils.register_class(IEAS_OT_Rotation)
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
     bpy.utils.register_class(IEAS_OT_Final)
     bpy.utils.register_class(IEAS_PGT_Inputs)
@@ -3754,6 +3804,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(IEAS_OT_Manual)
     bpy.utils.unregister_class(IEAS_OT_Iesdp)
+    bpy.utils.unregister_class(IEAS_OT_Rotation)
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_OT_Final)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
