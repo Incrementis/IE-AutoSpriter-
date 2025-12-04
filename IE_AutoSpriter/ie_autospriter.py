@@ -36,7 +36,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 2),
+    "version": (0, 36, 3),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1847,7 +1847,7 @@ class IEAS_AnimationTypes():
 # Operator to open the manual on GitHub in a web browser.
 # -------------------------------------------------------
 class IEAS_OT_Manual(Operator):
-    """This class offers a function which opens the manual on GitHub in a web browser."""
+    """This opens the manual on GitHub in a web browser"""
     bl_idname = "ieas.manual" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>].
     bl_label = "MANUAL" 
     
@@ -1862,7 +1862,7 @@ class IEAS_OT_Manual(Operator):
 # Operator to open the iesdp documentation in a web browser.
 # ----------------------------------------------------------
 class IEAS_OT_Iesdp(Operator):
-    """This class offers a function which opens the iesdp documentation in a web browser."""
+    """This opens the iesdp documentation in a web browser"""
     bl_idname = "ieas.iesdp" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>].
     bl_label = "IESDP"
     
@@ -1877,7 +1877,7 @@ class IEAS_OT_Iesdp(Operator):
 # Operator to rotate an object.
 # ----------------------------------------------------------
 class IEAS_OT_Rotation(Operator):
-    """This class offers a function which rotates an object"""
+    """This rotates an object"""
     bl_idname = "ieas.rotation" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label = "ROTATE(Preview)"
     
@@ -1970,16 +1970,20 @@ class IEAS_PGT_Inputs(PropertyGroup):
                     
     # --- Step 1: Global Parameters    
     # File path property for saving rendered sprites.
-    Save_at:        bpy.props.StringProperty(name="Save at",subtype='DIR_PATH') # File-opener
+    Save_at:        bpy.props.StringProperty(   name="Save at",
+                                                subtype='DIR_PATH', 
+                                                description="Defines the directory where the generated sprite files will be saved") # File-opener
     # String property for the file prefix.
-    Prefix:         bpy.props.StringProperty(name="Prefix")
+    Prefix:         bpy.props.StringProperty(   name="Prefix", 
+                                                description="A prefix that will be added to the beginning of the sprite file names")
     # String property for the resource reference (resref).
-    Resref:         bpy.props.StringProperty(name="Resref")
+    Resref:         bpy.props.StringProperty(   name="Resref",
+                                                description="This is the freely definable part of the sprite file name")
     # Pointer to a Blender object, typically the armature for animation.
     Object_List:    bpy.props.PointerProperty(
                                                 type=bpy.types.Object,
                                                 name="Object List", # Label for the UI element
-                                                description="Select the armature to be used to apply rendering." # Tooltip
+                                                description="Select the armature to be used to apply rendering" # Tooltip
                                                 )
     # (unique identifier, property name, property description, icon identifier, number)
     Type:   bpy.props.EnumProperty(
@@ -2008,310 +2012,318 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                             ('D000','D000','','',21),
                                             ('E000','E000','','',22),
                                             ('F000','F000','','',23),
-                                            # TODO: Delete unique identifier
-                                            ('unique identifier', 'property name', 'property description', 'icon identifier', 24),
                                         ],
                                         name            = "Animationtype",
-                                        description     = "TODO: Enum Name Description",
+                                        description     = "Lets you choose the animation type of creature or object you're rendering based on iesdp",
                                         default         = 'E000',
                                         update          = resetToggles
                                   )
     # Integer property for the render resolution in X-dimension.
-    Resolution_X:   bpy.props.IntProperty(  name    = "Resolution X",
-                                            default = 256,
-                                            min     = 1,
-                                            update  = updateResolutionX)
+    Resolution_X:   bpy.props.IntProperty(  name        = "Resolution X",
+                                            default     = 256,
+                                            min         = 1,
+                                            update      = updateResolutionX,
+                                            description = "This refers to the image/camera width resolution")
     # Integer property for the render resolution in Y-dimension.
-    Resolution_Y:   bpy.props.IntProperty(  name    = "Resolution Y",
-                                            default = 256,
-                                            min     = 1,
-                                            update  = updateResolutionY)
+    Resolution_Y:   bpy.props.IntProperty(  name        = "Resolution Y",
+                                            default     = 256,
+                                            min         = 1,
+                                            update      = updateResolutionY,
+                                            description = "This refers to the image/camera height resolution")
     # Integer property to control rendering frequency (e.g., render every X frames).
-    Every_X_Frame:  bpy.props.IntProperty(name="Every X Frame", default=1, min=1)
+    Every_X_Frame:  bpy.props.IntProperty(  name        = "Every X Frame", 
+                                            default     = 1, 
+                                            min         = 1,
+                                            description = "This saves every xth frame as a sprite")
     
     # --- Step 2: Shading Nodes
     # String property for the name of the Principled BSDF node.
-    Principled_BSDF:    bpy.props.StringProperty(name="Principle BSDF", default="Principled BSDF")
+    Principled_BSDF:    bpy.props.StringProperty(   name        = "Principle BSDF", 
+                                                    default     = "Principled BSDF",
+                                                    description = "This is the name of the Principled BSDF node")
     # String property for the name of the Material Output node.
-    Material_Output:    bpy.props.StringProperty(name="Material Output", default="Material Output")
+    Material_Output:    bpy.props.StringProperty(   name        = "Material Output", 
+                                                    default     = "Material Output",
+                                                    description = "This is the name of the Material Output node")
     # Pointer to a Blender Material, used for applying shading nodes.
     Material_List:      bpy.props.PointerProperty(
-                                                    type=bpy.types.Material,# Crucially, specify the type of data block it points to
-                                                    name="Material List", # Label for the UI element
-                                                    description="Select the material to be used to apply shading nodes." # Tooltip
+                                                    type        = bpy.types.Material,   # Crucially, specify the type of data block it points to
+                                                    name        = "Material List",      # Label for the UI element
+                                                    description = "Select the material to be used to apply shading nodes" # Tooltip
                                                  )
                                                     
     # --- Step 3: Camera (Subfolder Names and Toggles for each direction)
     # (unique identifier, property name, property description, icon identifier, number)
     Angles:   bpy.props.EnumProperty(
                                         items=[
-                                            ('22.5','22.5','south south east/south south west','',0),
-                                            ('45','45','south east/south west','',1),
-                                            ('67.5','67.5','east south east/west south west','',2),
-                                            ('90','90','east/west','',3),
-                                            ('112.5','112.5','east north east/west north west','',4),
-                                            ('135','135','north east/north west','',5),
-                                            ('157.5','157.5','north north east/north north west','',6),
-                                            ('180','180','north/south','',7),
+                                            ('22.5','22.5','Rotates by 22.5 degrees','',0),
+                                            ('45','45','Rotates by 45 degrees','',1),
+                                            ('67.5','67.5','Rotates by 67.5 degrees','',2),
+                                            ('90','90','Rotates by 90 degrees','',3),
+                                            ('112.5','112.5','Rotates by 112.5 degrees','',4),
+                                            ('135','135','Rotates by 135 degrees','',5),
+                                            ('157.5','157.5','Rotates by 157.5 degrees','',6),
+                                            ('180','180','Rotates by 180 degrees','',7),
                                         ],
                                         name            = "Rotation",
-                                        description     = "TODO: Enum Name Description",
+                                        description     = "The numbers indicate the degree of rotation",
                                     )
     Direction: bpy.props.EnumProperty(
         items=[
             ('CW', '', 'Clockwise', 'LOOP_FORWARDS', 0),
             ('CCW', '', 'Counter-Clockwise', 'LOOP_BACK', 1)
         ],
-        default='CW'
+        default     = 'CW',
+        description = "The curved arrows show clockwise or counterclockwise rotation"
     )
-    South:              bpy.props.StringProperty(name="Subfolder S", default="south")
-    South_South_West:   bpy.props.StringProperty(name="Subfolder SSW", default="south_south_west")
-    South_West:         bpy.props.StringProperty(name="Subfolder SW", default="south_west")
-    West_South_West:    bpy.props.StringProperty(name="Subfolder WSW", default="west_south_west")
-    West:               bpy.props.StringProperty(name="Subfolder W", default="west")
-    West_North_West:    bpy.props.StringProperty(name="Subfolder WNW", default="west_north_west")
-    North_West:         bpy.props.StringProperty(name="Subfolder NW", default="noth_west")
-    North_North_West:   bpy.props.StringProperty(name="Subfolder NNW", default="north_north_west")
-    North:              bpy.props.StringProperty(name="Subfolder N", default="north")
-    North_North_East:   bpy.props.StringProperty(name="Subfolder NNE", default="north_north_east")
-    North_East:         bpy.props.StringProperty(name="Subfolder NE", default="north_east")
-    East_North_East:    bpy.props.StringProperty(name="Subfolder ENE", default="east_north_east")
-    East:               bpy.props.StringProperty(name="Subfolder E", default="east")
-    East_South_East:    bpy.props.StringProperty(name="Subfolder ESE", default="east_south_east")
-    South_East:         bpy.props.StringProperty(name="Subfolder SE", default="south_east")
-    South_South_East:   bpy.props.StringProperty(name="Subfolder SSE", default="south_south_east")
+    South:              bpy.props.StringProperty(name="Subfolder S",    default="south",            description="This defines the name of the subfolder for the south orientation")
+    South_South_West:   bpy.props.StringProperty(name="Subfolder SSW",  default="south_south_west", description="This defines the name of the subfolder for the south south west orientation")
+    South_West:         bpy.props.StringProperty(name="Subfolder SW",   default="south_west",       description="This defines the name of the subfolder for the south west orientation")
+    West_South_West:    bpy.props.StringProperty(name="Subfolder WSW",  default="west_south_west",  description="This defines the name of the subfolder for the west south west orientation")
+    West:               bpy.props.StringProperty(name="Subfolder W",    default="west",             description="This defines the name of the subfolder for the west orientation")
+    West_North_West:    bpy.props.StringProperty(name="Subfolder WNW",  default="west_north_west",  description="This defines the name of the subfolder for the west north west orientation")
+    North_West:         bpy.props.StringProperty(name="Subfolder NW",   default="north_west",        description="This defines the name of the subfolder for the north west orientation")
+    North_North_West:   bpy.props.StringProperty(name="Subfolder NNW",  default="north_north_west", description="This defines the name of the subfolder for the north north west orientation")
+    North:              bpy.props.StringProperty(name="Subfolder N",    default="north",            description="This defines the name of the subfolder for the north orientation")
+    North_North_East:   bpy.props.StringProperty(name="Subfolder NNE",  default="north_north_east", description="This defines the name of the subfolder for the north north east orientation")
+    North_East:         bpy.props.StringProperty(name="Subfolder NE",   default="north_east",       description="This defines the name of the subfolder for the north east orientation")
+    East_North_East:    bpy.props.StringProperty(name="Subfolder ENE",  default="east_north_east",  description="This defines the name of the subfolder for the east north east orientation")
+    East:               bpy.props.StringProperty(name="Subfolder E",    default="east",             description="This defines the name of the subfolder for the east orientation")
+    East_South_East:    bpy.props.StringProperty(name="Subfolder ESE",  default="east_south_east",  description="This defines the name of the subfolder for the east south east orientation")
+    South_East:         bpy.props.StringProperty(name="Subfolder SE",   default="south_east",       description="This defines the name of the subfolder for the south east orientation")
+    South_South_East:   bpy.props.StringProperty(name="Subfolder SSE",  default="south_south_east", description="This defines the name of the subfolder for the south south east orientation")
     # Boolean toggles for rendering each camera direction.
-    Use_SO:     bpy.props.BoolProperty(name="Use S",    default=True)
-    Use_SSW:    bpy.props.BoolProperty(name="Use SSW",  default=False)
-    Use_SW:     bpy.props.BoolProperty(name="Use SW",   default=True)
-    Use_WSW:    bpy.props.BoolProperty(name="Use WSW",  default=False)
-    Use_WE:     bpy.props.BoolProperty(name="Use W",    default=True)
-    Use_WNW:    bpy.props.BoolProperty(name="Use WNW",  default=False)
-    Use_NW:     bpy.props.BoolProperty(name="Use NW",   default=True)
-    Use_NNW:    bpy.props.BoolProperty(name="Use NNW",  default=False)
-    Use_NO:     bpy.props.BoolProperty(name="Use N",    default=True)
-    Use_NNE:    bpy.props.BoolProperty(name="Use NNE",  default=False)
-    Use_NE:     bpy.props.BoolProperty(name="Use NE",   default=True)
-    Use_ENE:    bpy.props.BoolProperty(name="Use ENE",  default=False)
-    Use_ES:     bpy.props.BoolProperty(name="Use E",    default=True)
-    Use_ESE:    bpy.props.BoolProperty(name="Use ESE",  default=False)
-    Use_SE:     bpy.props.BoolProperty(name="Use SE",   default=True)
-    Use_SSE:    bpy.props.BoolProperty(name="Use SSE",  default=False)    
+    Use_SO:     bpy.props.BoolProperty(name="Use S",    default=True,   description="This determines whether sprites for the south orientation are rendered and saved in the corresponding folder")
+    Use_SSW:    bpy.props.BoolProperty(name="Use SSW",  default=False,  description="This determines whether sprites for the south south west orientation are rendered and saved in the corresponding folder")
+    Use_SW:     bpy.props.BoolProperty(name="Use SW",   default=True,   description="This determines whether sprites for the south west orientation are rendered and saved in the corresponding folder")
+    Use_WE:     bpy.props.BoolProperty(name="Use W",    default=True,   description="This determines whether sprites for the west orientation are rendered and saved in the corresponding folder")
+    Use_WSW:    bpy.props.BoolProperty(name="Use WSW",  default=False,  description="This determines whether sprites for the west south west orientation are rendered and saved in the corresponding folder")
+    Use_WNW:    bpy.props.BoolProperty(name="Use WNW",  default=False,  description="This determines whether sprites for the west north west orientation are rendered and saved in the corresponding folder")
+    Use_NW:     bpy.props.BoolProperty(name="Use NW",   default=True,   description="This determines whether sprites for the north west orientation are rendered and saved in the corresponding folder")
+    Use_NNW:    bpy.props.BoolProperty(name="Use NNW",  default=False,  description="This determines whether sprites for the north north west orientation are rendered and saved in the corresponding folder")
+    Use_NO:     bpy.props.BoolProperty(name="Use N",    default=True,   description="This determines whether sprites for the north orientation are rendered and saved in the corresponding folder")
+    Use_NNE:    bpy.props.BoolProperty(name="Use NNE",  default=False,  description="This determines whether sprites for the north north east orientation are rendered and saved in the corresponding folder")
+    Use_NE:     bpy.props.BoolProperty(name="Use NE",   default=True,   description="This determines whether sprites for the north east orientation are rendered and saved in the corresponding folder")
+    Use_ENE:    bpy.props.BoolProperty(name="Use ENE",  default=False,  description="This determines whether sprites for the east north east orientation are rendered and saved in the corresponding folder")
+    Use_ES:     bpy.props.BoolProperty(name="Use E",    default=True,   description="This determines whether sprites for the east orientation are rendered and saved in the corresponding folder")
+    Use_ESE:    bpy.props.BoolProperty(name="Use ESE",  default=False,  description="This determines whether sprites for the east south east orientation are rendered and saved in the corresponding folder")
+    Use_SE:     bpy.props.BoolProperty(name="Use SE",   default=True,   description="This determines whether sprites for the south east orientation are rendered and saved in the corresponding folder")
+    Use_SSE:    bpy.props.BoolProperty(name="Use SSE",  default=False,  description="This determines whether sprites for the south south east orientation are rendered and saved in the corresponding folder")    
     # --- Step 4: Animation (Animation Names and Toggles)
     # String properties for names of various animation actions.
-    Attack1:    bpy.props.StringProperty(name="Subfolder A1", default="slash")
-    Attack2:    bpy.props.StringProperty(name="Subfolder A2", default="stab")
-    Attack3:    bpy.props.StringProperty(name="Subfolder A3", default="strike")
-    Attack4:    bpy.props.StringProperty(name="Subfolder A4", default="throw")
-    Attack5:    bpy.props.StringProperty(name="Subfolder A5", default="unused?")
-    Cast:       bpy.props.StringProperty(name="Subfolder CA", default="cast")
-    Death:      bpy.props.StringProperty(name="Subfolder DE", default="death")
-    Get_Hit:    bpy.props.StringProperty(name="Subfolder GH", default="get hit")
-    Get_Up:     bpy.props.StringProperty(name="Subfolder GU", default="get up")
-    Ready:      bpy.props.StringProperty(name="Subfolder SC", default="ready")
-    Idle:       bpy.props.StringProperty(name="Subfolder SD", default="idle")
-    Sleep:      bpy.props.StringProperty(name="Subfolder SL", default="sleep")
-    Conjure:    bpy.props.StringProperty(name="Subfolder SP", default="conjure")
-    Dead:       bpy.props.StringProperty(name="Subfolder TW", default="dead")
-    Walk:       bpy.props.StringProperty(name="Subfolder WK", default="walk")
+    Attack1:    bpy.props.StringProperty(name="Subfolder A1", default="slash",      description="This defines the name of the subfolder for the Attack1 animation")
+    Attack2:    bpy.props.StringProperty(name="Subfolder A2", default="stab",       description="This defines the name of the subfolder for the Attack2 animation")
+    Attack3:    bpy.props.StringProperty(name="Subfolder A3", default="strike",     description="This defines the name of the subfolder for the Attack3 animation")
+    Attack4:    bpy.props.StringProperty(name="Subfolder A4", default="throw",      description="This defines the name of the subfolder for the Attack4 animation")
+    Attack5:    bpy.props.StringProperty(name="Subfolder A5", default="unused?",    description="This defines the name of the subfolder for the Attack5 animation")
+    Cast:       bpy.props.StringProperty(name="Subfolder CA", default="cast",       description="This defines the name of the subfolder for the Cast animation")
+    Death:      bpy.props.StringProperty(name="Subfolder DE", default="death",      description="This defines the name of the subfolder for the Death animation")
+    Get_Hit:    bpy.props.StringProperty(name="Subfolder GH", default="get hit",    description="This defines the name of the subfolder for the Gets Hit animation")
+    Get_Up:     bpy.props.StringProperty(name="Subfolder GU", default="get up",     description="This defines the name of the subfolder for the Get Up animation")
+    Ready:      bpy.props.StringProperty(name="Subfolder SC", default="ready",      description="This defines the name of the subfolder for the Ready animation")
+    Idle:       bpy.props.StringProperty(name="Subfolder SD", default="idle",       description="This defines the name of the subfolder for the Idle animation")
+    Sleep:      bpy.props.StringProperty(name="Subfolder SL", default="sleep",      description="This defines the name of the subfolder for the Sleep animation")
+    Conjure:    bpy.props.StringProperty(name="Subfolder SP", default="conjure",    description="This defines the name of the subfolder for the Conjure animation")
+    Dead:       bpy.props.StringProperty(name="Subfolder TW", default="dead",       description="This defines the name of the subfolder for the Dead animation")
+    Walk:       bpy.props.StringProperty(name="Subfolder WK", default="walk",       description="This defines the name of the subfolder for the Walk animation")
     # Additional string properties for names of various animation actions of type 5000/6000.
-    Walk2:      bpy.props.StringProperty(name="Subfolder WK2", default="walk")
-    Attack6:    bpy.props.StringProperty(name="Subfolder A6", default="2h-thrust")
-    Attack7:    bpy.props.StringProperty(name="Subfolder A7", default="2weapon-v1")
-    Attack8:    bpy.props.StringProperty(name="Subfolder A8", default="throwing?")
-    Attack9:    bpy.props.StringProperty(name="Subfolder A9", default="2weapon-v2")
-    Attack10:   bpy.props.StringProperty(name="Subfolder SA", default="shoot with bow")
-    Attack11:   bpy.props.StringProperty(name="Subfolder SS", default="shoot with sling")
-    Attack12:   bpy.props.StringProperty(name="Subfolder SX", default="shoot with crossbow")
-    Cast1:      bpy.props.StringProperty(name="Subfolder CA1", default="cast1")
-    Cast2:      bpy.props.StringProperty(name="Subfolder CA2", default="cast2")
-    Cast3:      bpy.props.StringProperty(name="Subfolder CA3", default="cast3")
-    Cast4:      bpy.props.StringProperty(name="Subfolder CA4", default="cast4")
-    Conjure1:   bpy.props.StringProperty(name="Subfolder SP1", default="conjure1")
-    Conjure2:   bpy.props.StringProperty(name="Subfolder SP2", default="conjure2")
-    Conjure3:   bpy.props.StringProperty(name="Subfolder SP3", default="conjure3")
-    Conjure4:   bpy.props.StringProperty(name="Subfolder SP4", default="conjure4")
-    Ready1:     bpy.props.StringProperty(name="Subfolder SC1", default="ready with 1-h weapon?")
-    Ready2:     bpy.props.StringProperty(name="Subfolder SC2", default="ready with 2-h weapon?")
-    Idle1:      bpy.props.StringProperty(name="Subfolder SD1", default="idle with 1-h weapon?")
-    Idle2:      bpy.props.StringProperty(name="Subfolder SD2", default="idle with 2-h weapon?")
-    Idle3:      bpy.props.StringProperty(name="Subfolder SD3", default="idle with which weapon?")
-    Sleep1:     bpy.props.StringProperty(name="Subfolder SL1", default="sleep1")
-    Sleep2:     bpy.props.StringProperty(name="Subfolder SL2", default="sleep2")
+    Walk2:      bpy.props.StringProperty(name="Subfolder WK2", default="walk",                  description="This defines the name of the subfolder for the Walk2 animation")
+    Attack6:    bpy.props.StringProperty(name="Subfolder A6", default="2h-thrust",              description="This defines the name of the subfolder for the Attack6(two handed thrust) animation")
+    Attack7:    bpy.props.StringProperty(name="Subfolder A7", default="2weapon-v1",             description="This defines the name of the subfolder for the Attack7(two weapon version 1) animation")
+    Attack8:    bpy.props.StringProperty(name="Subfolder A8", default="throwing?",              description="This defines the name of the subfolder for the Attack8(throwing?) animation")
+    Attack9:    bpy.props.StringProperty(name="Subfolder A9", default="2weapon-v2",             description="This defines the name of the subfolder for the Attack9(two weapon version 2) animation")
+    Attack10:   bpy.props.StringProperty(name="Subfolder SA", default="shoot with bow",         description="This defines the name of the subfolder for the Attack10(shoot with bow) animation")
+    Attack11:   bpy.props.StringProperty(name="Subfolder SS", default="shoot with sling",       description="This defines the name of the subfolder for the Attack11(shoot with sling) animation")
+    Attack12:   bpy.props.StringProperty(name="Subfolder SX", default="shoot with crossbow",    description="This defines the name of the subfolder for the Attack12(shoot with crossbow) animation")
+    Cast1:      bpy.props.StringProperty(name="Subfolder CA1", default="cast1",                 description="This defines the name of the subfolder for the Cast1 animation")
+    Cast2:      bpy.props.StringProperty(name="Subfolder CA2", default="cast2",                 description="This defines the name of the subfolder for the Cast2 animation")
+    Cast3:      bpy.props.StringProperty(name="Subfolder CA3", default="cast3",                 description="This defines the name of the subfolder for the Cast3 animation")
+    Cast4:      bpy.props.StringProperty(name="Subfolder CA4", default="cast4",                 description="This defines the name of the subfolder for the Cast4 animation")
+    Conjure1:   bpy.props.StringProperty(name="Subfolder SP1", default="conjure1",              description="This defines the name of the subfolder for the Conjure1 animation")
+    Conjure2:   bpy.props.StringProperty(name="Subfolder SP2", default="conjure2",              description="This defines the name of the subfolder for the Conjure2 animation")
+    Conjure3:   bpy.props.StringProperty(name="Subfolder SP3", default="conjure3",              description="This defines the name of the subfolder for the Conjure3 animation")
+    Conjure4:   bpy.props.StringProperty(name="Subfolder SP4", default="conjure4",              description="This defines the name of the subfolder for the Conjure4 animation")
+    Ready1:     bpy.props.StringProperty(name="Subfolder SC1", default="ready with 1-h weapon?",description="This defines the name of the subfolder for the Ready1 animation")
+    Ready2:     bpy.props.StringProperty(name="Subfolder SC2", default="ready with 2-h weapon?",description="This defines the name of the subfolder for the Ready2 animation")
+    Idle1:      bpy.props.StringProperty(name="Subfolder SD1", default="idle with 1-h weapon?", description="This defines the name of the subfolder for the Idle1 animation")
+    Idle2:      bpy.props.StringProperty(name="Subfolder SD2", default="idle with 2-h weapon?", description="This defines the name of the subfolder for the Idle2 animation")
+    Idle3:      bpy.props.StringProperty(name="Subfolder SD3", default="idle with which weapon?",description="This defines the name of the subfolder for the Idle3 animation")
+    Sleep1:     bpy.props.StringProperty(name="Subfolder SL1", default="sleep1",                description="This defines the name of the subfolder for the Sleep1 animation")
+    Sleep2:     bpy.props.StringProperty(name="Subfolder SL2", default="sleep2",                description="This defines the name of the subfolder for the Sleep2 animation")
     # String properties for names of various animation actions in PST.
-    PST_Attack1:        bpy.props.StringProperty(name="Subfolder AT1", default="slash")
-    PST_Attack2:        bpy.props.StringProperty(name="Subfolder AT2", default="stab")
-    PST_Attack3:        bpy.props.StringProperty(name="Subfolder AT3", default="strike")
-    PST_Get_Hit:        bpy.props.StringProperty(name="Subfolder HIT", default="get hit")
-    PST_Run:            bpy.props.StringProperty(name="Subfolder RUN", default="run")
-    PST_Walk:           bpy.props.StringProperty(name="Subfolder WLK", default="walk")
-    PST_Spell1:         bpy.props.StringProperty(name="Subfolder SP1", default="spell1")
-    PST_Spell2:         bpy.props.StringProperty(name="Subfolder SP2", default="spell2")
-    PST_Spell3:         bpy.props.StringProperty(name="Subfolder SP3", default="spell3")
-    PST_Get_Up:         bpy.props.StringProperty(name="Subfolder GUP", default="get up")
-    PST_Death1:         bpy.props.StringProperty(name="Subfolder DFB1",default="dieforward")
-    PST_Death2:         bpy.props.StringProperty(name="Subfolder DFB2",default="diebackward")
-    PST_Death3:         bpy.props.StringProperty(name="Subfolder DFB3",default="diecollapse")
-    PST_Talk1:          bpy.props.StringProperty(name="Subfolder TK1", default="Talk1")
-    PST_Talk2:          bpy.props.StringProperty(name="Subfolder TK2", default="Talk2")
-    PST_Talk3:          bpy.props.StringProperty(name="Subfolder TK3", default="Talk3")
-    PST_Stand:          bpy.props.StringProperty(name="Subfolder STD", default="stand")
-    PST_StandF1:        bpy.props.StringProperty(name="Subfolder STDF1", default="standfidget1")
-    PST_StandF2:        bpy.props.StringProperty(name="Subfolder STDF2", default="standfidget2")
-    PST_Stance:         bpy.props.StringProperty(name="Subfolder STC", default="stance")
-    PST_StanceF1:       bpy.props.StringProperty(name="Subfolder STCF1", default="stancefidget1")
-    PST_StanceF2:       bpy.props.StringProperty(name="Subfolder STCF2", default="stancefidget2")
-    PST_Stance_to_Stand:bpy.props.StringProperty(name="Subfolder STCtoSTD",default="stance to stand")
-    PST_Stand_to_Stance:bpy.props.StringProperty(name="Subfolder STDtoSTC",default="stand to stance")
-    PST_Misc1:          bpy.props.StringProperty(name="Subfolder MISC1",default="misc 1")
-    PST_Misc2:          bpy.props.StringProperty(name="Subfolder MISC2",default="misc 2")
-    PST_Misc3:          bpy.props.StringProperty(name="Subfolder MISC3",default="misc 3")
-    PST_Misc4:          bpy.props.StringProperty(name="Subfolder MISC4",default="misc 4")
-    PST_Misc5:          bpy.props.StringProperty(name="Subfolder MISC5",default="misc 5")
-    PST_Misc6:          bpy.props.StringProperty(name="Subfolder MISC6",default="misc 6")
-    PST_Misc7:          bpy.props.StringProperty(name="Subfolder MISC7",default="misc 7")
-    PST_Misc8:          bpy.props.StringProperty(name="Subfolder MISC8",default="misc 8")
-    PST_Misc9:          bpy.props.StringProperty(name="Subfolder MISC9",default="misc 9")
-    PST_Misc10:         bpy.props.StringProperty(name="Subfolder MISC10",default="misc 10")
-    PST_Misc11:         bpy.props.StringProperty(name="Subfolder MISC11",default="misc 11")
-    PST_Misc12:         bpy.props.StringProperty(name="Subfolder MISC12",default="misc 12")
-    PST_Misc13:         bpy.props.StringProperty(name="Subfolder MISC13",default="misc 13")
-    PST_Misc14:         bpy.props.StringProperty(name="Subfolder MISC14",default="misc 14")
-    PST_Misc15:         bpy.props.StringProperty(name="Subfolder MISC15",default="misc 15")
-    PST_Misc16:         bpy.props.StringProperty(name="Subfolder MISC16",default="misc 16")
-    PST_Misc17:         bpy.props.StringProperty(name="Subfolder MISC17",default="misc 17")
-    PST_Misc18:         bpy.props.StringProperty(name="Subfolder MISC18",default="misc 18")
-    PST_Misc19:         bpy.props.StringProperty(name="Subfolder MISC19",default="misc 19")
-    PST_Misc20:         bpy.props.StringProperty(name="Subfolder MISC20",default="misc 20")
+    PST_Attack1:        bpy.props.StringProperty(name="Subfolder AT1", default="slash",         description="This defines the name of the subfolder for the PST Attack1 animation")
+    PST_Attack2:        bpy.props.StringProperty(name="Subfolder AT2", default="stab",          description="This defines the name of the subfolder for the PST Attack2 animation")
+    PST_Attack3:        bpy.props.StringProperty(name="Subfolder AT3", default="strike",        description="This defines the name of the subfolder for the PST Attack3 animation")
+    PST_Get_Hit:        bpy.props.StringProperty(name="Subfolder HIT", default="get hit",       description="This defines the name of the subfolder for the PST Get Hit animation")
+    PST_Run:            bpy.props.StringProperty(name="Subfolder RUN", default="run",           description="This defines the name of the subfolder for the PST Run animation")
+    PST_Walk:           bpy.props.StringProperty(name="Subfolder WLK", default="walk",          description="This defines the name of the subfolder for the PST Walk animation")
+    PST_Spell1:         bpy.props.StringProperty(name="Subfolder SP1", default="spell1",        description="This defines the name of the subfolder for the PST Spell1 animation")
+    PST_Spell2:         bpy.props.StringProperty(name="Subfolder SP2", default="spell2",        description="This defines the name of the subfolder for the PST Spell2 animation")
+    PST_Spell3:         bpy.props.StringProperty(name="Subfolder SP3", default="spell3",        description="This defines the name of the subfolder for the PST Spell3 animation")
+    PST_Get_Up:         bpy.props.StringProperty(name="Subfolder GUP", default="get up",        description="This defines the name of the subfolder for the PST Get Up animation")
+    PST_Death1:         bpy.props.StringProperty(name="Subfolder DFB1",default="dieforward",    description="This defines the name of the subfolder for the PST Death1 animation")
+    PST_Death2:         bpy.props.StringProperty(name="Subfolder DFB2",default="diebackward",   description="This defines the name of the subfolder for the PST Death2 animation")
+    PST_Death3:         bpy.props.StringProperty(name="Subfolder DFB3",default="diecollapse",   description="This defines the name of the subfolder for the PST Death3 animation")
+    PST_Talk1:          bpy.props.StringProperty(name="Subfolder TK1", default="Talk1",         description="This defines the name of the subfolder for the PST Talk1 animation")
+    PST_Talk2:          bpy.props.StringProperty(name="Subfolder TK2", default="Talk2",         description="This defines the name of the subfolder for the PST Talk2 animation")
+    PST_Talk3:          bpy.props.StringProperty(name="Subfolder TK3", default="Talk3",         description="This defines the name of the subfolder for the PST Talk3 animation")
+    PST_Stand:          bpy.props.StringProperty(name="Subfolder STD", default="stand",         description="This defines the name of the subfolder for the PST Stand animation")
+    PST_StandF1:        bpy.props.StringProperty(name="Subfolder STDF1", default="standfidget1",description="This defines the name of the subfolder for the PST StandF1 animation")
+    PST_StandF2:        bpy.props.StringProperty(name="Subfolder STDF2", default="standfidget2",description="This defines the name of the subfolder for the PST StandF2 animation")
+    PST_Stance:         bpy.props.StringProperty(name="Subfolder STC", default="stance",        description="This defines the name of the subfolder for the PST Stance animation")
+    PST_StanceF1:       bpy.props.StringProperty(name="Subfolder STCF1", default="stancefidget1",description="This defines the name of the subfolder for the PST StanceF1 animation")
+    PST_StanceF2:       bpy.props.StringProperty(name="Subfolder STCF2", default="stancefidget2",description="This defines the name of the subfolder for the PST StanceF2 animation")
+    PST_Stance_to_Stand:bpy.props.StringProperty(name="Subfolder STCtoSTD",default="stance to stand",description="This defines the name of the subfolder for the PST Stance to Stand animation")
+    PST_Stand_to_Stance:bpy.props.StringProperty(name="Subfolder STDtoSTC",default="stand to stance",description="This defines the name of the subfolder for the PST Stand to Stance animation")
+    PST_Misc1:          bpy.props.StringProperty(name="Subfolder MISC1",default="misc 1",       description="This defines the name of the subfolder for the PST Misc1 animation")
+    PST_Misc2:          bpy.props.StringProperty(name="Subfolder MISC2",default="misc 2",       description="This defines the name of the subfolder for the PST Misc2 animation")
+    PST_Misc3:          bpy.props.StringProperty(name="Subfolder MISC3",default="misc 3",       description="This defines the name of the subfolder for the PST Misc3 animation")
+    PST_Misc4:          bpy.props.StringProperty(name="Subfolder MISC4",default="misc 4",       description="This defines the name of the subfolder for the PST Misc4 animation")
+    PST_Misc5:          bpy.props.StringProperty(name="Subfolder MISC5",default="misc 5",       description="This defines the name of the subfolder for the PST Misc5 animation")
+    PST_Misc6:          bpy.props.StringProperty(name="Subfolder MISC6",default="misc 6",       description="This defines the name of the subfolder for the PST Misc6 animation")
+    PST_Misc7:          bpy.props.StringProperty(name="Subfolder MISC7",default="misc 7",       description="This defines the name of the subfolder for the PST Misc7 animation")
+    PST_Misc8:          bpy.props.StringProperty(name="Subfolder MISC8",default="misc 8",       description="This defines the name of the subfolder for the PST Misc8 animation")
+    PST_Misc9:          bpy.props.StringProperty(name="Subfolder MISC9",default="misc 9",       description="This defines the name of the subfolder for the PST Misc9 animation")
+    PST_Misc10:         bpy.props.StringProperty(name="Subfolder MISC10",default="misc 10",     description="This defines the name of the subfolder for the PST Misc10 animation")
+    PST_Misc11:         bpy.props.StringProperty(name="Subfolder MISC11",default="misc 11",     description="This defines the name of the subfolder for the PST Misc11 animation")
+    PST_Misc12:         bpy.props.StringProperty(name="Subfolder MISC12",default="misc 12",     description="This defines the name of the subfolder for the PST Misc12 animation")
+    PST_Misc13:         bpy.props.StringProperty(name="Subfolder MISC13",default="misc 13",     description="This defines the name of the subfolder for the PST Misc13 animation")
+    PST_Misc14:         bpy.props.StringProperty(name="Subfolder MISC14",default="misc 14",     description="This defines the name of the subfolder for the PST Misc14 animation")
+    PST_Misc15:         bpy.props.StringProperty(name="Subfolder MISC15",default="misc 15",     description="This defines the name of the subfolder for the PST Misc15 animation")
+    PST_Misc16:         bpy.props.StringProperty(name="Subfolder MISC16",default="misc 16",     description="This defines the name of the subfolder for the PST Misc16 animation")
+    PST_Misc17:         bpy.props.StringProperty(name="Subfolder MISC17",default="misc 17",     description="This defines the name of the subfolder for the PST Misc17 animation")
+    PST_Misc18:         bpy.props.StringProperty(name="Subfolder MISC18",default="misc 18",     description="This defines the name of the subfolder for the PST Misc18 animation")
+    PST_Misc19:         bpy.props.StringProperty(name="Subfolder MISC19",default="misc 19",     description="This defines the name of the subfolder for the PST Misc19 animation")
+    PST_Misc20:         bpy.props.StringProperty(name="Subfolder MISC20",default="misc 20",     description="This defines the name of the subfolder for the PST Misc20 animation")
     # String property for unique effect animation(e.g. Ankheg).
-    Emerge:     bpy.props.StringProperty(name="Subfolder EMERGE", default="emerge")
-    Hide:       bpy.props.StringProperty(name="Subfolder HIDE",  default="hide")    
+    Emerge:     bpy.props.StringProperty(name="Subfolder EMERGE", default="emerge", description="This defines the name of the subfolder for the Emerge animation")
+    Hide:       bpy.props.StringProperty(name="Subfolder HIDE",  default="hide",    description="This defines the name of the subfolder for the Hide animation")    
     # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
-    Effect:     bpy.props.StringProperty(name="Effect", default="")   
+    Effect:     bpy.props.StringProperty(name="Effect", default="", description="This defines the name of the subfolder for the Effect animation")   
     # String properties for names of various weapon animations based on the collection names.
-    Creature:           bpy.props.StringProperty(name="Creature Main", default="")
-    Creature_Lower:     bpy.props.StringProperty(name="Creature Lower", default="")
-    Axe:                bpy.props.StringProperty(name="Subfolder A", default="axe")
-    Bow:                bpy.props.StringProperty(name="Subfolder B", default="bow")
-    Club:               bpy.props.StringProperty(name="Subfolder C", default="club")
-    Dagger:             bpy.props.StringProperty(name="Subfolder D", default="dagger")
-    Flail:              bpy.props.StringProperty(name="Subfolder F", default="flail")
-    Halberd:            bpy.props.StringProperty(name="Subfolder H", default="halberd")
-    Mace:               bpy.props.StringProperty(name="Subfolder M", default="mace")
-    Sword:              bpy.props.StringProperty(name="Subfolder S", default="sword")
-    Warhammer:          bpy.props.StringProperty(name="Subfolder W", default="warhammer")
-    Quarterstaff:       bpy.props.StringProperty(name="Subfolder Q", default="quarterstaff")
+    Creature:           bpy.props.StringProperty(name="Creature Main", default="",          description="This specifies the name of the Blender collection containing the main creature model. This is an absolutely necessary input")
+    Creature_Lower:     bpy.props.StringProperty(name="Creature Lower", default="",         description="This specifies the name of the Blender collection containing the creature’s lower model. This is an absolutely necessary input for animation type 3000")
+    Axe:                bpy.props.StringProperty(name="Subfolder A", default="axe",         description="This refers to the Blender collection for axe animation. It also defines the name of the subfolder for the Axe animation")
+    Bow:                bpy.props.StringProperty(name="Subfolder B", default="bow",         description="This refers to the Blender collection for bow animation. It also defines the name of the subfolder for the Bow animation")
+    Club:               bpy.props.StringProperty(name="Subfolder C", default="club",        description="This refers to the Blender collection for club animation. It also defines the name of the subfolder for the Club animation")
+    Dagger:             bpy.props.StringProperty(name="Subfolder D", default="dagger",      description="This refers to the Blender collection for Dagger animation. It also defines the name of the subfolder for the Dagger animation")
+    Flail:              bpy.props.StringProperty(name="Subfolder F", default="flail",       description="This refers to the Blender collection for Flail animation. It also defines the name of the subfolder for the Flail animation")
+    Halberd:            bpy.props.StringProperty(name="Subfolder H", default="halberd",     description="This refers to the Blender collection for Halberd animation. It also defines the name of the subfolder for the Halberd animation")
+    Mace:               bpy.props.StringProperty(name="Subfolder M", default="mace",        description="This refers to the Blender collection for Mace animation. It also defines the name of the subfolder for the Mace animation")
+    Sword:              bpy.props.StringProperty(name="Subfolder S", default="sword",       description="TThis refers to the Blender collection for Sword animation. It also defines the name of the subfolder for the Sword animation")
+    Warhammer:          bpy.props.StringProperty(name="Subfolder W", default="warhammer",   description="This refers to the Blender collection for Warhammer animation. It also defines the name of the subfolder for the Warhammer animation")
+    Quarterstaff:       bpy.props.StringProperty(name="Subfolder Q", default="quarterstaff",description="This refers to the Blender collection for Quarterstaff animation. It also defines the name of the subfolder for the Quarterstaff animation")
     # String properties for various armor collection names(used for e.g. Typ 5000/6000).
-    Armor1:             bpy.props.StringProperty(name="Subfolder ARMOR1", default="no_armor")
-    Armor2:             bpy.props.StringProperty(name="Subfolder ARMOR2", default="leather")
-    Armor3:             bpy.props.StringProperty(name="Subfolder ARMOR3", default="chain_robe")
-    Armor4:             bpy.props.StringProperty(name="Subfolder ARMOR4", default="plate")
+    Armor1:             bpy.props.StringProperty(name="Subfolder ARMOR1", default="no_armor",   description="This refers to the Blender collection for Armor1 animation. It also defines the name of the subfolder for the Armor1(no armor) animation")
+    Armor2:             bpy.props.StringProperty(name="Subfolder ARMOR2", default="leather",    description="This refers to the Blender collection for Armor2 animation. It also defines the name of the subfolder for the Armor2(e.g. leather armor) animation")
+    Armor3:             bpy.props.StringProperty(name="Subfolder ARMOR3", default="chain_robe", description="This refers to the Blender collection for Armor3 animation. It also defines the name of the subfolder for the Armor3(e.g. chain/robe armor) animation")
+    Armor4:             bpy.props.StringProperty(name="Subfolder ARMOR4", default="plate",      description="This refers to the Blender collection for Armor4 animation. It also defines the name of the subfolder for the Armor4(e.g. plate armor) animation")
     # Boolean toggles for rendering each animation.
-    Use_A1:     bpy.props.BoolProperty(name="Use A1",   default=True)
-    Use_A2:     bpy.props.BoolProperty(name="Use A2",   default=True)
-    Use_A3:     bpy.props.BoolProperty(name="Use A3",   default=True)
-    Use_A4:     bpy.props.BoolProperty(name="Use A4",   default=True)
-    Use_A5:     bpy.props.BoolProperty(name="Use A5",   default=True)
-    Use_CA:     bpy.props.BoolProperty(name="Use CA",   default=True)
-    Use_DE:     bpy.props.BoolProperty(name="Use DE",   default=True)
-    Use_GH:     bpy.props.BoolProperty(name="Use GH",   default=True)
-    Use_GU:     bpy.props.BoolProperty(name="Use GU",   default=True)
-    Use_SC:     bpy.props.BoolProperty(name="Use SC",   default=True)
-    Use_SD:     bpy.props.BoolProperty(name="Use SD",   default=True)
-    Use_SL:     bpy.props.BoolProperty(name="Use SL",   default=True)
-    Use_SP:     bpy.props.BoolProperty(name="Use SP",   default=True)
-    Use_TW:     bpy.props.BoolProperty(name="Use TW",   default=True)
-    Use_WK:     bpy.props.BoolProperty(name="Use WK",   default=True)
+    Use_A1:     bpy.props.BoolProperty(name="Use A1",   default=True, description="This determines whether sprites for the Attack1 animation are rendered and saved in the corresponding folder")
+    Use_A2:     bpy.props.BoolProperty(name="Use A2",   default=True, description="This determines whether sprites for the Attack2 animation are rendered and saved in the corresponding folder")
+    Use_A3:     bpy.props.BoolProperty(name="Use A3",   default=True, description="This determines whether sprites for the Attack3 animation are rendered and saved in the corresponding folder")
+    Use_A4:     bpy.props.BoolProperty(name="Use A4",   default=True, description="This determines whether sprites for the Attack4 animation are rendered and saved in the corresponding folder")
+    Use_A5:     bpy.props.BoolProperty(name="Use A5",   default=True, description="This determines whether sprites for the Attack5 animation are rendered and saved in the corresponding folder")
+    Use_CA:     bpy.props.BoolProperty(name="Use CA",   default=True, description="This determines whether sprites for the Cast animation are rendered and saved in the corresponding folder")
+    Use_DE:     bpy.props.BoolProperty(name="Use DE",   default=True, description="This determines whether sprites for the Death animation are rendered and saved in the corresponding folder")
+    Use_GH:     bpy.props.BoolProperty(name="Use GH",   default=True, description="This determines whether sprites for the Get Hit animation are rendered and saved in the corresponding folder")
+    Use_GU:     bpy.props.BoolProperty(name="Use GU",   default=True, description="This determines whether sprites for the Get Up animation are rendered and saved in the corresponding folder")
+    Use_SC:     bpy.props.BoolProperty(name="Use SC",   default=True, description="This determines whether sprites for the Ready animation are rendered and saved in the corresponding folder")
+    Use_SD:     bpy.props.BoolProperty(name="Use SD",   default=True, description="This determines whether sprites for the Idle animation are rendered and saved in the corresponding folder")
+    Use_SL:     bpy.props.BoolProperty(name="Use SL",   default=True, description="This determines whether sprites for the Sleep animation are rendered and saved in the corresponding folder")
+    Use_SP:     bpy.props.BoolProperty(name="Use SP",   default=True, description="This determines whether sprites for the Conjure animation are rendered and saved in the corresponding folder")
+    Use_TW:     bpy.props.BoolProperty(name="Use TW",   default=True, description="This determines whether sprites for the Dead animation are rendered and saved in the corresponding folder")
+    Use_WK:     bpy.props.BoolProperty(name="Use WK",   default=True, description="This determines whether sprites for the Walk animation are rendered and saved in the corresponding folder")
     # Boolean toggles for various animation actions of type 5000/6000.
-    Use_WK2:    bpy.props.BoolProperty(name="Use WK2",  default=True)
-    Use_A6:     bpy.props.BoolProperty(name="Use A6",   default=True)
-    Use_A7:     bpy.props.BoolProperty(name="Use A7",   default=True)
-    Use_A8:     bpy.props.BoolProperty(name="Use A8",   default=True)
-    Use_A9:     bpy.props.BoolProperty(name="Use A9",   default=True)
-    Use_SA:     bpy.props.BoolProperty(name="Use SA",   default=True)
-    Use_SS:     bpy.props.BoolProperty(name="Use SS",   default=True)
-    Use_SX:     bpy.props.BoolProperty(name="Use SX",   default=True)
-    Use_CA1:    bpy.props.BoolProperty(name="Use CA1",  default=True)
-    Use_CA2:    bpy.props.BoolProperty(name="Use CA2",  default=True)
-    Use_CA3:    bpy.props.BoolProperty(name="Use CA3",  default=True)
-    Use_CA4:    bpy.props.BoolProperty(name="Use CA4",  default=True)
-    Use_SP1:    bpy.props.BoolProperty(name="Use SP1",  default=True)
-    Use_SP2:    bpy.props.BoolProperty(name="Use SP2",  default=True)
-    Use_SP3:    bpy.props.BoolProperty(name="Use SP3",  default=True)
-    Use_SP4:    bpy.props.BoolProperty(name="Use SP4",  default=True)
-    Use_SC1:    bpy.props.BoolProperty(name="Use SC1",  default=True)
-    Use_SC2:    bpy.props.BoolProperty(name="Use SC2",  default=True)
-    Use_SD1:    bpy.props.BoolProperty(name="Use SD1",  default=True)
-    Use_SD2:    bpy.props.BoolProperty(name="Use SD2",  default=True)
-    Use_SD3:    bpy.props.BoolProperty(name="Use SD3",  default=True)
-    Use_SL1:    bpy.props.BoolProperty(name="Use SL1",  default=True)
-    Use_SL2:    bpy.props.BoolProperty(name="Use SL2",  default=True)
+    Use_WK2:    bpy.props.BoolProperty(name="Use WK2",  default=True, description="This determines whether sprites for the Walk2 animation are rendered and saved in the corresponding folder")
+    Use_A6:     bpy.props.BoolProperty(name="Use A6",   default=True, description="This determines whether sprites for the Attack6(two handed thrust) animation are rendered and saved in the corresponding folder")
+    Use_A7:     bpy.props.BoolProperty(name="Use A7",   default=True, description="This determines whether sprites for the Attack7(two weapon version 1) animation are rendered and saved in the corresponding folder")
+    Use_A8:     bpy.props.BoolProperty(name="Use A8",   default=True, description="This determines whether sprites for the Attack8(throwing?) animation are rendered and saved in the corresponding folder")
+    Use_A9:     bpy.props.BoolProperty(name="Use A9",   default=True, description="This determines whether sprites for the Attack9(two weapon version 2) animation are rendered and saved in the corresponding folder")
+    Use_SA:     bpy.props.BoolProperty(name="Use SA",   default=True, description="This determines whether sprites for the Attack10(shoot with bow) animation are rendered and saved in the corresponding folder")
+    Use_SS:     bpy.props.BoolProperty(name="Use SS",   default=True, description="This determines whether sprites for the Attack10(shoot with sling) animation are rendered and saved in the corresponding folder")
+    Use_SX:     bpy.props.BoolProperty(name="Use SX",   default=True, description="This determines whether sprites for the Attack10(shoot with crossbow) animation are rendered and saved in the corresponding folder")
+    Use_CA1:    bpy.props.BoolProperty(name="Use CA1",  default=True, description="This determines whether sprites for the Cast1 animation are rendered and saved in the corresponding folder")
+    Use_CA2:    bpy.props.BoolProperty(name="Use CA2",  default=True, description="This determines whether sprites for the Cast2 animation are rendered and saved in the corresponding folder")
+    Use_CA3:    bpy.props.BoolProperty(name="Use CA3",  default=True, description="This determines whether sprites for the Cast3 animation are rendered and saved in the corresponding folder")
+    Use_CA4:    bpy.props.BoolProperty(name="Use CA4",  default=True, description="This determines whether sprites for the Cast4 animation are rendered and saved in the corresponding folder")
+    Use_SP1:    bpy.props.BoolProperty(name="Use SP1",  default=True, description="This determines whether sprites for the Conjure1 animation are rendered and saved in the corresponding folder")
+    Use_SP2:    bpy.props.BoolProperty(name="Use SP2",  default=True, description="This determines whether sprites for the Conjure2 animation are rendered and saved in the corresponding folder")
+    Use_SP3:    bpy.props.BoolProperty(name="Use SP3",  default=True, description="This determines whether sprites for the Conjure3 animation are rendered and saved in the corresponding folder")
+    Use_SP4:    bpy.props.BoolProperty(name="Use SP4",  default=True, description="This determines whether sprites for the Conjure4 animation are rendered and saved in the corresponding folder")
+    Use_SC1:    bpy.props.BoolProperty(name="Use SC1",  default=True, description="This determines whether sprites for the Ready1 animation are rendered and saved in the corresponding folder")
+    Use_SC2:    bpy.props.BoolProperty(name="Use SC2",  default=True, description="This determines whether sprites for the Ready2 animation are rendered and saved in the corresponding folder")
+    Use_SD1:    bpy.props.BoolProperty(name="Use SD1",  default=True, description="This determines whether sprites for the Idle1 animation are rendered and saved in the corresponding folder")
+    Use_SD2:    bpy.props.BoolProperty(name="Use SD2",  default=True, description="This determines whether sprites for the Idle2 animation are rendered and saved in the corresponding folder")
+    Use_SD3:    bpy.props.BoolProperty(name="Use SD3",  default=True, description="This determines whether sprites for the Idle3 animation are rendered and saved in the corresponding folder")
+    Use_SL1:    bpy.props.BoolProperty(name="Use SL1",  default=True, description="This determines whether sprites for the Sleep1 animation are rendered and saved in the corresponding folder")
+    Use_SL2:    bpy.props.BoolProperty(name="Use SL2",  default=True, description="This determines whether sprites for the Sleep2 animation are rendered and saved in the corresponding folder")
     # Boolean toggles for unique effect animation(e.g. Ankheg).
-    Use_Emerge: bpy.props.BoolProperty(name="Use EMERGE", default=True)
-    Use_Hide:   bpy.props.BoolProperty(name="Use HIDE",   default=True)
+    Use_Emerge: bpy.props.BoolProperty(name="Use EMERGE", default=True, description="This determines whether sprites for the Emerge animation are rendered and saved in the corresponding folder")
+    Use_Hide:   bpy.props.BoolProperty(name="Use HIDE",   default=True, description="This determines whether sprites for the Hide animation are rendered and saved in the corresponding folder")
     # Boolean toggles for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures).
-    Use_Effect:     bpy.props.BoolProperty(name="Use Effect", default=False)
+    Use_Effect:     bpy.props.BoolProperty(name="Use Effect", default=False, description="This determines whether sprites for the Effect animation are rendered and saved in the corresponding folder")
     # Boolean toggles for character in armor animation(type 5000/6000).
-    Use_ARMOR1: bpy.props.BoolProperty(name="Use ARMOR 1",  default=False)
-    Use_ARMOR2: bpy.props.BoolProperty(name="Use ARMOR 2",  default=False)
-    Use_ARMOR3: bpy.props.BoolProperty(name="Use ARMOR 3",  default=False)
-    Use_ARMOR4: bpy.props.BoolProperty(name="Use ARMOR 4",  default=False)
+    Use_ARMOR1: bpy.props.BoolProperty(name="Use ARMOR 1",  default=False, description="This determines whether sprites for the Armor1(no armor) animation are rendered and saved in the corresponding folder")
+    Use_ARMOR2: bpy.props.BoolProperty(name="Use ARMOR 2",  default=False, description="This determines whether sprites for the Armor2(e.g. leather armor) animation are rendered and saved in the corresponding folder")
+    Use_ARMOR3: bpy.props.BoolProperty(name="Use ARMOR 3",  default=False, description="This determines whether sprites for the Armor3(e.g. chain/robe armor) animation are rendered and saved in the corresponding folder")
+    Use_ARMOR4: bpy.props.BoolProperty(name="Use ARMOR 4",  default=False, description="This determines whether sprites for the Armor4(e.g. plate armor) animation are rendered and saved in the corresponding folder")
     # Boolean toggles to render each weapon animation with the selected creature animation.
-    Use_A:      bpy.props.BoolProperty(name="Use A",    default=False)
-    Use_B:      bpy.props.BoolProperty(name="Use B",    default=False)
-    Use_C:      bpy.props.BoolProperty(name="Use C",    default=False)
-    Use_D:      bpy.props.BoolProperty(name="Use D",    default=False)
-    Use_F:      bpy.props.BoolProperty(name="Use F",    default=False)
-    Use_H:      bpy.props.BoolProperty(name="Use H",    default=False)
-    Use_M:      bpy.props.BoolProperty(name="Use M",    default=False)
-    Use_S:      bpy.props.BoolProperty(name="Use S",    default=False)
-    Use_W:      bpy.props.BoolProperty(name="Use W",    default=False)
-    Use_Q:      bpy.props.BoolProperty(name="Use Q",    default=False)
+    Use_A:      bpy.props.BoolProperty(name="Use A",    default=False, description="This determines whether sprites for the Axe animation are rendered and saved in the corresponding folder")
+    Use_B:      bpy.props.BoolProperty(name="Use B",    default=False, description="This determines whether sprites for the Bow animation are rendered and saved in the corresponding folder")
+    Use_C:      bpy.props.BoolProperty(name="Use C",    default=False, description="This determines whether sprites for the Club animation are rendered and saved in the corresponding folder")
+    Use_D:      bpy.props.BoolProperty(name="Use D",    default=False, description="This determines whether sprites for the Dagger animation are rendered and saved in the corresponding folder")
+    Use_F:      bpy.props.BoolProperty(name="Use F",    default=False, description="This determines whether sprites for the Flail animation are rendered and saved in the corresponding folder")
+    Use_H:      bpy.props.BoolProperty(name="Use H",    default=False, description="This determines whether sprites for the Halberd animation are rendered and saved in the corresponding folder")
+    Use_M:      bpy.props.BoolProperty(name="Use M",    default=False, description="This determines whether sprites for the Mace animation are rendered and saved in the corresponding folder")
+    Use_S:      bpy.props.BoolProperty(name="Use S",    default=False, description="This determines whether sprites for the Sword animation are rendered and saved in the corresponding folder")
+    Use_W:      bpy.props.BoolProperty(name="Use W",    default=False, description="This determines whether sprites for the Warhammer animation are rendered and saved in the corresponding folder")
+    Use_Q:      bpy.props.BoolProperty(name="Use Q",    default=False, description="This determines whether sprites for the Quarterstaff animation are rendered and saved in the corresponding folder")
     # Boolean toggles for rendering each animation for PST.
-    Use_AT1:        bpy.props.BoolProperty(name="Use AT1",      default=False)
-    Use_AT2:        bpy.props.BoolProperty(name="Use AT2",      default=False)
-    Use_AT3:        bpy.props.BoolProperty(name="Use AT3",      default=False)
-    Use_HIT:        bpy.props.BoolProperty(name="Use HIT",      default=False)  
-    Use_RUN:        bpy.props.BoolProperty(name="Use RUN",      default=False) 
-    Use_WLK:        bpy.props.BoolProperty(name="Use WLK",      default=False)
-    Use_SP1:        bpy.props.BoolProperty(name="Use SP1",      default=False) 
-    Use_SP2:        bpy.props.BoolProperty(name="Use SP2",      default=False)
-    Use_SP3:        bpy.props.BoolProperty(name="Use SP3",      default=False)
-    Use_GUP:        bpy.props.BoolProperty(name="Use GUP",      default=False)
-    Use_DFB1:       bpy.props.BoolProperty(name="Use DFB1",     default=False)
-    Use_DFB2:       bpy.props.BoolProperty(name="Use DFB2",     default=False)
-    Use_DFB3:       bpy.props.BoolProperty(name="Use DFB3",     default=False)
-    Use_TK1:        bpy.props.BoolProperty(name="Use TK1",      default=False)
-    Use_TK2:        bpy.props.BoolProperty(name="Use TK2",      default=False)
-    Use_TK3:        bpy.props.BoolProperty(name="Use TK3",      default=False)
-    Use_STD:        bpy.props.BoolProperty(name="Use STD",      default=False)
-    Use_STDF1:      bpy.props.BoolProperty(name="Use STDF1",    default=False)
-    Use_STDF2:      bpy.props.BoolProperty(name="Use STDF2",    default=False)
-    Use_STC:        bpy.props.BoolProperty(name="Use STC",      default=False)
-    Use_STCF1:      bpy.props.BoolProperty(name="Use STCF1",    default=False)
-    Use_STCF2:      bpy.props.BoolProperty(name="Use STCF2",    default=False)
-    Use_STCtoSTD:   bpy.props.BoolProperty(name="Use STCtoSTD", default=False)
-    Use_STDtoSTC:   bpy.props.BoolProperty(name="Use STDtoSTC", default=False)
-    Use_MISC1:      bpy.props.BoolProperty(name="Use MISC1",    default=False)
-    Use_MISC2:      bpy.props.BoolProperty(name="Use MISC2",    default=False)
-    Use_MISC3:      bpy.props.BoolProperty(name="Use MISC3",    default=False)
-    Use_MISC4:      bpy.props.BoolProperty(name="Use MISC4",    default=False)
-    Use_MISC5:      bpy.props.BoolProperty(name="Use MISC5",    default=False)
-    Use_MISC6:      bpy.props.BoolProperty(name="Use MISC6",    default=False)
-    Use_MISC7:      bpy.props.BoolProperty(name="Use MISC7",    default=False)
-    Use_MISC8:      bpy.props.BoolProperty(name="Use MISC8",    default=False)
-    Use_MISC9:      bpy.props.BoolProperty(name="Use MISC9",    default=False)
-    Use_MISC10:     bpy.props.BoolProperty(name="Use MISC10",   default=False)
-    Use_MISC11:     bpy.props.BoolProperty(name="Use MISC11",   default=False)
-    Use_MISC12:     bpy.props.BoolProperty(name="Use MISC12",   default=False)
-    Use_MISC13:     bpy.props.BoolProperty(name="Use MISC13",   default=False)
-    Use_MISC14:     bpy.props.BoolProperty(name="Use MISC14",   default=False)
-    Use_MISC15:     bpy.props.BoolProperty(name="Use MISC15",   default=False)
-    Use_MISC16:     bpy.props.BoolProperty(name="Use MISC16",   default=False)
-    Use_MISC17:     bpy.props.BoolProperty(name="Use MISC17",   default=False)
-    Use_MISC18:     bpy.props.BoolProperty(name="Use MISC18",   default=False)
-    Use_MISC19:     bpy.props.BoolProperty(name="Use MISC19",   default=False)
-    Use_MISC20:     bpy.props.BoolProperty(name="Use MISC20",   default=False)
+    Use_AT1:        bpy.props.BoolProperty(name="Use AT1",      default=False, description="This determines whether sprites for the PST Attack1 animation are rendered and saved in the corresponding folder")
+    Use_AT2:        bpy.props.BoolProperty(name="Use AT2",      default=False, description="This determines whether sprites for the PST Attack2 animation are rendered and saved in the corresponding folder")
+    Use_AT3:        bpy.props.BoolProperty(name="Use AT3",      default=False, description="This determines whether sprites for the PST Attack3 animation are rendered and saved in the corresponding folder")
+    Use_HIT:        bpy.props.BoolProperty(name="Use HIT",      default=False, description="This determines whether sprites for the PST Get Hit animation are rendered and saved in the corresponding folder")  
+    Use_RUN:        bpy.props.BoolProperty(name="Use RUN",      default=False, description="This determines whether sprites for the PST Run animation are rendered and saved in the corresponding folder") 
+    Use_WLK:        bpy.props.BoolProperty(name="Use WLK",      default=False, description="This determines whether sprites for the PST Walk animation are rendered and saved in the corresponding folder")
+    Use_SP1:        bpy.props.BoolProperty(name="Use SP1",      default=False, description="This determines whether sprites for the PST Spell1 animation are rendered and saved in the corresponding folder") 
+    Use_SP2:        bpy.props.BoolProperty(name="Use SP2",      default=False, description="This determines whether sprites for the PST Spell2 animation are rendered and saved in the corresponding folder")
+    Use_SP3:        bpy.props.BoolProperty(name="Use SP3",      default=False, description="This determines whether sprites for the PST Spell3 animation are rendered and saved in the corresponding folder")
+    Use_GUP:        bpy.props.BoolProperty(name="Use GUP",      default=False, description="This determines whether sprites for the PST Get Up animation are rendered and saved in the corresponding folder")
+    Use_DFB1:       bpy.props.BoolProperty(name="Use DFB1",     default=False, description="This determines whether sprites for the PST Die Forward animation are rendered and saved in the corresponding folder")
+    Use_DFB2:       bpy.props.BoolProperty(name="Use DFB2",     default=False, description="This determines whether sprites for the PST Die Backward animation are rendered and saved in the corresponding folder")
+    Use_DFB3:       bpy.props.BoolProperty(name="Use DFB3",     default=False, description="This determines whether sprites for the PST Die Collapse animation are rendered and saved in the corresponding folder")
+    Use_TK1:        bpy.props.BoolProperty(name="Use TK1",      default=False, description="This determines whether sprites for the PST Talk1 animation are rendered and saved in the corresponding folder")
+    Use_TK2:        bpy.props.BoolProperty(name="Use TK2",      default=False, description="This determines whether sprites for the PST Talk2 animation are rendered and saved in the corresponding folder")
+    Use_TK3:        bpy.props.BoolProperty(name="Use TK3",      default=False, description="This determines whether sprites for the PST Talk3 animation are rendered and saved in the corresponding folder")
+    Use_STD:        bpy.props.BoolProperty(name="Use STD",      default=False, description="This determines whether sprites for the PST Stand animation are rendered and saved in the corresponding folder")
+    Use_STDF1:      bpy.props.BoolProperty(name="Use STDF1",    default=False, description="This determines whether sprites for the PST Stand Fidget1 animation are rendered and saved in the corresponding folder")
+    Use_STDF2:      bpy.props.BoolProperty(name="Use STDF2",    default=False, description="This determines whether sprites for the PST Stand Fidget2 animation are rendered and saved in the corresponding folder")
+    Use_STC:        bpy.props.BoolProperty(name="Use STC",      default=False, description="This determines whether sprites for the PST Stance animation are rendered and saved in the corresponding folder")
+    Use_STCF1:      bpy.props.BoolProperty(name="Use STCF1",    default=False, description="This determines whether sprites for the PST Stance Fidget1 animation are rendered and saved in the corresponding folder")
+    Use_STCF2:      bpy.props.BoolProperty(name="Use STCF2",    default=False, description="This determines whether sprites for the PST Stance Fidget2 animation are rendered and saved in the corresponding folder")
+    Use_STCtoSTD:   bpy.props.BoolProperty(name="Use STCtoSTD", default=False, description="This determines whether sprites for the PST Stance to Stand animation are rendered and saved in the corresponding folder")
+    Use_STDtoSTC:   bpy.props.BoolProperty(name="Use STDtoSTC", default=False, description="This determines whether sprites for the PST Stand to Stance animation are rendered and saved in the corresponding folder")
+    Use_MISC1:      bpy.props.BoolProperty(name="Use MISC1",    default=False, description="This determines whether sprites for the Miscellanous1 animation are rendered and saved in the corresponding folder")
+    Use_MISC2:      bpy.props.BoolProperty(name="Use MISC2",    default=False, description="This determines whether sprites for the Miscellanous2 animation are rendered and saved in the corresponding folder")
+    Use_MISC3:      bpy.props.BoolProperty(name="Use MISC3",    default=False, description="This determines whether sprites for the Miscellanous3 animation are rendered and saved in the corresponding folder")
+    Use_MISC4:      bpy.props.BoolProperty(name="Use MISC4",    default=False, description="This determines whether sprites for the Miscellanous4 animation are rendered and saved in the corresponding folder")
+    Use_MISC5:      bpy.props.BoolProperty(name="Use MISC5",    default=False, description="This determines whether sprites for the Miscellanous5 animation are rendered and saved in the corresponding folder")
+    Use_MISC6:      bpy.props.BoolProperty(name="Use MISC6",    default=False, description="This determines whether sprites for the Miscellanous6 animation are rendered and saved in the corresponding folder")
+    Use_MISC7:      bpy.props.BoolProperty(name="Use MISC7",    default=False, description="This determines whether sprites for the Miscellanous7 animation are rendered and saved in the corresponding folder")
+    Use_MISC8:      bpy.props.BoolProperty(name="Use MISC8",    default=False, description="This determines whether sprites for the Miscellanous8 animation are rendered and saved in the corresponding folder")
+    Use_MISC9:      bpy.props.BoolProperty(name="Use MISC9",    default=False, description="This determines whether sprites for the Miscellanous9 animation are rendered and saved in the corresponding folder")
+    Use_MISC10:     bpy.props.BoolProperty(name="Use MISC10",   default=False, description="This determines whether sprites for the Miscellanous10 animation are rendered and saved in the corresponding folder")
+    Use_MISC11:     bpy.props.BoolProperty(name="Use MISC11",   default=False, description="This determines whether sprites for the Miscellanous11 animation are rendered and saved in the corresponding folder")
+    Use_MISC12:     bpy.props.BoolProperty(name="Use MISC12",   default=False, description="This determines whether sprites for the Miscellanous12 animation are rendered and saved in the corresponding folder")
+    Use_MISC13:     bpy.props.BoolProperty(name="Use MISC13",   default=False, description="This determines whether sprites for the Miscellanous13 animation are rendered and saved in the corresponding folder")
+    Use_MISC14:     bpy.props.BoolProperty(name="Use MISC14",   default=False, description="This determines whether sprites for the Miscellanous14 animation are rendered and saved in the corresponding folder")
+    Use_MISC15:     bpy.props.BoolProperty(name="Use MISC15",   default=False, description="This determines whether sprites for the Miscellanous15 animation are rendered and saved in the corresponding folder")
+    Use_MISC16:     bpy.props.BoolProperty(name="Use MISC16",   default=False, description="This determines whether sprites for the Miscellanous16 animation are rendered and saved in the corresponding folder")
+    Use_MISC17:     bpy.props.BoolProperty(name="Use MISC17",   default=False, description="This determines whether sprites for the Miscellanous17 animation are rendered and saved in the corresponding folder")
+    Use_MISC18:     bpy.props.BoolProperty(name="Use MISC18",   default=False, description="This determines whether sprites for the Miscellanous18 animation are rendered and saved in the corresponding folder")
+    Use_MISC19:     bpy.props.BoolProperty(name="Use MISC19",   default=False, description="This determines whether sprites for the Miscellanous19 animation are rendered and saved in the corresponding folder")
+    Use_MISC20:     bpy.props.BoolProperty(name="Use MISC20",   default=False, description="This determines whether sprites for the Miscellanous20 animation are rendered and saved in the corresponding folder")
     # --- Step 5: Render
     # Reserved/None
 
@@ -2323,7 +2335,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
 # This prepares the material for indexed color palettes required by Infinity Engine games.
 # ----------------------------------------------------------------------------------------
 class IEAS_OT_ShadingNodes(Operator):
-    """This class offers a function which adds shading nodes which then is used in "IEAS_PT_ShadingNodes" class."""
+    """This class offers a function which adds shading nodes which then is used in "IEAS_PT_ShadingNodes" class"""
     bl_idname = "ieas.shading_nodes" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label = "ADD" # Text displayed on the button in the UI.
     
@@ -2382,7 +2394,7 @@ class IEAS_OT_ShadingNodes(Operator):
 # Operator to initiate the full sprite rendering process for selected objects, animations, and directions.
 # --------------------------------------------------------------------------------------------------------
 class IEAS_OT_Final(Operator):
-    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class."""
+    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class"""
     bl_idname = "ieas.final" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label = "RENDER" # Text displayed on the button in the UI.
     
@@ -2762,7 +2774,7 @@ class IEAS_OT_Final(Operator):
 # -----------------------------------------------------------
 class IEAS_PT_Core(Panel):
     # Use this as a tooltip for menu items and buttons. 
-    """Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations."""
+    """Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations"""
     
      # --- Blender specific class variables
     bl_label        = "IE AutoSpriter"    # Visible name when category is opened (title of the panel).
@@ -2783,7 +2795,7 @@ class IEAS_PT_Core(Panel):
 # This panel defines general settings that apply across the entire sprite rendering process.
 # ------------------------------------------------------------------------------------------
 class IEAS_PT_GlobalParameters(Panel):
-    """This step defines general settings that apply across the entire sprite rendering process."""
+    """This step defines general settings that apply across the entire sprite rendering process"""
     
     # --- Blender specific class variables
     bl_label        = "Step 1: Global Parameters" 
@@ -2828,7 +2840,7 @@ class IEAS_PT_GlobalParameters(Panel):
 # and specific material properties.
 # ------------------------------------------------------------------------------------
 class IEAS_PT_ShadingNodes(Panel):
-    """This step defines general settings that apply across the entire sprite rendering process."""
+    """This step defines general settings that apply across the entire sprite rendering process"""
     
     # --- Blender specific class variables
     bl_label        = "Step 2: Shading Nodes" 
@@ -2859,7 +2871,7 @@ class IEAS_PT_ShadingNodes(Panel):
 # will be rendered for the sprites.
 # ---------------------------------------------------------------------------------
 class IEAS_PT_Camera(Panel):
-    """This step manages the output folders and defines which object orientations shown in the camera will be rendered."""
+    """This step manages the output folders and defines which object orientations shown in the camera will be rendered"""
     
     # --- Blender specific class variables
     bl_label        = "Step 3: Camera" 
@@ -3016,7 +3028,7 @@ class IEAS_PT_Camera(Panel):
 # and how their corresponding output folders/filenames will be named.
 # -------------------------------------------------------------------------
 class IEAS_PT_Animation(Panel):
-    """This step defines which animations (Blender Actions) should be rendered and how they are named in the output."""
+    """This step defines which animations (Blender Actions) should be rendered and how they are named in the output"""
     
     # --- Blender specific class variables
     bl_label        = "Step 4: Animation" 
@@ -3633,7 +3645,7 @@ class IEAS_PT_Animation(Panel):
 # and how their corresponding output folders/filenames will be named.
 # ----------------------------------------------------------------------------------
 class IEAS_PT_Collections(Panel):
-    """This panel defines which weapon animations (Blender Collection) should be rendered and how they are named in the output."""
+    """This panel defines which weapon animations (Blender Collection) should be rendered and how they are named in the output"""
     
     # --- Blender specific class variables
     bl_label        = "Collections"
@@ -3752,7 +3764,7 @@ class IEAS_PT_Collections(Panel):
 # This final panel contains the button to start the sprite rendering process.
 # ---------------------------------------------------------------------------
 class IEAS_PT_Final(Panel):
-    """This step defines general settings that apply across the entire sprite rendering process."""
+    """This step defines general settings that apply across the entire sprite rendering process"""
     
     # --- Blender specific class variables
     bl_label        = "Step 5: Final" 
