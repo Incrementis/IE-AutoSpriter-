@@ -7,20 +7,24 @@ Please use the latest version instead of the latest commit.
 
 This is also a learning project focused on my personal use and interest. Suggestions are welcome!
 
+## Note
+* The latest version of IE Autospriter for Blender 4.0 can be found in the branch "v36.3-legacy-for-blender4.0".
+* Further versions will be implemented and tested on newer Blender versions. This also includes the manual.
+
 ## Alpha Version:
 * May not work or only work under special conditions.
 * May not work due to missing information in the manual.
 * May contain issues for various reasons.
 * I am not a Blender or Blender API expert, so this may also cause issues.
-* Only Tested it with blender version 4.0(It may already work on higher versions)
-* The focus of the beta phase will be on bug fixing.
+* Currently only rudimentary tested with Blender version 4.0, but further versions will be implemented and tested on newer Blender version.
+* The focus of the beta phase will be mainly on bug fixing.
 * [Here](https://github.com/Incrementis/IE-AutoSpriter-/issues/52) you will find the currently known issues that will be fixed in the beta phase.
 ### Performance
 The 4.0 blend save files contain the appropriate settings.
 #### Render engine "Cycles": 
-* Rendering a frame took [0.8 to 1 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079607164)
+* Rendering a frame took [0.8 to 1 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079607164) (tested in blender 4.0)
 #### Render engine "EEVEE": 
-* Rendering a frame took [0.05 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079719096)
+* Rendering a frame took [0.05 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079719096) (tested in blender 4.0)
 
 ## Discussion
 * [Beamdog Forums](https://forums.beamdog.com/discussion/89525/blender-add-on-ie-autospriter)
