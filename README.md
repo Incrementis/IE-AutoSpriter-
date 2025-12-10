@@ -1,29 +1,34 @@
 # IE-AutoSpriter-
 Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations.
 
-This is a work in progress and an alpha release. This means that most things are not implemented and the add-on is subject to heavy changes. Use this add-on with caution!!
+This is a work in progress and an beta release. This means that most things are implemented, but the add-on is still subject to heavy changes. Use this add-on with caution!!
 
-Please use the latest version instead of the latest commit.
+Please use the latest release version instead of the latest commit.
 
 This is also a learning project focused on my personal use and interest. Suggestions are welcome!
 
 ## Note
-* The latest version of IE Autospriter for Blender 4.0 can be found in the branch "v36.3-legacy-for-blender4.0".
-* Further versions will be implemented and tested on newer Blender versions. This also includes the manual.
+* The latest version of IE Autospriter for Blender 4.0 can be found in the branch "v0.36.3-legacy-for-blender4.0".
+* Further versions will be implemented and tested on newer Blender 4.5.5 LTS. This also includes the manual.
 
-## Alpha Version:
+## Beta Version:
 * May not work or only work under special conditions.
 * May not work due to missing information in the manual.
 * May contain issues for various reasons.
 * I am not a Blender or Blender API expert, so this may also cause issues.
-* Currently only rudimentary tested with Blender version 4.0, but further versions will be implemented and tested on newer Blender version.
+* Currently only rudimentary tested with Blender 4.5.5 LTS version.
 * The focus of the beta phase will be mainly on bug fixing.
 * [Here](https://github.com/Incrementis/IE-AutoSpriter-/issues/52) you will find the currently known issues that will be fixed in the beta phase.
+
 ### Performance
-The 4.0 blend save files contain the appropriate settings.
+The 4.5.5 LTS blend save files contain the appropriate settings.
+
 #### Render engine "Cycles": 
+* Not tested on Blender 4.5.5 LTS
 * Rendering a frame took [0.8 to 1 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079607164) (tested in blender 4.0)
-#### Render engine "EEVEE": 
+
+#### Render engine "EEVEE":
+* Not tested on Blender 4.5.5 LTS
 * Rendering a frame took [0.05 seconds](https://github.com/Incrementis/IE-AutoSpriter-/issues/18#issuecomment-3079719096) (tested in blender 4.0)
 
 ## Discussion
@@ -41,7 +46,7 @@ The 4.0 blend save files contain the appropriate settings.
 ## Guides
 The functions are explained in detail in the manual.
 * [manual.pdf](https://github.com/Incrementis/IE-AutoSpriter-/blob/main/manual.pdf)
-* Please note that the demos are not intended as a guide or tutorial. They are intended ONLY to demonstrate/test the features of IE Autospriter.
+* Please note that the demos are not intended as an ideal guide or tutorial. They are intended ONLY to demonstrate/test the features of IE Autospriter.
 
 ## Operating Systems
 * Windows 11
