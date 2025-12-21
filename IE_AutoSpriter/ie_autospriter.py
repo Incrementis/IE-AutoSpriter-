@@ -36,7 +36,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 10),
+    "version": (0, 36, 11),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2650,9 +2650,15 @@ class IEAS_OT_Final(Operator):
             handler_method(typeParameters)
                         
         # ----- Deselecting and selecting
+        # Checks if the user is not in "Object Mode"
+        if bpy.context.mode != 'OBJECT':
+            # Displays a red error message in the UI
+            self.report({'ERROR'}, "ERROR: Please switch to 'Object Mode' before starting rendering!")
+            return {'CANCELLED'}
+        
         # Deselects all objects in the scene to ensure only the target object is affected.
         bpy.ops.object.select_all(action='DESELECT')
-        # Selects the specific object by setting its selection state to True.
+        # Selects the specific object by setting its se ection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
         # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
         bpy.context.view_layer.objects.active = bpy.data.objects[objectName]
