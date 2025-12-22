@@ -36,7 +36,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 11),
+    "version": (0, 36, 13),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -77,12 +77,27 @@ class IEAS_AnimationTypesParameters:
 class IEAS_AnimationTypes():
     """Contains methods for handling different animation types before rendering"""
     
-    # --- TODO: Methods
     def type0000(self, typeParameters:IEAS_AnimationTypesParameters):
-        """Method for handling 0000 type logic."""       
-        if (typeParameters.exclude == False):
+        """Method for handling 0000 type logic."""
+        # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
+        if (typeParameters.exclude == True):
+            # Deactivates every collection found.                   
+            for collection in bpy.context.view_layer.layer_collection.children:
+                collection.exclude = True            
+            # Activates only creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
+            # TODO:Delete!
+            print("type0000: Executing 'exclude' logic for 0000 type.")
+            print("typeParameters.CreatureCollectionName:",typeParameters.CreatureCollectionName)
+        else:
+            # Makes the main collection visible for rendering.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render  = False
+            # Ensures the Lower Part collection remains excluded (invisible) on the View Layer.
+            if (typeParameters.CreatureCollectionNameLP in bpy.context.view_layer.layer_collection.children):
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = True            
+            
             # Constructs the filename for the current sprite, including prefix,resref and padded frame number.
-            fileName = f"{typeParameters.prefixResref}_{str(typeParameters.frame).zfill(5)}.png"                    
+            fileName = f"{typeParameters.prefixResref}_MAIN_{str(typeParameters.frame).zfill(5)}.png"                    
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
             # This is the actual rendering process.
@@ -93,6 +108,36 @@ class IEAS_AnimationTypes():
             renderFrame(  False,
                           animation     =False,
                           write_still   =True)
+                          
+            # ----- Setup for SECOND RENDER PASS: Lower Collection Part -----
+            if (typeParameters.CreatureCollectionNameLP in bpy.context.view_layer.layer_collection.children):
+                # Constructs the output folder path for lower part.
+                lowerpart_folder            = os.path.join(typeParameters.pathSaveAt, typeParameters.CreatureCollectionNameLP)
+                # Creates a subfolder for the specific animation and position angle.
+                lowerpart_position_folder   = os.path.join(lowerpart_folder, typeParameters.positionKey)
+                if not os.path.exists(lowerpart_position_folder):
+                    os.makedirs(lowerpart_position_folder)
+                    
+                # Hides the main collection (makes it invisible for the next render).
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render = True             
+                # Un-excludes the Lower Part collection, making its LayerCollection enabled
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = False
+                # Constructs the filename for the current sprite, including prefix,resref and padded frame number.
+                fileName = f"{typeParameters.prefixResref}_LOWER_{str(typeParameters.frame).zfill(5)}.png"
+                
+                # Sets Blender's render output filepath for the current lower-part image.
+                bpy.context.scene.render.filepath = os.path.join(lowerpart_position_folder, fileName)
+                # This is the actual rendering process.
+                # `animation=False` renders a single still image.
+                # `write_still=True` saves the rendered image to the specified `filepath`.
+                # The first `False` argument disables undo support for the operation.
+                renderFrame = bpy.ops.render.render
+                renderFrame(  False,
+                              animation     =False,
+                              write_still   =True)
+                              
+                # Restores the render visibility of the main/upper creature collection (visible for subsequent calls).
+                bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render  = False
                           
     def type1000_monster_quadrant(self, typeParameters:IEAS_AnimationTypesParameters):
         """Handles the logic for rendering and processing monster quadrants of type 1000."""
@@ -2201,8 +2246,8 @@ class IEAS_PGT_Inputs(PropertyGroup):
     # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
     Effect:     bpy.props.StringProperty(name="Effect", default="", description="This defines the name of the subfolder for the Effect animation")   
     # String properties for names of various weapon animations based on the collection names.
-    Creature:           bpy.props.StringProperty(name="Creature Main", default="",          description="This specifies the name of the Blender collection containing the main creature model. This is an absolutely necessary input")
-    Creature_Lower:     bpy.props.StringProperty(name="Creature Lower", default="",         description="This specifies the name of the Blender collection containing the creature’s lower model. This is an absolutely necessary input for animation type 3000")
+    Creature:           bpy.props.StringProperty(name="Main", default="",                   description="This specifies the name of the Blender collection containing the main creature or upper model. This is an absolutely necessary input")
+    Creature_Lower:     bpy.props.StringProperty(name="Lower", default="",                  description="This specifies the name of the Blender collection containing the creature`s or effect`s lower model. This is an absolutely necessary input for animation type 3000")
     Axe:                bpy.props.StringProperty(name="Subfolder A", default="axe",         description="This refers to the Blender collection for axe animation. It also defines the name of the subfolder for the Axe animation")
     Bow:                bpy.props.StringProperty(name="Subfolder B", default="bow",         description="This refers to the Blender collection for bow animation. It also defines the name of the subfolder for the Bow animation")
     Club:               bpy.props.StringProperty(name="Subfolder C", default="club",        description="This refers to the Blender collection for club animation. It also defines the name of the subfolder for the Club animation")
@@ -2635,16 +2680,17 @@ class IEAS_OT_Final(Operator):
             prefixResref                = prefixResref,
             position_folder             = ""
         )
-        if (selectedType == 'E000' or
-            selectedType == '2000' or
-            selectedType == '3000 mirror 0' or
-            selectedType == '3000 mirror 1' or
-            selectedType == '5000/6000 character split bams 0' or
-            selectedType == '5000/6000 character split bams 1' or
-            selectedType == '5000/6000 character old' or
-            selectedType == '7000 monster split bams 0' or
-            selectedType == '7000 monster split bams 1' or
-            selectedType == '8000'):
+        if (selectedType == '0000'                              or
+            selectedType == '2000'                              or
+            selectedType == '3000 mirror 0'                     or
+            selectedType == '3000 mirror 1'                     or
+            selectedType == '5000/6000 character split bams 0'  or
+            selectedType == '5000/6000 character split bams 1'  or
+            selectedType == '5000/6000 character old'           or
+            selectedType == '7000 monster split bams 0'         or
+            selectedType == '7000 monster split bams 1'         or
+            selectedType == '8000'                              or
+            selectedType == 'E000'):
             # Get the method from the dictionary, defaulting to a general handler if not found
             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
             handler_method(typeParameters)
@@ -3647,7 +3693,7 @@ class IEAS_PT_Animation(Panel):
 # --------
 # Purpose:
 # --------
-# This panel defines which weapon animations (Blender Collection) should be rendered
+# This panel defines which animations (Blender Collection) should be rendered
 # and how their corresponding output folders/filenames will be named.
 # ----------------------------------------------------------------------------------
 class IEAS_PT_Collections(Panel):
@@ -3739,7 +3785,8 @@ class IEAS_PT_Collections(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[weaponKey])
                 
-        elif (animationTypesActive['3000 mirror 0'] or animationTypesActive['3000 mirror 1']):
+        elif (animationTypesActive['3000 mirror 0'] or animationTypesActive['3000 mirror 1'] or
+              animationTypesActive['0000'] ):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")
             row = self.layout.row()
