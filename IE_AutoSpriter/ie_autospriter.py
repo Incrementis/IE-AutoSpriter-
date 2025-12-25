@@ -36,7 +36,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 16),
+    "version": (0, 36, 19),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2653,6 +2653,17 @@ class IEAS_OT_Final(Operator):
         selectedType    = context.window_manager.IEAS_properties.Type
         # Retrieves the name of the object selected in the UI.
         objectName      = context.scene.IEAS_properties.Object_List.name
+        # Stores the current object in the scene with the specific user given name.
+        objectCurrent   = context.scene.objects.get(objectName)
+        # Checks if the object exist.
+        if (objectCurrent is None):
+            self.report({'ERROR'}, f"ERROR: Object '{objectName}' does not exist!")
+            return {'CANCELLED'}
+        # Checks if the collection is excluded from vie layer(e.g. through unchecked tick).
+        if not objectCurrent.visible_get():
+            self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from View Layer! Perhaps the collection or object is disabled?")
+            return {'CANCELLED'}
+        
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
         # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
@@ -2704,7 +2715,18 @@ class IEAS_OT_Final(Operator):
         
         # Deselects all objects in the scene to ensure only the target object is affected.
         bpy.ops.object.select_all(action='DESELECT')
-        # Selects the specific object by setting its se ection state to True.
+        
+        objectCurrent   = context.scene.objects.get(objectName)
+        # Checks if the object exist.
+        if (objectCurrent is None):
+            self.report({'ERROR'}, f"ERROR: Object '{objectName}' does not exist!")
+            return {'CANCELLED'}
+        # Checks if the collection is excluded from vie layer(e.g. through unchecked tick).
+        if not objectCurrent.visible_get():
+            self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from View Layer! This error can be caused by an incorrect object in step 1(see `Object List`)")
+            return {'CANCELLED'}
+        
+        # Selects the specific object by setting its section state to True.
         bpy.context.scene.objects[objectName].select_set(True)
         # Sets the selected object as the active object, crucial for operations relying on `bpy.context.active_object`.
         bpy.context.view_layer.objects.active = bpy.data.objects[objectName]
@@ -2726,6 +2748,15 @@ class IEAS_OT_Final(Operator):
         # ----- Main/Outer loop 
         # Iterates through each defined animation.  
         for animationKey, animation in animationFolderNames.items():
+            # Checks if any aniamtion exists.
+            if (bpy.context.active_object.animation_data is None):
+                self.report({'ERROR'}, f"Object '{bpy.context.active_object.name}' has no animation data.")
+                return {'CANCELLED'}
+            # Checks if the action(animation) was found in this blender file.
+            if (bpy.data.actions.get(animation) is None):
+                self.report({'ERROR'}, f"The action '{animation}' could not be found in the Blender file.")
+                return {'CANCELLED'}
+            
             # Attempts to get the animation action data block.
             bpy.context.active_object.animation_data.action = bpy.data.actions.get(animation)
             currentAction = bpy.context.active_object.animation_data.action
