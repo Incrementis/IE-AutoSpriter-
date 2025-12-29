@@ -36,7 +36,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 19),
+    "version": (0, 36, 20),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2576,7 +2576,7 @@ class IEAS_OT_Final(Operator):
             'Effect':   context.scene.IEAS_properties.Use_Effect,   'EMERGE': context.scene.IEAS_properties.Use_Emerge,
             'HIDE':     context.scene.IEAS_properties.Use_Hide,            
             # Type 5000/6000 Boolean Properties
-            'WK2': context.scene.IEAS_properties.Use_WK2,
+            'WK2':      context.scene.IEAS_properties.Use_WK2,
             'A6':       context.scene.IEAS_properties.Use_A6,       'A7': context.scene.IEAS_properties.Use_A7,
             'A8':       context.scene.IEAS_properties.Use_A8,       'A9': context.scene.IEAS_properties.Use_A9,
             'SA':       context.scene.IEAS_properties.Use_SA,       'SS': context.scene.IEAS_properties.Use_SS,
@@ -2753,7 +2753,7 @@ class IEAS_OT_Final(Operator):
                 self.report({'ERROR'}, f"Object '{bpy.context.active_object.name}' has no animation data.")
                 return {'CANCELLED'}
             # Checks if the action(animation) was found in this blender file.
-            if (bpy.data.actions.get(animation) is None):
+            if (bpy.data.actions.get(animation) is None and (animationToggles[animationKey] == True)):
                 self.report({'ERROR'}, f"The action '{animation}' could not be found in the Blender file.")
                 return {'CANCELLED'}
             
