@@ -36,7 +36,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 20),
+    "version": (0, 36, 23),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -3221,7 +3221,7 @@ class IEAS_PT_Animation(Panel):
         Toggles4000 = {
             'Death':    context.scene.IEAS_properties.Use_DE, 'Get_Hit':  context.scene.IEAS_properties.Use_GH,
             'Ready':    context.scene.IEAS_properties.Use_SC, 'Idle':     context.scene.IEAS_properties.Use_SD,
-            'Walk':     context.scene.IEAS_properties.Use_WK,
+            'Dead':     context.scene.IEAS_properties.Use_TW,
         }
         Toggles5000and6000_character_sp0 = {
             'Attack1':   context.scene.IEAS_properties.Use_A1, 'Attack2':   context.scene.IEAS_properties.Use_A2,

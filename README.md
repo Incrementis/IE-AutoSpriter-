@@ -71,3 +71,4 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [Blender Rendering Optimization Tips](https://whoisryosuke.com/blog/2024/blender-rendering-optimization-tips) by Ryo
 * [Expressions in Blender 3D](https://www.youtube.com/watch?v=5IMFSC5h0a4) by ukramedia
 * [Creating radio buttons in the Blender add-ons interface](https://b3d.interplanety.org/en/creating-radio-buttons-in-the-blender-add-ons-interface/) by Nikita
+* [Add a Predefined Meta-Rig]https://docs.blender.org/manual/en/2.81/addons/rigging/rigify.html?highlight=horse
