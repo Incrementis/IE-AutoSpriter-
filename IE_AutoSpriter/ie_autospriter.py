@@ -10,6 +10,8 @@
 # https://docs.blender.org/api/current/bpy.ops.render.html#bpy.ops.render.render
 # https://docs.blender.org/api/current/info_best_practice.html#user-interface-layout
 # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
+# https://docs.blender.org/api/current/mathutils.html#mathutils.Matrix.identity
+# https://docs.blender.org/api/current/bpy.types.PoseBone.html#bpy.types.PoseBone.matrix_basis
 # ----------------------------------------------------------------------------------
 # (PT   = Panel Type)
 # (OT   = Operator Type)
@@ -36,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 23),
+    "version": (0, 36, 28),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2756,6 +2758,12 @@ class IEAS_OT_Final(Operator):
             if (bpy.data.actions.get(animation) is None and (animationToggles[animationKey] == True)):
                 self.report({'ERROR'}, f"The action '{animation}' could not be found in the Blender file.")
                 return {'CANCELLED'}
+            
+            # Resets/deletes all bone transofrmations(basically overwrites matrix_basis with the identity matrix?!)
+            # The information is possibly retrieved from "edit mode".
+            # Maybe matrix multiplication like: <Current Pose> = <Pose in edit mode> x <identity> (?!)
+            for bone in objectCurrent.pose.bones:
+                bone.matrix_basis.identity()
             
             # Attempts to get the animation action data block.
             bpy.context.active_object.animation_data.action = bpy.data.actions.get(animation)
