@@ -12,6 +12,7 @@
 # https://docs.blender.org/api/current/bpy.props.html#bpy.props.EnumProperty
 # https://docs.blender.org/api/current/mathutils.html#mathutils.Matrix.identity
 # https://docs.blender.org/api/current/bpy.types.PoseBone.html#bpy.types.PoseBone.matrix_basis
+# https://developer.blender.org/docs/features/core/rna/
 # ----------------------------------------------------------------------------------
 # (PT   = Panel Type)
 # (OT   = Operator Type)
@@ -38,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 29),
+    "version": (0, 36, 33),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2081,7 +2082,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Every_X_Frame:  bpy.props.IntProperty(  name        = "Every X Frame", 
                                             default     = 1, 
                                             min         = 1,
-                                            description = "This saves every xth frame as a sprite")
+                                            description = "This saves every xth frame as a sprite. The steps depend on the frame start")
     
     # --- Step 2: Shading Nodes
     # String property for the name of the Principled BSDF node.
@@ -2389,11 +2390,18 @@ class IEAS_OT_ShadingNodes(Operator):
     # Blender specific function which is executed in this case when ADD button is pressed
     def execute(self, context):
         
+        # Checks if the property pointer is not empty.
+        if (not context.scene.IEAS_properties.Material_List):
+            # Accesses the "name" property of the pointer "Material_List".
+            Material_List_name = context.scene.IEAS_properties.bl_rna.properties['Material_List'].name
+            self.report({'ERROR'}, f"ERROR: No material selected in '{Material_List_name}'!")
+            return {'CANCELLED'}
+        
+        # Accesses the name of the selected object in the pointer "Material_List".
         materialName    = context.scene.IEAS_properties.Material_List.name
         activeMaterial  = bpy.data.materials[materialName]
         # Activates nodes for specific mesh material(See toggle button "Use Nodes" in "Shading" screen)
         use_nodes = bpy.data.materials[materialName].use_nodes
-        
         # Enable material nodes if they are not already active.
         if(use_nodes==False):
             use_nodes = True
@@ -2665,6 +2673,10 @@ class IEAS_OT_Final(Operator):
         if not objectCurrent.visible_get():
             self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from View Layer! Perhaps the collection or object is disabled?")
             return {'CANCELLED'}
+        # Checks if the object's renderer is deactivated.
+        if (objectCurrent.hide_render):
+            self.report({'WARNING'}, f"WARNING: Object '{objectName}' is excluded from renders (Camera icon is OFF)!")
+            #return {'CANCELLED'}
         
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
@@ -2815,12 +2827,32 @@ class IEAS_OT_Final(Operator):
                 
                         # ----- Variables used in nested inner loop
                         frameStart      = bpy.context.scene.frame_start
-                        frameEnd        = bpy.context.scene.frame_end+1
+                        frameEnd        = bpy.context.scene.frame_end
                         Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
                         
+                        # Checks if every x frame is not too high. 
+                        if(Every_X_Frame > frameEnd):
+                            self.report({'ERROR'}, f"ERROR: Every x frame is with value '{Every_X_Frame}' too high. Fram end is '{frameEnd}'.")
+                            return {'CANCELLED'}
+                        # Negative frame start might be allowed in blender, but not in IE AutoSpriter.
+                        if(frameStart <= 0):
+                            self.report({'ERROR'}, f"ERROR: Frame start is set as '{frameStart}'. IE AutoSpriter does not support zero or negative frame numbers.")
+                            return {'CANCELLED'}
+
+                        # ----- Calculates neccessary frame numbers.
+                        numberOfFrames  = math.floor(frameEnd/Every_X_Frame)
+                        AllFrames       = []
+                        for frame in range(1,numberOfFrames+1):      
+                            calculatedFrame = (frame*Every_X_Frame) + (frameStart-1)         
+                            # This is necessary, otherwise the sprite names will be incorrect.
+                            if calculatedFrame > frameEnd:
+                                break
+                            # This list contains frames which will be rendered.                          
+                            AllFrames.append(calculatedFrame)
+                                                    
                         #  ----- Nested/Inner loop 
                         # Loops through frames within the animation's range, stepping by 'Every_X_Frame'.
-                        for frame in range(frameStart,frameEnd,Every_X_Frame):
+                        for frame in AllFrames:
                             # Sets the current frame of the scene, updating the object's animation pose.
                             bpy.context.scene.frame_current = frame
                                                        
