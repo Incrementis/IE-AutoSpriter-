@@ -60,8 +60,9 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * The Artisan
 * CamDawg
 * Argent77
+* exhuman
 
-## Sources(Learning Materials)
+## Sources and Learning Materials
 * [INI file format: Creature Animations](https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm)
 * [Avatar Naming Schemes](https://gibberlings3.github.io/iesdp/appendices/avatarnaming.htm)
 * [IE-Animations](https://github.com/ArtemiusI/IE-Animations) by Artemiusl
@@ -72,4 +73,6 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [Blender Rendering Optimization Tips](https://whoisryosuke.com/blog/2024/blender-rendering-optimization-tips) by Ryo
 * [Expressions in Blender 3D](https://www.youtube.com/watch?v=5IMFSC5h0a4) by ukramedia
 * [Creating radio buttons in the Blender add-ons interface](https://b3d.interplanety.org/en/creating-radio-buttons-in-the-blender-add-ons-interface/) by Nikita
-* [Add a Predefined Meta-Rig](https://docs.blender.org/manual/en/2.81/addons/rigging/rigify.html?highlight=horse)
+* [Add a Predefined Meta-Rig](https://docs.blender.org/manual/en/2.81/addons/rigging/rigify.html?highlight=horse) by blender
+* [Make Animals In Blender 3 - The Easy Way](https://www.youtube.com/watch?v=tEZOXuDhTJ0) by Grant Abbitt (Gabbitt)
+* [Create Low Poly Characters in Blender (Beginner Tutorial)](https://www.youtube.com/watch?v=BL6fyBeldHA&t=4341s) by Ryan King Art
