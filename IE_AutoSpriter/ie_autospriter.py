@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 36),
+    "version": (0, 36, 38),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1696,7 +1696,6 @@ class IEAS_AnimationTypes():
             # Used to identify which sprite file is defined for which sequence
             sequences = {
                 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
-                'A1':'G2', 'CA':'G2', 'A3':'G2',
             }
             animationKey = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
@@ -1722,7 +1721,6 @@ class IEAS_AnimationTypes():
             # Used to identify which sprite file is defined for which sequence
             sequences = {
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
-                'A1':'G2', 'CA':'G2', 'A3':'G2',
             }
             animationKey = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
@@ -3366,17 +3364,14 @@ class IEAS_PT_Animation(Panel):
             'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         TogglesB000 = {
-            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack3':  context.scene.IEAS_properties.Use_A3, 
-            'Cast':     context.scene.IEAS_properties.Use_CA, 'Death':    context.scene.IEAS_properties.Use_DE,
-            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC, 
-            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
+            'Death':    context.scene.IEAS_properties.Use_DE, 'Get_Hit':  context.scene.IEAS_properties.Use_GH,
+            'Ready':    context.scene.IEAS_properties.Use_SC, 'Idle':     context.scene.IEAS_properties.Use_SD,
+            'Dead':     context.scene.IEAS_properties.Use_TW,
         }
         TogglesC000 = {
-            'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack3':  context.scene.IEAS_properties.Use_A3,
-            'Cast':     context.scene.IEAS_properties.Use_CA, 'Death':    context.scene.IEAS_properties.Use_DE,
-            'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
-            'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW, 
-            'Walk':     context.scene.IEAS_properties.Use_WK,
+            'Death':    context.scene.IEAS_properties.Use_DE, 'Get_Hit':  context.scene.IEAS_properties.Use_GH,
+            'Ready':    context.scene.IEAS_properties.Use_SC, 'Idle':     context.scene.IEAS_properties.Use_SD,
+            'Dead':     context.scene.IEAS_properties.Use_TW, 'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         TogglesD000 = {
             'Idle':     context.scene.IEAS_properties.Use_SD, 'Walk':     context.scene.IEAS_properties.Use_WK,
