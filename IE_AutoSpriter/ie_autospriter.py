@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 40),
+    "version": (0, 36, 41),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2418,14 +2418,16 @@ class IEAS_OT_ShadingNodes(Operator):
 #            return {'CANCELLED'}
         
         # Creates the new nodes (Mix Shader and Bright/Contrast) and positions them near the Principled BSDF node.
-        x           = 0
-        x_location  = Principled_BSDF.location[x]
-        x_offset    = 250
-        y_location  = -100
+        x                               = 0
+        y                               = 0
+        MixShader_offset                = 250
+        BrightContrast_offset           = 50
+        x_location                      = Principled_BSDF.location[x]
+        y_location                      = Principled_BSDF.location[y]
         MixShader_node                  = activeMaterial.node_tree.nodes.new('ShaderNodeMixShader')
-        MixShader_node.location         = (x_location, y_location)
+        MixShader_node.location         = (x_location + MixShader_offset, y_location)
         BrightContrast_node             = activeMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
-        BrightContrast_node.location    = (x_location+x_offset, y_location)
+        BrightContrast_node.location    = (x_location + BrightContrast_offset, y_location - BrightContrast_offset)
         
         # Connects the newly created nodes and existing nodes to form the desired shader graph.
         activeMaterial.node_tree.links.new(Principled_BSDF.outputs[0],MixShader_node.inputs[1])
