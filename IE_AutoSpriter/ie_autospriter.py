@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 39),
+    "version": (0, 36, 40),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1930,9 +1930,9 @@ class IEAS_OT_Rotation(Operator):
     # Blender specific function which is executed in this case when a specific rotation radio button is pressed.
     def execute(self, context):
         # Converts string to float
-        rotationDegree = float(context.window_manager.IEAS_properties.Angles)
+        rotationDegree = float(context.scene.IEAS_properties.Angles)
         # Checks if the rotation is clockwise or counter-clockwise.
-        if context.window_manager.IEAS_properties.Direction == 'CCW':
+        if context.scene.IEAS_properties.Direction == 'CCW':
             rotationDegree = -rotationDegree
         # Rotation on the z-axis in degrees.
         bpy.ops.transform.rotate(value=rotationDegree*math.pi/180, orient_axis='Z')
@@ -2658,7 +2658,7 @@ class IEAS_OT_Final(Operator):
         
         # ----- Init varibales(order is relevant)
         # Retrieves the animation type name of the type list from the UI settings.
-        selectedType    = context.window_manager.IEAS_properties.Type
+        selectedType    = context.scene.IEAS_properties.Type
         # Retrieves the name of the object selected in the UI.
         objectName      = context.scene.IEAS_properties.Object_List.name
         # Stores the current object in the scene with the specific user given name.
@@ -2942,7 +2942,7 @@ class IEAS_PT_GlobalParameters(Panel):
         row.prop(context.scene.IEAS_properties, "Resref")
         row = self.layout.row()
         # "True" displayes as radio buttons, not as drop-down list
-        row.prop(context.window_manager.IEAS_properties, 'Type', expand=False)
+        row.prop(context.scene.IEAS_properties, 'Type', expand=False)
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Object_List")
         row = self.layout.row()
@@ -3069,7 +3069,7 @@ class IEAS_PT_Camera(Panel):
         }
                 
         # --- Reset and activate
-        activeType = context.window_manager.IEAS_properties.Type
+        activeType = context.scene.IEAS_properties.Type
         # Reset active types to false
         for animationTypeKey in animationTypesActive:
             animationTypesActive[animationTypeKey] = False
@@ -3078,8 +3078,8 @@ class IEAS_PT_Camera(Panel):
         
         # --- Creates buttons for rotation 
         row = self.layout.row(align=True)
-        row.prop(context.window_manager.IEAS_properties, 'Angles', expand=True)
-        row.prop(context.window_manager.IEAS_properties, 'Direction', expand=True)
+        row.prop(context.scene.IEAS_properties, 'Angles', expand=True)
+        row.prop(context.scene.IEAS_properties, 'Direction', expand=True)
         row = self.layout.row(align=True)
         row.operator("ieas.rotation") # selfdefined button functionality
         
@@ -3459,7 +3459,7 @@ class IEAS_PT_Animation(Panel):
         }
         
         # --- Reset and activate
-        activeType = context.window_manager.IEAS_properties.Type
+        activeType = context.scene.IEAS_properties.Type
         # Reset active types to false
         for animationTypeKey in animationTypesActive:
             animationTypesActive[animationTypeKey] = False
@@ -3827,7 +3827,7 @@ class IEAS_PT_Collections(Panel):
         }
         
         # --- Reset and activate
-        activeType = context.window_manager.IEAS_properties.Type
+        activeType = context.scene.IEAS_properties.Type
         # Reset active types to false
         for animationTypeKey in animationTypesActive:
             animationTypesActive[animationTypeKey] = False
@@ -3924,7 +3924,6 @@ def register():
     
     # Pointers: Registers the PropertyGroup to the scene, making its properties accessible via `bpy.context.scene.IEAS_properties`.
     bpy.types.Scene.IEAS_properties         = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
-    bpy.types.WindowManager.IEAS_properties = bpy.props.PointerProperty(type=IEAS_PGT_Inputs)
 
     
 # --------
@@ -3949,7 +3948,6 @@ def unregister():
     
     # Deletes pointer
     del bpy.types.Scene.IEAS_properties
-    del bpy.types.WindowManager.IEAS_properties
     
 
 # --------
