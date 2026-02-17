@@ -8,6 +8,7 @@ Please use the latest release version instead of the latest commit.
 This is also a learning project focused on my personal use and interest. Suggestions are welcome!
 
 ## Note
+* Before rendering all animations in all directions, start with just one animation and one direction to see if everything works correctly. 
 * The latest version of IE Autospriter for Blender 4.0 can be found in the branch "v0.36.3-legacy-for-blender4.0".
 * Further versions will be implemented and tested on newer Blender 4.5.5 LTS. This also includes the manual.
 
