@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 43),
+    "version": (0, 36, 45),
     "blender": (4, 0, 0),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2402,7 +2402,7 @@ class IEAS_OT_ShadingNodes(Operator):
         use_nodes = bpy.data.materials[materialName].use_nodes
         # Enable material nodes if they are not already active.
         if(use_nodes==False):
-            use_nodes = True
+            bpy.data.materials[materialName].use_nodes = True
         
         # Gets the user given string inputs (node names) and stores them into variables.
         Principled_BSDF_name = context.scene.IEAS_properties.Principled_BSDF
@@ -2412,10 +2412,13 @@ class IEAS_OT_ShadingNodes(Operator):
         Principled_BSDF = activeMaterial.node_tree.nodes.get(Principled_BSDF_name)
         Material_Output = activeMaterial.node_tree.nodes.get(Material_Output_name)
                 
-        # TODO:Sanity chekc needs Testing
-#        if not Principled_BSDF or not Material_Output:
-#            self.report({'ERROR'}, "Principled BSDF or Material Output node not found. Please check names in settings.")
-#            return {'CANCELLED'}
+        # Checks if the string property has an incorrect value or the node does not exist.
+        if (not Principled_BSDF):
+            self.report({'ERROR'}, "Principled BSDF node not found. Maybe the name 'Principle BSDF' is incorrect?")
+            return {'CANCELLED'}
+        if (not Material_Output):
+            self.report({'ERROR'}, "Material Output node not found. Maybe the name in 'Material Output' is incorrect?")
+            return {'CANCELLED'}
         
         # Creates the new nodes (Mix Shader and Bright/Contrast) and positions them near the Principled BSDF node.
         x                               = 0
