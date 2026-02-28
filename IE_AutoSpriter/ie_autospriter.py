@@ -39,8 +39,8 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 45),
-    "blender": (4, 0, 0),
+    "version": (0, 36, 46),
+    "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
     "description": "Infinity Engine AutoSpriter is a Blender add-on that automates sprite creation from creature animations for IE games. GitHub:https://github.com/Incrementis/IE-AutoSpriter- ",
@@ -84,6 +84,11 @@ class IEAS_AnimationTypes():
         """Method for handling 0000 type logic."""
         # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -620,6 +625,11 @@ class IEAS_AnimationTypes():
         """Method for handling 2000 type logic."""    
         # ----- Deactivates/Activates collections      
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -739,6 +749,11 @@ class IEAS_AnimationTypes():
         """Handles the logic for rendering and processing type 3000(mirror = 0)."""
          # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -820,6 +835,11 @@ class IEAS_AnimationTypes():
         """Handles the logic for rendering and processing type 3000(mirror = 1)."""    
         # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -910,6 +930,11 @@ class IEAS_AnimationTypes():
         """Method for handling 5000/6000 character split bams 0 type logic."""
         # ----- Deactivates/Activates collections      
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -1015,6 +1040,11 @@ class IEAS_AnimationTypes():
         """Method for handling 5000/6000 character split bams 1 type logic."""
         # ----- Deactivates/Activates collections      
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -1120,6 +1150,11 @@ class IEAS_AnimationTypes():
         """Method for handling 5000/6000 character old type logic."""
         # ----- Deactivates/Activates collections      
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -1268,6 +1303,11 @@ class IEAS_AnimationTypes():
         """Method for handling 7000 monster split bams 0 type logic."""
          # ----- Deactivates/Activates collections      
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -1380,6 +1420,11 @@ class IEAS_AnimationTypes():
         """Method for handling 7000 monster split bams 1 type logic."""
          # ----- Deactivates/Activates collections
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True
@@ -1519,6 +1564,11 @@ class IEAS_AnimationTypes():
         """Method for handling 8000 monster_layered type logic."""
          # ----- Deactivates/Activates collections      
         if (typeParameters.exclude == True):
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -1758,9 +1808,14 @@ class IEAS_AnimationTypes():
         
     def typeE000(self, typeParameters:IEAS_AnimationTypesParameters):
         """Method for handling E000 type logic."""     
-        # ----- Deactivates/Activates collections      
+        # ----- Deactivates/Activates collections
         if (typeParameters.exclude == True):
-            # Deactivates every collection found.                   
+            # Checks the collection name in the scene collection  
+            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+            
+            # Deactivates every collection found.
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
             # Activates only creature collection.
@@ -2719,9 +2774,13 @@ class IEAS_OT_Final(Operator):
             selectedType == '7000 monster split bams 1'         or
             selectedType == '8000'                              or
             selectedType == 'E000'):
-            # Get the method from the dictionary, defaulting to a general handler if not found
-            handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
-            handler_method(typeParameters)
+            try:
+                # Get the method from the dictionary, defaulting to a general handler if not found
+                handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
+                handler_method(typeParameters)
+            except ValueError as e:
+                self.report({'ERROR'}, str(e))
+                return {'CANCELLED'}
                         
         # ----- Deselecting and selecting
         # Checks if the user is not in "Object Mode"
@@ -2879,6 +2938,7 @@ class IEAS_OT_Final(Operator):
                             
                             # Get the method from the dictionary, defaulting to a general handler if not found
                             handler_method  = animationTypeHandlers.get(selectedType, IEAS_AnimationTypes().typeNone)
+                            # The handler is basically the found function(e.g. def typeE000) and can be called as such.
                             handler_method(typeParametersUpdated)                        
                 
         # Restore the object's Z-axis rotation to its original state
