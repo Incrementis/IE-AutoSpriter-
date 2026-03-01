@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 46),
+    "version": (0, 36, 48),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2710,12 +2710,16 @@ class IEAS_OT_Final(Operator):
         if (context.scene.IEAS_properties.Resolution_Y != bpy.context.scene.render.resolution_y):
             context.scene.IEAS_properties.Resolution_Y = bpy.context.scene.render.resolution_y
         
+        # Checks if 'Object List' is selected with an object(armature/rig)
+        if (context.scene.IEAS_properties.Object_List is None):
+            self.report({'ERROR'}, f"ERROR: Value in 'Object List' in step 1 is '{context.scene.IEAS_properties.Object_List}'! Perhaps no object is selected?")
+            return {'CANCELLED'}
+        
         # ----- Filename and path
         # Retrieves the base save path from user input.            
         pathSaveAt      = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
         # Combines prefix and resref for use in filename construction.      
-        prefixResref    = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
-        
+        prefixResref    = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref        
         # ----- Init varibales(order is relevant)
         # Retrieves the animation type name of the type list from the UI settings.
         selectedType    = context.scene.IEAS_properties.Type
@@ -2723,18 +2727,22 @@ class IEAS_OT_Final(Operator):
         objectName      = context.scene.IEAS_properties.Object_List.name
         # Stores the current object in the scene with the specific user given name.
         objectCurrent   = context.scene.objects.get(objectName)
+        
         # Checks if the object exist.
         if (objectCurrent is None):
-            self.report({'ERROR'}, f"ERROR: Object '{objectName}' does not exist!")
+            self.report({'ERROR'}, f"ERROR: Object '{objectCurrent}' does not exist!")
             return {'CANCELLED'}
-        # Checks if the collection is excluded from vie layer(e.g. through unchecked tick).
+        # Checks if the collection is excluded from view layer(e.g. through unchecked tick).
         if not objectCurrent.visible_get():
             self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from View Layer! Perhaps the collection or object is disabled?")
             return {'CANCELLED'}
         # Checks if the object's renderer is deactivated.
         if (objectCurrent.hide_render):
-            self.report({'WARNING'}, f"WARNING: Object '{objectName}' is excluded from renders (Camera icon is OFF)!")
-            #return {'CANCELLED'}
+            self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from renders (Camera icon is OFF)!")
+            return {'CANCELLED'}
+        # Checks if 'Object List' is selected with an object(armature/rig)
+        if (prefixResref is ''):
+            self.report({'WARNING'}, f"WARNING: Prefix AND Resref are empty in step 1!")
         
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
