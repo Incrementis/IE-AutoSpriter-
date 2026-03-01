@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 48),
+    "version": (0, 36, 50),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2741,7 +2741,7 @@ class IEAS_OT_Final(Operator):
             self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from renders (Camera icon is OFF)!")
             return {'CANCELLED'}
         # Checks if 'Object List' is selected with an object(armature/rig)
-        if (prefixResref is ''):
+        if (prefixResref == ''):
             self.report({'WARNING'}, f"WARNING: Prefix AND Resref are empty in step 1!")
         
         # Selects the specific object by setting its selection state to True.
