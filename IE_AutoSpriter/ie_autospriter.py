@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 50),
+    "version": (0, 36, 51),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1318,7 +1318,7 @@ class IEAS_AnimationTypes():
         else:
             # Used to identify which sprite file is defined for which sequence
             sequences = {
-                'SD':'G1', 'SC':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
+                'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
                 'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
             }
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
