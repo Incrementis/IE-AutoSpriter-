@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 51),
+    "version": (0, 36, 57),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1539,7 +1539,7 @@ class IEAS_AnimationTypes():
              # Used to identify which sprite file is defined for which sequence
             sequences = {
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1','DE':'G1', 'TW':'G1',
-                'A1':'G2', 'CA':'G2', 'A3':'G3'
+                'A1':'G2', 'CA':'G2', 'A3':'G2'
             }
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
@@ -2841,11 +2841,12 @@ class IEAS_OT_Final(Operator):
                 self.report({'ERROR'}, f"The action '{animation}' could not be found in the Blender file.")
                 return {'CANCELLED'}
             
+            # TODO: Delete the reset mode
             # Resets/deletes all bone transofrmations(basically overwrites matrix_basis with the identity matrix?!)
             # The information is possibly retrieved from "edit mode".
             # Maybe matrix multiplication like: <Current Pose> = <Pose in edit mode> x <identity> (?!)
-            for bone in objectCurrent.pose.bones:
-                bone.matrix_basis.identity()
+            # for bone in objectCurrent.pose.bones:
+                # bone.matrix_basis.identity()
             
             # Attempts to get the animation action data block.
             bpy.context.active_object.animation_data.action = bpy.data.actions.get(animation)
@@ -2884,10 +2885,10 @@ class IEAS_OT_Final(Operator):
                         if(selectedType not in excludedAnimationTypes):                  
                             if not os.path.exists(position_folder):
                                 os.makedirs(position_folder)
-                            
+                        
                         # Rotates the active object (the character/model) around its Z-axis to face the current direction.
                         # The script rotates the subject, relying on a static camera to capture it, rather than rotating the camera itself.
-                        bpy.context.active_object.rotation_euler[axis_Z] = math.radians(cameraAngles[positionKey]) 
+                        bpy.context.active_object.rotation_euler[axis_Z] = math.radians(cameraAngles[positionKey])
                         
                         # ----- Debugging
                         # TODO: Delete print

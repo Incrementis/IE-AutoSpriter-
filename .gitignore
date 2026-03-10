@@ -25,3 +25,5 @@
 /demos/blender4.0(legacy)/*.blend1
 *.blend1
 *.png
+/demos/test bams/type 7000/monster_old/!_WolfG2E.ini
+/demos/test bams/type 7000/monster_old/!_WolfG1.ini
