@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 62),
+    "version": (0, 36, 64),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2588,13 +2588,13 @@ class IEAS_OT_Final(Operator):
         animationFolderNames = {
             'A1':       context.scene.IEAS_properties.Attack1,      'A2': context.scene.IEAS_properties.Attack2,
             'A3':       context.scene.IEAS_properties.Attack3,      'A4': context.scene.IEAS_properties.Attack4,
+            'A5':       context.scene.IEAS_properties.Attack5,      'TW': context.scene.IEAS_properties.Dead,
             'CA':       context.scene.IEAS_properties.Cast,         'DE': context.scene.IEAS_properties.Death,
             'GH':       context.scene.IEAS_properties.Get_Hit,      'GU': context.scene.IEAS_properties.Get_Up,
             'SC':       context.scene.IEAS_properties.Ready,        'SD': context.scene.IEAS_properties.Idle,
             'SL':       context.scene.IEAS_properties.Sleep,        'SP': context.scene.IEAS_properties.Conjure,
-            'TW':       context.scene.IEAS_properties.Dead,         'WK': context.scene.IEAS_properties.Walk,
-            'Effect':   context.scene.IEAS_properties.Effect,       'EMERGE': context.scene.IEAS_properties.Emerge,
-            'HIDE':     context.scene.IEAS_properties.Hide,
+            'WK': context.scene.IEAS_properties.Walk,               'EMERGE': context.scene.IEAS_properties.Emerge,
+            'HIDE':     context.scene.IEAS_properties.Hide,         'Effect':   context.scene.IEAS_properties.Effect,
             # Type 5000/6000 Properties
             'WK2':      context.scene.IEAS_properties.Walk2,
             'A6':       context.scene.IEAS_properties.Attack6,      'A7': context.scene.IEAS_properties.Attack7,
@@ -2636,13 +2636,13 @@ class IEAS_OT_Final(Operator):
         animationToggles = {
             'A1':       context.scene.IEAS_properties.Use_A1,       'A2': context.scene.IEAS_properties.Use_A2,
             'A3':       context.scene.IEAS_properties.Use_A3,       'A4': context.scene.IEAS_properties.Use_A4,
+            'A5':       context.scene.IEAS_properties.Use_A5,       'TW': context.scene.IEAS_properties.Use_TW,
             'CA':       context.scene.IEAS_properties.Use_CA,       'DE': context.scene.IEAS_properties.Use_DE,
             'GH':       context.scene.IEAS_properties.Use_GH,       'GU': context.scene.IEAS_properties.Use_GU,
             'SC':       context.scene.IEAS_properties.Use_SC,       'SD': context.scene.IEAS_properties.Use_SD,
             'SL':       context.scene.IEAS_properties.Use_SL,       'SP': context.scene.IEAS_properties.Use_SP,
-            'TW':       context.scene.IEAS_properties.Use_TW,       'WK': context.scene.IEAS_properties.Use_WK,
-            'Effect':   context.scene.IEAS_properties.Use_Effect,   'EMERGE': context.scene.IEAS_properties.Use_Emerge,
-            'HIDE':     context.scene.IEAS_properties.Use_Hide,            
+            'WK':       context.scene.IEAS_properties.Use_WK,       'EMERGE':   context.scene.IEAS_properties.Use_Emerge,
+            'Effect':   context.scene.IEAS_properties.Use_Effect,   'HIDE':     context.scene.IEAS_properties.Use_Hide,                      
             # Type 5000/6000 Boolean Properties
             'WK2':      context.scene.IEAS_properties.Use_WK2,
             'A6':       context.scene.IEAS_properties.Use_A6,       'A7': context.scene.IEAS_properties.Use_A7,

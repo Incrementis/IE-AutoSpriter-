@@ -77,3 +77,5 @@ Thanks to "The Gibberlings 3" forum users and "Artisan's Corner" discord server 
 * [Add a Predefined Meta-Rig](https://docs.blender.org/manual/en/2.81/addons/rigging/rigify.html?highlight=horse) by blender
 * [Make Animals In Blender 3 - The Easy Way](https://www.youtube.com/watch?v=tEZOXuDhTJ0) by Grant Abbitt (Gabbitt)
 * [Create Low Poly Characters in Blender (Beginner Tutorial)](https://www.youtube.com/watch?v=BL6fyBeldHA&t=4341s) by Ryan King Art
+* [How to Grow Tendrils Over Any Object (Blender Tutorial)](https://www.youtube.com/watch?v=ufRygCrYsx4) by Pixel Me That
+* [A Different approach to making FIRE in Blender!](https://www.youtube.com/watch?v=cUfc4iWG9qI) by Kenan Proffitt
