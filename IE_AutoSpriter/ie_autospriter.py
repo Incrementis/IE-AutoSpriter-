@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 64),
+    "version": (0, 36, 66),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2212,21 +2212,21 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_SSE:    bpy.props.BoolProperty(name="Use SSE",  default=False,  description="This determines whether sprites for the south south east orientation are rendered and saved in the corresponding folder")    
     # --- Step 4: Animation (Animation Names and Toggles)
     # String properties for names of various animation actions.
-    Attack1:    bpy.props.StringProperty(name="Subfolder A1", default="slash",      description="This defines the name of the subfolder for the Attack1 animation")
-    Attack2:    bpy.props.StringProperty(name="Subfolder A2", default="stab",       description="This defines the name of the subfolder for the Attack2 animation")
-    Attack3:    bpy.props.StringProperty(name="Subfolder A3", default="strike",     description="This defines the name of the subfolder for the Attack3 animation")
-    Attack4:    bpy.props.StringProperty(name="Subfolder A4", default="throw",      description="This defines the name of the subfolder for the Attack4 animation")
-    Attack5:    bpy.props.StringProperty(name="Subfolder A5", default="unused?",    description="This defines the name of the subfolder for the Attack5 animation")
-    Cast:       bpy.props.StringProperty(name="Subfolder CA", default="cast",       description="This defines the name of the subfolder for the Cast animation")
-    Death:      bpy.props.StringProperty(name="Subfolder DE", default="death",      description="This defines the name of the subfolder for the Death animation")
-    Get_Hit:    bpy.props.StringProperty(name="Subfolder GH", default="get hit",    description="This defines the name of the subfolder for the Gets Hit animation")
-    Get_Up:     bpy.props.StringProperty(name="Subfolder GU", default="get up",     description="This defines the name of the subfolder for the Get Up animation")
-    Ready:      bpy.props.StringProperty(name="Subfolder SC", default="ready",      description="This defines the name of the subfolder for the Ready animation")
-    Idle:       bpy.props.StringProperty(name="Subfolder SD", default="idle",       description="This defines the name of the subfolder for the Idle animation")
-    Sleep:      bpy.props.StringProperty(name="Subfolder SL", default="sleep",      description="This defines the name of the subfolder for the Sleep animation")
-    Conjure:    bpy.props.StringProperty(name="Subfolder SP", default="conjure",    description="This defines the name of the subfolder for the Conjure animation")
-    Dead:       bpy.props.StringProperty(name="Subfolder TW", default="dead",       description="This defines the name of the subfolder for the Dead animation")
-    Walk:       bpy.props.StringProperty(name="Subfolder WK", default="walk",       description="This defines the name of the subfolder for the Walk animation")
+    Attack1:    bpy.props.StringProperty(name="Subfolder A1", default="slash",                          description="This defines the name of the subfolder for the Attack1 animation")
+    Attack2:    bpy.props.StringProperty(name="Subfolder A2", default="strike",                         description="This defines the name of the subfolder for the Attack2 animation")
+    Attack3:    bpy.props.StringProperty(name="Subfolder A3", default="stab",                           description="This defines the name of the subfolder for the Attack3 animation")
+    Attack4:    bpy.props.StringProperty(name="Subfolder A4", default="throw(all except sling?)",       description="This defines the name of the subfolder for the Attack4 animation")
+    Attack5:    bpy.props.StringProperty(name="Subfolder A5", default="unused?(throw with sling?)",     description="This defines the name of the subfolder for the Attack5 animation")
+    Cast:       bpy.props.StringProperty(name="Subfolder CA", default="cast",                           description="This defines the name of the subfolder for the Cast animation")
+    Death:      bpy.props.StringProperty(name="Subfolder DE", default="death",                          description="This defines the name of the subfolder for the Death animation")
+    Get_Hit:    bpy.props.StringProperty(name="Subfolder GH", default="get hit",                        description="This defines the name of the subfolder for the Gets Hit animation")
+    Get_Up:     bpy.props.StringProperty(name="Subfolder GU", default="get up",                         description="This defines the name of the subfolder for the Get Up animation")
+    Ready:      bpy.props.StringProperty(name="Subfolder SC", default="ready",                          description="This defines the name of the subfolder for the Ready animation")
+    Idle:       bpy.props.StringProperty(name="Subfolder SD", default="idle",                           description="This defines the name of the subfolder for the Idle animation")
+    Sleep:      bpy.props.StringProperty(name="Subfolder SL", default="sleep",                          description="This defines the name of the subfolder for the Sleep animation")
+    Conjure:    bpy.props.StringProperty(name="Subfolder SP", default="conjure",                        description="This defines the name of the subfolder for the Conjure animation")
+    Dead:       bpy.props.StringProperty(name="Subfolder TW", default="dead",                           description="This defines the name of the subfolder for the Dead animation")
+    Walk:       bpy.props.StringProperty(name="Subfolder WK", default="walk",                           description="This defines the name of the subfolder for the Walk animation")
     # Additional string properties for names of various animation actions of type 5000/6000.
     Walk2:      bpy.props.StringProperty(name="Subfolder WK2", default="walk",                  description="This defines the name of the subfolder for the Walk2 animation")
     Attack6:    bpy.props.StringProperty(name="Subfolder A6", default="2h-thrust",              description="This defines the name of the subfolder for the Attack6(two handed thrust) animation")
