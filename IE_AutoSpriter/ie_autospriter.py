@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 66),
+    "version": (0, 36, 72),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1435,13 +1435,13 @@ class IEAS_AnimationTypes():
         else:
             # Used to identify which sprite file is defined for which sequence
             sequences = {
-                'SC':'G1', 'WK':'G11','SD':'G12', 'GH':'G13and14', 'DE':'G14', 'TW':'G14and15',
+                'SC':'G1', 'WK':'G11','SD':'G12', 'GH':'G13and14', 'DE':'G14', 'TW':'G14and15', 'GU':'G14', 'SL':'G14',
                 'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
             }
             animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{animationKey}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1494,7 +1494,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{animationKey}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -2138,14 +2138,14 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                             description = "This saves every xth frame as a sprite. The steps depend on the frame start")
     
     # --- Step 2: Shading Nodes
-    # String property for the name of the Principled BSDF node.
-    Principled_BSDF:    bpy.props.StringProperty(   name        = "Principle BSDF", 
-                                                    default     = "Principled BSDF",
-                                                    description = "This is the name of the Principled BSDF node")
-    # String property for the name of the Material Output node.
-    Material_Output:    bpy.props.StringProperty(   name        = "Material Output", 
-                                                    default     = "Material Output",
-                                                    description = "This is the name of the Material Output node")
+    # String property for the name of the input node for Mix Shader node.
+    Mix_Shader_Input:    bpy.props.StringProperty(  name        = "Mix Shader Input", 
+                                                    default     = "Mix Shader Input",
+                                                    description = "This is the node name which will be connected to the Mix Shader input[e.g. Principle BSDF]")
+    # String property for the name of the output node for Mix Shader node.
+    Mix_Shader_Output:   bpy.props.StringProperty(  name        = "Mix Shader Output", 
+                                                    default     = "Mix Shader Output",
+                                                    description = "This is the node name which will be connected to the Mix Shader output[e.g. Material Output]")
     # Pointer to a Blender Material, used for applying shading nodes.
     Material_List:      bpy.props.PointerProperty(
                                                     type        = bpy.types.Material,   # Crucially, specify the type of data block it points to
@@ -2460,36 +2460,36 @@ class IEAS_OT_ShadingNodes(Operator):
             bpy.data.materials[materialName].use_nodes = True
         
         # Gets the user given string inputs (node names) and stores them into variables.
-        Principled_BSDF_name = context.scene.IEAS_properties.Principled_BSDF
-        Material_Output_name = context.scene.IEAS_properties.Material_Output
+        Mix_Shader_Input_name   = context.scene.IEAS_properties.Mix_Shader_Input
+        Mix_Shader_Output_name  = context.scene.IEAS_properties.Mix_Shader_Output
         
         # Retrieves existing nodes by their names from the active material's node tree.
-        Principled_BSDF = activeMaterial.node_tree.nodes.get(Principled_BSDF_name)
-        Material_Output = activeMaterial.node_tree.nodes.get(Material_Output_name)
+        Mix_Shader_Input_node  = activeMaterial.node_tree.nodes.get(Mix_Shader_Input_name)
+        Mix_Shader_Output_node = activeMaterial.node_tree.nodes.get(Mix_Shader_Output_name)
                 
         # Checks if the string property has an incorrect value or the node does not exist.
-        if (not Principled_BSDF):
-            self.report({'ERROR'}, "Principled BSDF node not found. Maybe the name 'Principle BSDF' is incorrect?")
+        if (not Mix_Shader_Input_node):
+            self.report({'ERROR'}, "Input node for Mix Shader node not found. Maybe the node name for 'Mix Shader Input' is incorrect?")
             return {'CANCELLED'}
-        if (not Material_Output):
-            self.report({'ERROR'}, "Material Output node not found. Maybe the name in 'Material Output' is incorrect?")
+        if (not Mix_Shader_Output_node):
+            self.report({'ERROR'}, "Output node for Mix Shader node not found. Maybe the node name for 'Mix Shader Output' is incorrect?")
             return {'CANCELLED'}
         
-        # Creates the new nodes (Mix Shader and Bright/Contrast) and positions them near the Principled BSDF node.
+        # Creates the new nodes (Mix Shader and Bright/Contrast) and positions them near the Mix Shader input node node.
         x                               = 0
         y                               = 0
         MixShader_offset                = 250
         BrightContrast_offset           = 50
-        x_location                      = Principled_BSDF.location[x]
-        y_location                      = Principled_BSDF.location[y]
+        x_location                      = Mix_Shader_Input_node.location[x]
+        y_location                      = Mix_Shader_Input_node.location[y]
         MixShader_node                  = activeMaterial.node_tree.nodes.new('ShaderNodeMixShader')
         MixShader_node.location         = (x_location + MixShader_offset, y_location)
         BrightContrast_node             = activeMaterial.node_tree.nodes.new('ShaderNodeBrightContrast')
         BrightContrast_node.location    = (x_location + BrightContrast_offset, y_location - BrightContrast_offset)
         
         # Connects the newly created nodes and existing nodes to form the desired shader graph.
-        activeMaterial.node_tree.links.new(Principled_BSDF.outputs[0],MixShader_node.inputs[1])
-        activeMaterial.node_tree.links.new(MixShader_node.outputs[0],Material_Output.inputs[0])
+        activeMaterial.node_tree.links.new(Mix_Shader_Input_node.outputs[0],MixShader_node.inputs[1])
+        activeMaterial.node_tree.links.new(MixShader_node.outputs[0],Mix_Shader_Output_node.inputs[0])
         activeMaterial.node_tree.links.new(BrightContrast_node.outputs[0],MixShader_node.inputs[2])
         
         # Sets default values for the new nodes' inputs, based on typical(??) IE sprite requirements.
@@ -3051,8 +3051,8 @@ class IEAS_PT_ShadingNodes(Panel):
     def draw(self, context):
         layout = self.layout
         # Draws UI elements linked to material-related properties.
-        layout.prop(context.scene.IEAS_properties, "Principled_BSDF")
-        layout.prop(context.scene.IEAS_properties, "Material_Output")
+        layout.prop(context.scene.IEAS_properties, "Mix_Shader_Input")
+        layout.prop(context.scene.IEAS_properties, "Mix_Shader_Output")
         layout.prop(context.scene.IEAS_properties, "Material_List")
         col = layout.column()
         # Creates a button that executes the IEAS_OT_ShadingNodes operator.
