@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 72),
+    "version": (0, 36, 74),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2141,7 +2141,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     # String property for the name of the input node for Mix Shader node.
     Mix_Shader_Input:    bpy.props.StringProperty(  name        = "Mix Shader Input", 
                                                     default     = "Mix Shader Input",
-                                                    description = "This is the node name which will be connected to the Mix Shader input[e.g. Principle BSDF]")
+                                                    description = "This is the node name which will be connected to the Mix Shader input[e.g. Principled BSDF]")
     # String property for the name of the output node for Mix Shader node.
     Mix_Shader_Output:   bpy.props.StringProperty(  name        = "Mix Shader Output", 
                                                     default     = "Mix Shader Output",
@@ -2302,18 +2302,38 @@ class IEAS_PGT_Inputs(PropertyGroup):
     # String property for unique effect animation(e.g. visual effects,spell effects or body parts of exploding creatures)
     Effect:     bpy.props.StringProperty(name="Effect", default="", description="This defines the name of the subfolder for the Effect animation")   
     # String properties for names of various weapon animations based on the collection names.
-    Creature:           bpy.props.StringProperty(name="Main", default="",                   description="This specifies the name of the Blender collection containing the main creature or upper model. This is an absolutely necessary input")
-    Creature_Lower:     bpy.props.StringProperty(name="Lower", default="",                  description="This specifies the name of the Blender collection containing the creature`s or effect`s lower model. This is an absolutely necessary input for animation type 3000")
-    Axe:                bpy.props.StringProperty(name="Subfolder A", default="axe",         description="This refers to the Blender collection for axe animation. It also defines the name of the subfolder for the Axe animation")
-    Bow:                bpy.props.StringProperty(name="Subfolder B", default="bow",         description="This refers to the Blender collection for bow animation. It also defines the name of the subfolder for the Bow animation")
-    Club:               bpy.props.StringProperty(name="Subfolder C", default="club",        description="This refers to the Blender collection for club animation. It also defines the name of the subfolder for the Club animation")
-    Dagger:             bpy.props.StringProperty(name="Subfolder D", default="dagger",      description="This refers to the Blender collection for Dagger animation. It also defines the name of the subfolder for the Dagger animation")
-    Flail:              bpy.props.StringProperty(name="Subfolder F", default="flail",       description="This refers to the Blender collection for Flail animation. It also defines the name of the subfolder for the Flail animation")
-    Halberd:            bpy.props.StringProperty(name="Subfolder H", default="halberd",     description="This refers to the Blender collection for Halberd animation. It also defines the name of the subfolder for the Halberd animation")
-    Mace:               bpy.props.StringProperty(name="Subfolder M", default="mace",        description="This refers to the Blender collection for Mace animation. It also defines the name of the subfolder for the Mace animation")
-    Sword:              bpy.props.StringProperty(name="Subfolder S", default="sword",       description="TThis refers to the Blender collection for Sword animation. It also defines the name of the subfolder for the Sword animation")
-    Warhammer:          bpy.props.StringProperty(name="Subfolder W", default="warhammer",   description="This refers to the Blender collection for Warhammer animation. It also defines the name of the subfolder for the Warhammer animation")
-    Quarterstaff:       bpy.props.StringProperty(name="Subfolder Q", default="quarterstaff",description="This refers to the Blender collection for Quarterstaff animation. It also defines the name of the subfolder for the Quarterstaff animation")
+    Creature:           bpy.props.StringProperty(name="Main",           default="",                             description="This specifies the name of the Blender collection containing the main creature or upper model. This is an absolutely necessary input")
+    Creature_Lower:     bpy.props.StringProperty(name="Lower",          default="",                             description="This specifies the name of the Blender collection containing the creature`s or effect`s lower model. This is an absolutely necessary input for animation type 3000")
+    Axe:                bpy.props.StringProperty(name="Subfolder AX",   default="axe",                          description="This refers to the Blender collection for axe animation. It also defines the name of the subfolder for the axe animation")
+    Shortbow:           bpy.props.StringProperty(name="Subfolder BS",   default="short bow",                    description="This refers to the Blender collection for short bow animation. It also defines the name of the subfolder for the short bow animation")
+    Longbow:            bpy.props.StringProperty(name="Subfolder BW",   default="long bow",                     description="This refers to the Blender collection for long bow animation. It also defines the name of the subfolder for the long bow animation")
+    Crossbow:           bpy.props.StringProperty(name="Subfolder CB",   default="crossbow",                     description="This refers to the Blender collection for crossbow animation. It also defines the name of the subfolder for the crossbow animation")
+    Sling:              bpy.props.StringProperty(name="Subfolder SL",   default="sling",                        description="This refers to the Blender collection for sling animation. It also defines the name of the subfolder for the sling animation")
+    Club:               bpy.props.StringProperty(name="Subfolder CL",   default="club",                         description="This refers to the Blender collection for club animation. It also defines the name of the subfolder for the club animation")
+    Dagger:             bpy.props.StringProperty(name="Subfolder DD",   default="dagger",                       description="This refers to the Blender collection for dagger animation. It also defines the name of the subfolder for the dagger animation")
+    Short_Sword:        bpy.props.StringProperty(name="Subfolder SS",   default="short sword",                  description="This refers to the Blender collection for short sword animation. It also defines the name of the subfolder for the short sword animation")
+    Flail:              bpy.props.StringProperty(name="Subfolder FL",   default="flail(round head)",            description="This refers to the Blender collection for flail animation. It also defines the name of the subfolder for the flail animation")
+    Flail1:             bpy.props.StringProperty(name="Subfolder F0",   default="flail(1 long head)",           description="This refers to the Blender collection for flail(alternate 1) animation. It also defines the name of the subfolder for the flail(alternate 1) animation")
+    Flail2:             bpy.props.StringProperty(name="Subfolder F1",   default="flail(2 long heads)",          description="This refers to the Blender collection for flail(alternate 2) animation. It also defines the name of the subfolder for the flail(alternate 2) animation")
+    Flail3:             bpy.props.StringProperty(name="Subfolder F3",   default="flail(3 long head)",           description="This refers to the Blender collection for flail(alternate 3) animation. It also defines the name of the subfolder for the flail(alternate 3) animation")
+    Halberd:            bpy.props.StringProperty(name="Subfolder HB",   default="halberd",                      description="This refers to the Blender collection for halberd animation. It also defines the name of the subfolder for the halberd animation")
+    Spear:              bpy.props.StringProperty(name="Subfolder SP",   default="spear",                        description="This refers to the Blender collection for spear animation. It also defines the name of the subfolder for the spear animation")
+    Mace:               bpy.props.StringProperty(name="Subfolder MC",   default="mace(simple head and hilt)",   description="This refers to the Blender collection for Mace animation. It also defines the name of the subfolder for the mace animation")
+    Mace1:              bpy.props.StringProperty(name="Subfolder M2",   default="mace(complex head and hilt)",  description="This refers to the Blender collection for Mace(alternate) animation. It also defines the name of the subfolder for the mace(alternate) animation")
+    Flaming_Short_Sword:bpy.props.StringProperty(name="Subfolder F2",   default="flaming short sword",          description="This refers to the Blender collection for flaming short sword animation. It also defines the name of the subfolder for the flaming short sword animation")
+    Flaming_Sword:      bpy.props.StringProperty(name="Subfolder FS",   default="flaming sword",                description="This refers to the Blender collection for flaming sword animation. It also defines the name of the subfolder for the flaming sword animation")
+    Bastardsword:       bpy.props.StringProperty(name="Subfolder S0",   default="bastardsword",                 description="This refers to the Blender collection for bastardsword animation. It also defines the name of the subfolder for the bastardsword animation")
+    Longsword:          bpy.props.StringProperty(name="Subfolder S1",   default="longsword",                    description="This refers to the Blender collection for longsword animation. It also defines the name of the subfolder for the longsword animation")
+    Greatsword:         bpy.props.StringProperty(name="Subfolder S2",   default="greatsword",                   description="This refers to the Blender collection for two handed sword animation. It also defines the name of the subfolder for the two handed sword animation")
+    Katana:             bpy.props.StringProperty(name="Subfolder S3",   default="katana",                       description="This refers to the Blender collection for katana animation. It also defines the name of the subfolder for the katana animation")
+    Scimitar:           bpy.props.StringProperty(name="Subfolder SC",   default="scimitar",                     description="This refers to the Blender collection for scimitar animation. It also defines the name of the subfolder for the scimitar animation")
+    Morning_Star:       bpy.props.StringProperty(name="Subfolder MS",   default="morning star",                 description="This refers to the Blender collection for morning star animation. It also defines the name of the subfolder for the morning star animation")
+    Warhammer:          bpy.props.StringProperty(name="Subfolder WH",   default="warhammer",                    description="This refers to the Blender collection for warhammer animation. It also defines the name of the subfolder for the warhammer animation")
+    Quarterstaff:       bpy.props.StringProperty(name="Subfolder QS",   default="quarterstaff(wood)",           description="This refers to the Blender collection for quarterstaff animation. It also defines the name of the subfolder for the quarterstaff animation")
+    Quarterstaff1:      bpy.props.StringProperty(name="Subfolder Q2",   default="quarterstaff(steel and gold)", description="This refers to the Blender collection for quarterstaff(alternet 1) animation. It also defines the name of the subfolder for the quarterstaff(alternet 1) animation")
+    Quarterstaff2:      bpy.props.StringProperty(name="Subfolder Q3",   default="quarterstaff(root like hilt)", description="This refers to the Blender collection for quarterstaff(alternet 2) animation. It also defines the name of the subfolder for the quarterstaff(alternet 2) animation")
+    Quarterstaff3:      bpy.props.StringProperty(name="Subfolder Q4",   default="quarterstaff(heavily crooked)",description="This refers to the Blender collection for quarterstaff(alternet 3) animation. It also defines the name of the subfolder for the quarterstaff(alternet 3) animation")
+    Glowing_Staff:      bpy.props.StringProperty(name="Subfolder GS",   default="glowing staff",                description="This refers to the Blender collection for glowing staff animation. It also defines the name of the subfolder for the glowing staff animation")
     # String properties for various armor collection names(used for e.g. Typ 5000/6000).
     Armor1:             bpy.props.StringProperty(name="Subfolder ARMOR1", default="no_armor",   description="This refers to the Blender collection for Armor1 animation. It also defines the name of the subfolder for the Armor1(no armor) animation")
     Armor2:             bpy.props.StringProperty(name="Subfolder ARMOR2", default="leather",    description="This refers to the Blender collection for Armor2 animation. It also defines the name of the subfolder for the Armor2(e.g. leather armor) animation")
@@ -2370,16 +2390,36 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_ARMOR3: bpy.props.BoolProperty(name="Use ARMOR 3",  default=False, description="This determines whether sprites for the Armor3(e.g. chain/robe armor) animation are rendered and saved in the corresponding folder")
     Use_ARMOR4: bpy.props.BoolProperty(name="Use ARMOR 4",  default=False, description="This determines whether sprites for the Armor4(e.g. plate armor) animation are rendered and saved in the corresponding folder")
     # Boolean toggles to render each weapon animation with the selected creature animation.
-    Use_A:      bpy.props.BoolProperty(name="Use A",    default=False, description="This determines whether sprites for the Axe animation are rendered and saved in the corresponding folder")
-    Use_B:      bpy.props.BoolProperty(name="Use B",    default=False, description="This determines whether sprites for the Bow animation are rendered and saved in the corresponding folder")
-    Use_C:      bpy.props.BoolProperty(name="Use C",    default=False, description="This determines whether sprites for the Club animation are rendered and saved in the corresponding folder")
-    Use_D:      bpy.props.BoolProperty(name="Use D",    default=False, description="This determines whether sprites for the Dagger animation are rendered and saved in the corresponding folder")
-    Use_F:      bpy.props.BoolProperty(name="Use F",    default=False, description="This determines whether sprites for the Flail animation are rendered and saved in the corresponding folder")
-    Use_H:      bpy.props.BoolProperty(name="Use H",    default=False, description="This determines whether sprites for the Halberd animation are rendered and saved in the corresponding folder")
-    Use_M:      bpy.props.BoolProperty(name="Use M",    default=False, description="This determines whether sprites for the Mace animation are rendered and saved in the corresponding folder")
-    Use_S:      bpy.props.BoolProperty(name="Use S",    default=False, description="This determines whether sprites for the Sword animation are rendered and saved in the corresponding folder")
-    Use_W:      bpy.props.BoolProperty(name="Use W",    default=False, description="This determines whether sprites for the Warhammer animation are rendered and saved in the corresponding folder")
-    Use_Q:      bpy.props.BoolProperty(name="Use Q",    default=False, description="This determines whether sprites for the Quarterstaff animation are rendered and saved in the corresponding folder")
+    Use_AX: bpy.props.BoolProperty(name="Use AX", default=False, description="This determines whether sprites for the Axe animation are rendered and saved in the corresponding folder")
+    Use_BS: bpy.props.BoolProperty(name="Use BS", default=False, description="This determines whether sprites for the Shortbow animation are rendered and saved in the corresponding folder")
+    Use_BW: bpy.props.BoolProperty(name="Use BW", default=False, description="This determines whether sprites for the Longbow animation are rendered and saved in the corresponding folder")
+    Use_CB: bpy.props.BoolProperty(name="Use CB", default=False, description="This determines whether sprites for the Crossbow animation are rendered and saved in the corresponding folder")
+    Use_SL: bpy.props.BoolProperty(name="Use SL", default=False, description="This determines whether sprites for the Sling animation are rendered and saved in the corresponding folder")
+    Use_CL: bpy.props.BoolProperty(name="Use CL", default=False, description="This determines whether sprites for the Club animation are rendered and saved in the corresponding folder")
+    Use_DD: bpy.props.BoolProperty(name="Use DD", default=False, description="This determines whether sprites for the Dagger animation are rendered and saved in the corresponding folder")
+    Use_SS: bpy.props.BoolProperty(name="Use SS", default=False, description="This determines whether sprites for the Short Sword animation are rendered and saved in the corresponding folder")
+    Use_FL: bpy.props.BoolProperty(name="Use FL", default=False, description="This determines whether sprites for the Flail animation are rendered and saved in the corresponding folder")
+    Use_F0: bpy.props.BoolProperty(name="Use F0", default=False, description="This determines whether sprites for the Flail(alternate 1) animation are rendered and saved in the corresponding folder")
+    Use_F1: bpy.props.BoolProperty(name="Use F1", default=False, description="This determines whether sprites for the Flail(alternate 2) animation are rendered and saved in the corresponding folder")
+    Use_F3: bpy.props.BoolProperty(name="Use F3", default=False, description="This determines whether sprites for the Flail(alternate 3) animation are rendered and saved in the corresponding folder")
+    Use_HB: bpy.props.BoolProperty(name="Use HB", default=False, description="This determines whether sprites for the Halberd animation are rendered and saved in the corresponding folder")
+    Use_SP: bpy.props.BoolProperty(name="Use SP", default=False, description="This determines whether sprites for the Spear animation are rendered and saved in the corresponding folder")
+    Use_MC: bpy.props.BoolProperty(name="Use MC", default=False, description="This determines whether sprites for the Mace animation are rendered and saved in the corresponding folder")
+    Use_M2: bpy.props.BoolProperty(name="Use M2", default=False, description="This determines whether sprites for the Mace(alternate) animation are rendered and saved in the corresponding folder")
+    Use_F2: bpy.props.BoolProperty(name="Use F2", default=False, description="This determines whether sprites for the Flaming Short Sword animation are rendered and saved in the corresponding folder")
+    Use_FS: bpy.props.BoolProperty(name="Use FS", default=False, description="This determines whether sprites for the Flaming Sword animation are rendered and saved in the corresponding folder")
+    Use_S0: bpy.props.BoolProperty(name="Use S0", default=False, description="This determines whether sprites for the Bastardsword animation are rendered and saved in the corresponding folder")
+    Use_S1: bpy.props.BoolProperty(name="Use S1", default=False, description="This determines whether sprites for the Longsword animation are rendered and saved in the corresponding folder")
+    Use_S2: bpy.props.BoolProperty(name="Use S2", default=False, description="This determines whether sprites for the Greatsword animation are rendered and saved in the corresponding folder")
+    Use_S3: bpy.props.BoolProperty(name="Use S3", default=False, description="This determines whether sprites for the Katana animation are rendered and saved in the corresponding folder")
+    Use_SC: bpy.props.BoolProperty(name="Use SC", default=False, description="This determines whether sprites for the Scimitar animation are rendered and saved in the corresponding folder")
+    Use_MS: bpy.props.BoolProperty(name="Use MS", default=False, description="This determines whether sprites for the Morning Star animation are rendered and saved in the corresponding folder")
+    Use_WH: bpy.props.BoolProperty(name="Use WH", default=False, description="This determines whether sprites for the Warhammer animation are rendered and saved in the corresponding folder")
+    Use_QS: bpy.props.BoolProperty(name="Use QS", default=False, description="This determines whether sprites for the Quarterstaff animation are rendered and saved in the corresponding folder")
+    Use_Q2: bpy.props.BoolProperty(name="Use Q2", default=False, description="This determines whether sprites for the Quarterstaff(alternate 1) animation are rendered and saved in the corresponding folder")
+    Use_Q3: bpy.props.BoolProperty(name="Use Q3", default=False, description="This determines whether sprites for the Quarterstaff(alternate 2) animation are rendered and saved in the corresponding folder")
+    Use_Q4: bpy.props.BoolProperty(name="Use Q4", default=False, description="This determines whether sprites for the Quarterstaff(alternate 3) animation are rendered and saved in the corresponding folder")
+    Use_GS: bpy.props.BoolProperty(name="Use GS", default=False, description="This determines whether sprites for the Glowing Staff animation are rendered and saved in the corresponding folder")
     # Boolean toggles for rendering each animation for PST.
     Use_AT1:        bpy.props.BoolProperty(name="Use AT1",      default=False, description="This determines whether sprites for the PST Attack1 animation are rendered and saved in the corresponding folder")
     Use_AT2:        bpy.props.BoolProperty(name="Use AT2",      default=False, description="This determines whether sprites for the PST Attack2 animation are rendered and saved in the corresponding folder")
@@ -3879,25 +3919,45 @@ class IEAS_PT_Collections(Panel):
             'unique identifier':                    False,# TODO: Delete unique identifier!
         }        
         ToggleWeapons = {
-            'Axe':          context.scene.IEAS_properties.Use_A, 'Bow':          context.scene.IEAS_properties.Use_B,
-            'Club':         context.scene.IEAS_properties.Use_C, 'Dagger':       context.scene.IEAS_properties.Use_D,
-            'Flail':        context.scene.IEAS_properties.Use_F, 'Halberd':      context.scene.IEAS_properties.Use_H,
-            'Mace':         context.scene.IEAS_properties.Use_M, 'Sword':        context.scene.IEAS_properties.Use_S,
-            'Warhammer':    context.scene.IEAS_properties.Use_W, 'Quarterstaff': context.scene.IEAS_properties.Use_Q,
+            'Axe':                 context.scene.IEAS_properties.Use_AX, 'Shortbow':     context.scene.IEAS_properties.Use_BS,
+            'Longbow':             context.scene.IEAS_properties.Use_BW, 'Crossbow':     context.scene.IEAS_properties.Use_CB,
+            'Sling':               context.scene.IEAS_properties.Use_SL, 'Club':         context.scene.IEAS_properties.Use_CL,
+            'Dagger':              context.scene.IEAS_properties.Use_DD, 'Short_Sword':  context.scene.IEAS_properties.Use_SS,
+            'Flail':               context.scene.IEAS_properties.Use_FL, 'Flail1':       context.scene.IEAS_properties.Use_F0,
+            'Flail2':              context.scene.IEAS_properties.Use_F1, 'Flail3':       context.scene.IEAS_properties.Use_F3,
+            'Halberd':             context.scene.IEAS_properties.Use_HB, 'Spear':        context.scene.IEAS_properties.Use_SP,
+            'Mace':                context.scene.IEAS_properties.Use_MC, 'Mace1':        context.scene.IEAS_properties.Use_M2,
+            'Flaming_Short_Sword': context.scene.IEAS_properties.Use_F2, 'Flaming_Sword':context.scene.IEAS_properties.Use_FS,
+            'Bastardsword':        context.scene.IEAS_properties.Use_S0, 'Longsword':    context.scene.IEAS_properties.Use_S1,
+            'Greatsword':          context.scene.IEAS_properties.Use_S2, 'Katana':       context.scene.IEAS_properties.Use_S3,
+            'Scimitar':            context.scene.IEAS_properties.Use_SC, 'Morning_Star': context.scene.IEAS_properties.Use_MS,
+            'Warhammer':           context.scene.IEAS_properties.Use_WH, 'Quarterstaff': context.scene.IEAS_properties.Use_QS,
+            'Quarterstaff1':       context.scene.IEAS_properties.Use_Q2, 'Quarterstaff2':context.scene.IEAS_properties.Use_Q3,
+            'Quarterstaff3':       context.scene.IEAS_properties.Use_Q4, 'Glowing_Staff':context.scene.IEAS_properties.Use_GS,
         }
         ToggleArmor = {
             'Armor1':   context.scene.IEAS_properties.Use_ARMOR1,  'Armor2':   context.scene.IEAS_properties.Use_ARMOR2,
             'Armor3':   context.scene.IEAS_properties.Use_ARMOR3,  'Armor4':   context.scene.IEAS_properties.Use_ARMOR4,
         }
         ToggleNames = {
-            'Axe':          'Use_A',            'Bow':          'Use_B',
-            'Club':         'Use_C',            'Dagger':       'Use_D',
-            'Flail':        'Use_F',            'Halberd':      'Use_H',
-            'Mace':         'Use_M',            'Sword':        'Use_S',
-            'Warhammer':    'Use_W',            'Quarterstaff': 'Use_Q',
-            'Armor1':       'Use_ARMOR1',       'Armor2':       'Use_ARMOR2',
-            'Armor3':       'Use_ARMOR3',       'Armor4':       'Use_ARMOR4',
-            'Effect':       'Use_Effect',
+            'Axe':                 'Use_AX',        'Shortbow':         'Use_BS',
+            'Longbow':             'Use_BW',        'Crossbow':         'Use_CB',
+            'Sling':               'Use_SL',        'Club':             'Use_CL',
+            'Dagger':              'Use_DD',        'Short_Sword':      'Use_SS',
+            'Flail':               'Use_FL',        'Flail1':           'Use_F0',
+            'Flail2':              'Use_F1',        'Flail3':           'Use_F3',
+            'Halberd':             'Use_HB',        'Spear':            'Use_SP',
+            'Mace':                'Use_MC',        'Mace1':            'Use_M2',
+            'Flaming_Short_Sword': 'Use_F2',        'Flaming_Sword':    'Use_FS',
+            'Bastardsword':        'Use_S0',        'Longsword':        'Use_S1',
+            'Greatsword':          'Use_S2',        'Katana':           'Use_S3',
+            'Scimitar':            'Use_SC',        'Morning_Star':     'Use_MS',
+            'Warhammer':           'Use_WH',        'Quarterstaff':     'Use_QS',
+            'Quarterstaff1':       'Use_Q2',        'Quarterstaff2':    'Use_Q3',
+            'Quarterstaff3':       'Use_Q4',        'Glowing_Staff':    'Use_GS',
+            'Armor1':              'Use_ARMOR1',    'Armor2':           'Use_ARMOR2',
+            'Armor3':              'Use_ARMOR3',    'Armor4':           'Use_ARMOR4',
+            'Effect':              'Use_Effect',
         }
         
         # --- Reset and activate

@@ -64,6 +64,7 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * exhuman
 * moggadeet
 * Bubb
+* lynx
 
 ## Sources and Learning Materials
 * [INI file format: Creature Animations](https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm)
