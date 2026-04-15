@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 74),
+    "version": (0, 36, 76),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1321,10 +1321,10 @@ class IEAS_AnimationTypes():
                 'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
                 'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSeq = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
@@ -1377,7 +1377,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{animationKey}{wovl}{typeParameters.animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -1438,10 +1438,10 @@ class IEAS_AnimationTypes():
                 'SC':'G1', 'WK':'G11','SD':'G12', 'GH':'G13and14', 'DE':'G14', 'TW':'G14and15', 'GU':'G14', 'SL':'G14',
                 'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSeq = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1494,7 +1494,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -2308,7 +2308,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Shortbow:           bpy.props.StringProperty(name="Subfolder BS",   default="short bow",                    description="This refers to the Blender collection for short bow animation. It also defines the name of the subfolder for the short bow animation")
     Longbow:            bpy.props.StringProperty(name="Subfolder BW",   default="long bow",                     description="This refers to the Blender collection for long bow animation. It also defines the name of the subfolder for the long bow animation")
     Crossbow:           bpy.props.StringProperty(name="Subfolder CB",   default="crossbow",                     description="This refers to the Blender collection for crossbow animation. It also defines the name of the subfolder for the crossbow animation")
-    Sling:              bpy.props.StringProperty(name="Subfolder SL",   default="sling",                        description="This refers to the Blender collection for sling animation. It also defines the name of the subfolder for the sling animation")
+    Sling:              bpy.props.StringProperty(name="Subfolder SI",   default="sling",                        description="This refers to the Blender collection for sling animation. It also defines the name of the subfolder for the sling animation")
     Club:               bpy.props.StringProperty(name="Subfolder CL",   default="club",                         description="This refers to the Blender collection for club animation. It also defines the name of the subfolder for the club animation")
     Dagger:             bpy.props.StringProperty(name="Subfolder DD",   default="dagger",                       description="This refers to the Blender collection for dagger animation. It also defines the name of the subfolder for the dagger animation")
     Short_Sword:        bpy.props.StringProperty(name="Subfolder SS",   default="short sword",                  description="This refers to the Blender collection for short sword animation. It also defines the name of the subfolder for the short sword animation")
@@ -2317,7 +2317,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Flail2:             bpy.props.StringProperty(name="Subfolder F1",   default="flail(2 long heads)",          description="This refers to the Blender collection for flail(alternate 2) animation. It also defines the name of the subfolder for the flail(alternate 2) animation")
     Flail3:             bpy.props.StringProperty(name="Subfolder F3",   default="flail(3 long head)",           description="This refers to the Blender collection for flail(alternate 3) animation. It also defines the name of the subfolder for the flail(alternate 3) animation")
     Halberd:            bpy.props.StringProperty(name="Subfolder HB",   default="halberd",                      description="This refers to the Blender collection for halberd animation. It also defines the name of the subfolder for the halberd animation")
-    Spear:              bpy.props.StringProperty(name="Subfolder SP",   default="spear",                        description="This refers to the Blender collection for spear animation. It also defines the name of the subfolder for the spear animation")
+    Spear:              bpy.props.StringProperty(name="Subfolder SR",   default="spear",                        description="This refers to the Blender collection for spear animation. It also defines the name of the subfolder for the spear animation")
     Mace:               bpy.props.StringProperty(name="Subfolder MC",   default="mace(simple head and hilt)",   description="This refers to the Blender collection for Mace animation. It also defines the name of the subfolder for the mace animation")
     Mace1:              bpy.props.StringProperty(name="Subfolder M2",   default="mace(complex head and hilt)",  description="This refers to the Blender collection for Mace(alternate) animation. It also defines the name of the subfolder for the mace(alternate) animation")
     Flaming_Short_Sword:bpy.props.StringProperty(name="Subfolder F2",   default="flaming short sword",          description="This refers to the Blender collection for flaming short sword animation. It also defines the name of the subfolder for the flaming short sword animation")
@@ -2326,7 +2326,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Longsword:          bpy.props.StringProperty(name="Subfolder S1",   default="longsword",                    description="This refers to the Blender collection for longsword animation. It also defines the name of the subfolder for the longsword animation")
     Greatsword:         bpy.props.StringProperty(name="Subfolder S2",   default="greatsword",                   description="This refers to the Blender collection for two handed sword animation. It also defines the name of the subfolder for the two handed sword animation")
     Katana:             bpy.props.StringProperty(name="Subfolder S3",   default="katana",                       description="This refers to the Blender collection for katana animation. It also defines the name of the subfolder for the katana animation")
-    Scimitar:           bpy.props.StringProperty(name="Subfolder SC",   default="scimitar",                     description="This refers to the Blender collection for scimitar animation. It also defines the name of the subfolder for the scimitar animation")
+    Scimitar:           bpy.props.StringProperty(name="Subfolder ST",   default="scimitar",                     description="This refers to the Blender collection for scimitar animation. It also defines the name of the subfolder for the scimitar animation")
     Morning_Star:       bpy.props.StringProperty(name="Subfolder MS",   default="morning star",                 description="This refers to the Blender collection for morning star animation. It also defines the name of the subfolder for the morning star animation")
     Warhammer:          bpy.props.StringProperty(name="Subfolder WH",   default="warhammer",                    description="This refers to the Blender collection for warhammer animation. It also defines the name of the subfolder for the warhammer animation")
     Quarterstaff:       bpy.props.StringProperty(name="Subfolder QS",   default="quarterstaff(wood)",           description="This refers to the Blender collection for quarterstaff animation. It also defines the name of the subfolder for the quarterstaff animation")
@@ -2394,7 +2394,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_BS: bpy.props.BoolProperty(name="Use BS", default=False, description="This determines whether sprites for the Shortbow animation are rendered and saved in the corresponding folder")
     Use_BW: bpy.props.BoolProperty(name="Use BW", default=False, description="This determines whether sprites for the Longbow animation are rendered and saved in the corresponding folder")
     Use_CB: bpy.props.BoolProperty(name="Use CB", default=False, description="This determines whether sprites for the Crossbow animation are rendered and saved in the corresponding folder")
-    Use_SL: bpy.props.BoolProperty(name="Use SL", default=False, description="This determines whether sprites for the Sling animation are rendered and saved in the corresponding folder")
+    Use_SI: bpy.props.BoolProperty(name="Use SI", default=False, description="This determines whether sprites for the Sling animation are rendered and saved in the corresponding folder")
     Use_CL: bpy.props.BoolProperty(name="Use CL", default=False, description="This determines whether sprites for the Club animation are rendered and saved in the corresponding folder")
     Use_DD: bpy.props.BoolProperty(name="Use DD", default=False, description="This determines whether sprites for the Dagger animation are rendered and saved in the corresponding folder")
     Use_SS: bpy.props.BoolProperty(name="Use SS", default=False, description="This determines whether sprites for the Short Sword animation are rendered and saved in the corresponding folder")
@@ -2403,7 +2403,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_F1: bpy.props.BoolProperty(name="Use F1", default=False, description="This determines whether sprites for the Flail(alternate 2) animation are rendered and saved in the corresponding folder")
     Use_F3: bpy.props.BoolProperty(name="Use F3", default=False, description="This determines whether sprites for the Flail(alternate 3) animation are rendered and saved in the corresponding folder")
     Use_HB: bpy.props.BoolProperty(name="Use HB", default=False, description="This determines whether sprites for the Halberd animation are rendered and saved in the corresponding folder")
-    Use_SP: bpy.props.BoolProperty(name="Use SP", default=False, description="This determines whether sprites for the Spear animation are rendered and saved in the corresponding folder")
+    Use_SR: bpy.props.BoolProperty(name="Use SR", default=False, description="This determines whether sprites for the Spear animation are rendered and saved in the corresponding folder")
     Use_MC: bpy.props.BoolProperty(name="Use MC", default=False, description="This determines whether sprites for the Mace animation are rendered and saved in the corresponding folder")
     Use_M2: bpy.props.BoolProperty(name="Use M2", default=False, description="This determines whether sprites for the Mace(alternate) animation are rendered and saved in the corresponding folder")
     Use_F2: bpy.props.BoolProperty(name="Use F2", default=False, description="This determines whether sprites for the Flaming Short Sword animation are rendered and saved in the corresponding folder")
@@ -2412,7 +2412,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_S1: bpy.props.BoolProperty(name="Use S1", default=False, description="This determines whether sprites for the Longsword animation are rendered and saved in the corresponding folder")
     Use_S2: bpy.props.BoolProperty(name="Use S2", default=False, description="This determines whether sprites for the Greatsword animation are rendered and saved in the corresponding folder")
     Use_S3: bpy.props.BoolProperty(name="Use S3", default=False, description="This determines whether sprites for the Katana animation are rendered and saved in the corresponding folder")
-    Use_SC: bpy.props.BoolProperty(name="Use SC", default=False, description="This determines whether sprites for the Scimitar animation are rendered and saved in the corresponding folder")
+    Use_ST: bpy.props.BoolProperty(name="Use ST", default=False, description="This determines whether sprites for the Scimitar animation are rendered and saved in the corresponding folder")
     Use_MS: bpy.props.BoolProperty(name="Use MS", default=False, description="This determines whether sprites for the Morning Star animation are rendered and saved in the corresponding folder")
     Use_WH: bpy.props.BoolProperty(name="Use WH", default=False, description="This determines whether sprites for the Warhammer animation are rendered and saved in the corresponding folder")
     Use_QS: bpy.props.BoolProperty(name="Use QS", default=False, description="This determines whether sprites for the Quarterstaff animation are rendered and saved in the corresponding folder")
@@ -2721,18 +2721,38 @@ class IEAS_OT_Final(Operator):
             'MISC19':   context.scene.IEAS_properties.Use_MISC19,   'MISC20': context.scene.IEAS_properties.Use_MISC20
         }
         animationWeaponFolderNames = {
-            'A': context.scene.IEAS_properties.Axe,     'B': context.scene.IEAS_properties.Bow,
-            'C': context.scene.IEAS_properties.Club,    'D': context.scene.IEAS_properties.Dagger,
-            'F': context.scene.IEAS_properties.Flail,   'H': context.scene.IEAS_properties.Halberd,
-            'M': context.scene.IEAS_properties.Mace,    'S': context.scene.IEAS_properties.Sword,
-            'W': context.scene.IEAS_properties.Warhammer, 'Q': context.scene.IEAS_properties.Quarterstaff,          
+            'AX': context.scene.IEAS_properties.Axe,                 'SR': context.scene.IEAS_properties.Spear,
+            'BS': context.scene.IEAS_properties.Shortbow,            'MC': context.scene.IEAS_properties.Mace,
+            'BW': context.scene.IEAS_properties.Longbow,             'M2': context.scene.IEAS_properties.Mace1,
+            'CB': context.scene.IEAS_properties.Crossbow,            'F2': context.scene.IEAS_properties.Flaming_Short_Sword,
+            'SI': context.scene.IEAS_properties.Sling,               'FS': context.scene.IEAS_properties.Flaming_Sword,
+            'CL': context.scene.IEAS_properties.Club,                'S0': context.scene.IEAS_properties.Bastardsword,
+            'DD': context.scene.IEAS_properties.Dagger,              'S1': context.scene.IEAS_properties.Longsword,
+            'SS': context.scene.IEAS_properties.Short_Sword,         'S2': context.scene.IEAS_properties.Greatsword,
+            'FL': context.scene.IEAS_properties.Flail,               'S3': context.scene.IEAS_properties.Katana,
+            'F0': context.scene.IEAS_properties.Flail1,              'ST': context.scene.IEAS_properties.Scimitar,
+            'F1': context.scene.IEAS_properties.Flail2,              'MS': context.scene.IEAS_properties.Morning_Star,
+            'F3': context.scene.IEAS_properties.Flail3,              'WH': context.scene.IEAS_properties.Warhammer,
+            'HB': context.scene.IEAS_properties.Halberd,             'QS': context.scene.IEAS_properties.Quarterstaff,
+            'Q2': context.scene.IEAS_properties.Quarterstaff1,       'Q3': context.scene.IEAS_properties.Quarterstaff2,
+            'Q4': context.scene.IEAS_properties.Quarterstaff3,       'GS': context.scene.IEAS_properties.Glowing_Staff,          
         }
         animationWeaponToggles = {
-            'A': context.scene.IEAS_properties.Use_A,   'B': context.scene.IEAS_properties.Use_B,
-            'C': context.scene.IEAS_properties.Use_C,   'D': context.scene.IEAS_properties.Use_D,
-            'F': context.scene.IEAS_properties.Use_F,   'H': context.scene.IEAS_properties.Use_H,
-            'M': context.scene.IEAS_properties.Use_M,   'S': context.scene.IEAS_properties.Use_S,
-            'W': context.scene.IEAS_properties.Use_W,   'Q': context.scene.IEAS_properties.Use_Q,          
+            'AX': context.scene.IEAS_properties.Use_AX,         'SR': context.scene.IEAS_properties.Use_SR,
+            'BS': context.scene.IEAS_properties.Use_BS,         'MC': context.scene.IEAS_properties.Use_MC,
+            'BW': context.scene.IEAS_properties.Use_BW,         'M2': context.scene.IEAS_properties.Use_M2,
+            'CB': context.scene.IEAS_properties.Use_CB,         'F2': context.scene.IEAS_properties.Use_F2,
+            'SI': context.scene.IEAS_properties.Use_SI,         'FS': context.scene.IEAS_properties.Use_FS,
+            'CL': context.scene.IEAS_properties.Use_CL,         'S0': context.scene.IEAS_properties.Use_S0,
+            'DD': context.scene.IEAS_properties.Use_DD,         'S1': context.scene.IEAS_properties.Use_S1,
+            'SS': context.scene.IEAS_properties.Use_SS,         'S2': context.scene.IEAS_properties.Use_S2,
+            'FL': context.scene.IEAS_properties.Use_FL,         'S3': context.scene.IEAS_properties.Use_S3,
+            'F0': context.scene.IEAS_properties.Use_F0,         'ST': context.scene.IEAS_properties.Use_ST,
+            'F1': context.scene.IEAS_properties.Use_F1,         'MS': context.scene.IEAS_properties.Use_MS,
+            'F3': context.scene.IEAS_properties.Use_F3,         'WH': context.scene.IEAS_properties.Use_WH,
+            'HB': context.scene.IEAS_properties.Use_HB,         'QS': context.scene.IEAS_properties.Use_QS,
+            'Q2': context.scene.IEAS_properties.Use_Q2,         'Q3': context.scene.IEAS_properties.Use_Q3,
+            'Q4': context.scene.IEAS_properties.Use_Q4,         'GS': context.scene.IEAS_properties.Use_GS,
         }
         animationArmorToggles = {
             'ARMOR1': context.scene.IEAS_properties.Use_ARMOR1,   'ARMOR2': context.scene.IEAS_properties.Use_ARMOR2,
@@ -3921,16 +3941,16 @@ class IEAS_PT_Collections(Panel):
         ToggleWeapons = {
             'Axe':                 context.scene.IEAS_properties.Use_AX, 'Shortbow':     context.scene.IEAS_properties.Use_BS,
             'Longbow':             context.scene.IEAS_properties.Use_BW, 'Crossbow':     context.scene.IEAS_properties.Use_CB,
-            'Sling':               context.scene.IEAS_properties.Use_SL, 'Club':         context.scene.IEAS_properties.Use_CL,
+            'Sling':               context.scene.IEAS_properties.Use_SI, 'Club':         context.scene.IEAS_properties.Use_CL,
             'Dagger':              context.scene.IEAS_properties.Use_DD, 'Short_Sword':  context.scene.IEAS_properties.Use_SS,
             'Flail':               context.scene.IEAS_properties.Use_FL, 'Flail1':       context.scene.IEAS_properties.Use_F0,
             'Flail2':              context.scene.IEAS_properties.Use_F1, 'Flail3':       context.scene.IEAS_properties.Use_F3,
-            'Halberd':             context.scene.IEAS_properties.Use_HB, 'Spear':        context.scene.IEAS_properties.Use_SP,
+            'Halberd':             context.scene.IEAS_properties.Use_HB, 'Spear':        context.scene.IEAS_properties.Use_SR,
             'Mace':                context.scene.IEAS_properties.Use_MC, 'Mace1':        context.scene.IEAS_properties.Use_M2,
             'Flaming_Short_Sword': context.scene.IEAS_properties.Use_F2, 'Flaming_Sword':context.scene.IEAS_properties.Use_FS,
             'Bastardsword':        context.scene.IEAS_properties.Use_S0, 'Longsword':    context.scene.IEAS_properties.Use_S1,
             'Greatsword':          context.scene.IEAS_properties.Use_S2, 'Katana':       context.scene.IEAS_properties.Use_S3,
-            'Scimitar':            context.scene.IEAS_properties.Use_SC, 'Morning_Star': context.scene.IEAS_properties.Use_MS,
+            'Scimitar':            context.scene.IEAS_properties.Use_ST, 'Morning_Star': context.scene.IEAS_properties.Use_MS,
             'Warhammer':           context.scene.IEAS_properties.Use_WH, 'Quarterstaff': context.scene.IEAS_properties.Use_QS,
             'Quarterstaff1':       context.scene.IEAS_properties.Use_Q2, 'Quarterstaff2':context.scene.IEAS_properties.Use_Q3,
             'Quarterstaff3':       context.scene.IEAS_properties.Use_Q4, 'Glowing_Staff':context.scene.IEAS_properties.Use_GS,
@@ -3942,16 +3962,16 @@ class IEAS_PT_Collections(Panel):
         ToggleNames = {
             'Axe':                 'Use_AX',        'Shortbow':         'Use_BS',
             'Longbow':             'Use_BW',        'Crossbow':         'Use_CB',
-            'Sling':               'Use_SL',        'Club':             'Use_CL',
+            'Sling':               'Use_SI',        'Club':             'Use_CL',
             'Dagger':              'Use_DD',        'Short_Sword':      'Use_SS',
             'Flail':               'Use_FL',        'Flail1':           'Use_F0',
             'Flail2':              'Use_F1',        'Flail3':           'Use_F3',
-            'Halberd':             'Use_HB',        'Spear':            'Use_SP',
+            'Halberd':             'Use_HB',        'Spear':            'Use_SR',
             'Mace':                'Use_MC',        'Mace1':            'Use_M2',
             'Flaming_Short_Sword': 'Use_F2',        'Flaming_Sword':    'Use_FS',
             'Bastardsword':        'Use_S0',        'Longsword':        'Use_S1',
             'Greatsword':          'Use_S2',        'Katana':           'Use_S3',
-            'Scimitar':            'Use_SC',        'Morning_Star':     'Use_MS',
+            'Scimitar':            'Use_ST',        'Morning_Star':     'Use_MS',
             'Warhammer':           'Use_WH',        'Quarterstaff':     'Use_QS',
             'Quarterstaff1':       'Use_Q2',        'Quarterstaff2':    'Use_Q3',
             'Quarterstaff3':       'Use_Q4',        'Glowing_Staff':    'Use_GS',
