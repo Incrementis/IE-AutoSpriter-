@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 36, 76),
+    "version": (0, 37, 00),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2534,11 +2534,27 @@ class IEAS_OT_ShadingNodes(Operator):
         
         # Sets default values for the new nodes' inputs, based on typical(??) IE sprite requirements.
         fac     = 0
-        bright  = 1    
+        bright  = 1
         MixShader_node.inputs[fac].default_value            = 0.010
         BrightContrast_node.inputs[bright].default_value    = 1.000
         
         return {'FINISHED'}
+
+
+# --------
+# Purpose: TODO
+# --------
+# Operator to handle INI files.
+# -----------------------------
+class IEAS_OT_IniFiles(Operator):
+    """This class offers a function which creates INI files which can be used to automate the BAM pre creation process in e.g. Near Infinity"""
+    bl_idname = "ieas.ini_files" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    bl_label = "CREATE" # Text displayed on the button in the UI.
+    
+    # Blender specific function which is executed in this case when CREATE button is pressed
+    def execute(self, context):
+        pass
+
 
 
 # --------
@@ -3086,6 +3102,30 @@ class IEAS_PT_GlobalParameters(Panel):
         row = self.layout.row()
         row.prop(context.scene.IEAS_properties, "Every_X_Frame")
         
+
+
+# --------
+# Purpose:
+# --------
+# Defines the main panel for step 2.
+# It serves as a container for other sub-panels.
+# ------------------------------------------------------------------------------------
+class IEAS_PT_QoLOptions(Panel):
+    """Defines the main panel for step 2. It serves as a container for other sub-panels."""
+    
+    # --- Blender specific class variables
+    bl_label        = "Step 2: QoL Options" 
+    bl_idname       = 'IEAS_PT_QoLOptions'
+    bl_space_type   = 'VIEW_3D'
+    bl_region_type  = 'UI'
+    bl_category     = "IE AutoSpriter"
+    bl_parent_id    = 'IEAS_PT_Core'
+    bl_options      = {'DEFAULT_CLOSED'}
+    
+    # --- Blender specific function which places elements into GUI
+    # As this is a container panel,no UI elements are needed.
+    def draw(self, context):
+        pass
         
 # --------
 # Purpose:
@@ -3098,12 +3138,12 @@ class IEAS_PT_ShadingNodes(Panel):
     """This step defines general settings that apply across the entire sprite rendering process"""
     
     # --- Blender specific class variables
-    bl_label        = "Step 2: Shading Nodes" 
+    bl_label        = "Shading Nodes" 
     bl_idname       = 'IEAS_PT_ShadingNodes'
     bl_space_type   = 'VIEW_3D'
     bl_region_type  = 'UI'
     bl_category     = "IE AutoSpriter"
-    bl_parent_id    = 'IEAS_PT_Core'
+    bl_parent_id    = 'IEAS_PT_QoLOptions'
     bl_options      = {'DEFAULT_CLOSED'}
     
     # --- Blender specific function which places elements into GUI
@@ -3117,7 +3157,35 @@ class IEAS_PT_ShadingNodes(Panel):
         col = layout.column()
         # Creates a button that executes the IEAS_OT_ShadingNodes operator.
         col.operator("ieas.shading_nodes")
+
         
+# --------
+# Purpose: TODO
+# --------
+# This panel allows for managing INI files.
+# This is crucial for e.g. pre creating BAM files in Near Infinity, 
+# as the number of sprites can reach over 10 thousands.
+# -----------------------------------------------------------------
+class IEAS_PT_IniFiles(Panel):
+    """This step defines general settings in regards to INI files."""
+    
+    # --- Blender specific class variables
+    bl_label        = "INI files" 
+    bl_idname       = 'IEAS_PT_IniFiles'
+    bl_space_type   = 'VIEW_3D'
+    bl_region_type  = 'UI'
+    bl_category     = "IE AutoSpriter"
+    bl_parent_id    = 'IEAS_PT_QoLOptions'
+    bl_options      = {'DEFAULT_CLOSED'}
+    
+    # --- Blender specific function which places elements into GUI
+    # This method draws the UI elements for INI files settings.
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column()
+        # Creates a button that executes the IEAS_OT_IniFiles operator.
+        col.operator("ieas.ini_files")
+
         
 # --------
 # Purpose:
@@ -4060,17 +4128,21 @@ class IEAS_PT_Final(Panel):
 # --------      
 # Registers all classes (Operators, PropertyGroups, Panels) with Blender.
 # This makes them available for use in the Blender environment and within the add-on.
+# The register position defines in which order the UI elements are drawn.
 # -----------------------------------------------------------------------------------
 def register():
     bpy.utils.register_class(IEAS_OT_Manual)
     bpy.utils.register_class(IEAS_OT_Iesdp)
     bpy.utils.register_class(IEAS_OT_Rotation)
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
+    bpy.utils.register_class(IEAS_OT_IniFiles)
     bpy.utils.register_class(IEAS_OT_Final)
     bpy.utils.register_class(IEAS_PGT_Inputs)
     bpy.utils.register_class(IEAS_PT_Core)
     bpy.utils.register_class(IEAS_PT_GlobalParameters)
+    bpy.utils.register_class(IEAS_PT_QoLOptions)
     bpy.utils.register_class(IEAS_PT_ShadingNodes)
+    bpy.utils.register_class(IEAS_PT_IniFiles)
     bpy.utils.register_class(IEAS_PT_Camera)
     bpy.utils.register_class(IEAS_PT_Animation)
     bpy.utils.register_class(IEAS_PT_Collections)
@@ -4085,16 +4157,20 @@ def register():
 # --------
 # Unregisters all classes and cleans up custom properties when the add-on is disabled.
 # This prevents data remnants and potential conflicts if the add-on is re-enabled or other add-ons are used(??).
+# --------------------------------------------------------------------------------------------------------------
 def unregister():
     bpy.utils.unregister_class(IEAS_OT_Manual)
     bpy.utils.unregister_class(IEAS_OT_Iesdp)
     bpy.utils.unregister_class(IEAS_OT_Rotation)
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
+    bpy.utils.unregister_class(IEAS_OT_IniFiles)
     bpy.utils.unregister_class(IEAS_OT_Final)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
     bpy.utils.unregister_class(IEAS_PT_Core)
     bpy.utils.unregister_class(IEAS_PT_GlobalParameters)
+    bpy.utils.unregister_class(IEAS_PT_QoLOptions)
     bpy.utils.unregister_class(IEAS_PT_ShadingNodes)
+    bpy.utils.unregister_class(IEAS_PT_IniFiles)
     bpy.utils.unregister_class(IEAS_PT_Camera)
     bpy.utils.unregister_class(IEAS_PT_Animation)
     bpy.utils.unregister_class(IEAS_PT_Collections)

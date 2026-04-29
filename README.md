@@ -82,3 +82,4 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * [Create Low Poly Characters in Blender (Beginner Tutorial)](https://www.youtube.com/watch?v=BL6fyBeldHA&t=4341s) by Ryan King Art
 * [How to Grow Tendrils Over Any Object (Blender Tutorial)](https://www.youtube.com/watch?v=ufRygCrYsx4) by Pixel Me That
 * [A Different approach to making FIRE in Blender!](https://www.youtube.com/watch?v=cUfc4iWG9qI) by Kenan Proffitt
+* [Blender 4.0 RIGIFY ＃6-1: Custom Rigs (theory)](https://youtu.be/Cq2Vw6EFXy0?list=PLdcL5aF8ZcJuG3kKcVgQQz36E3JXzijEH) by CGDive (Blender Rigging Tuts)
