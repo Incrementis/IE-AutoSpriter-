@@ -75,6 +75,120 @@ class IEAS_AnimationTypesParameters:
 # --------
 # Purpose:
 # --------
+# Contains dictonaries, lists and other globally needed elements.
+# ---------------------------------------------------------------
+class IEAS_Data:
+    @staticmethod
+    def retrieveAnimationTypeHandlers():
+        """List wrapper function - returns method references of IEAS_AnimationTypes."""
+        animationTypeHandlers = {
+                '0000':                                 IEAS_AnimationTypes().type0000,
+                '1000 monster quadrant':                IEAS_AnimationTypes().type1000_monster_quadrant,
+                '1000 monster multi split bams 0':      IEAS_AnimationTypes().type1000_monster_multi_sp0,
+                '1000 monster multi split bams 1':      IEAS_AnimationTypes().type1000_monster_multi_sp1,
+                '1000 multi new split bams 0':          IEAS_AnimationTypes().type1000_multi_new_sp0,
+                '1000 multi new split bams 1':          IEAS_AnimationTypes().type1000_multi_new_sp1,
+                '2000':                                 IEAS_AnimationTypes().type2000,
+                '3000 mirror 0':                        IEAS_AnimationTypes().type3000_mirror0,
+                '3000 mirror 1':                        IEAS_AnimationTypes().type3000_mirror1,
+                '4000':                                 IEAS_AnimationTypes().type4000,
+                '5000/6000 character split bams 0':     IEAS_AnimationTypes().type5000and6000_character_sp0,
+                '5000/6000 character split bams 1':     IEAS_AnimationTypes().type5000and6000_character_sp1,
+                '5000/6000 character old':              IEAS_AnimationTypes().type5000and6000_character_old,
+                '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
+                '7000 monster split bams 1':            IEAS_AnimationTypes().type7000_monster_sp1,
+                '7000 monster old':                     IEAS_AnimationTypes().type7000_monster_old,
+                '8000':                                 IEAS_AnimationTypes().type8000,
+                '9000':                                 IEAS_AnimationTypes().type9000,
+                'A000':                                 IEAS_AnimationTypes().typeA000,
+                'B000':                                 IEAS_AnimationTypes().typeB000,
+                'C000':                                 IEAS_AnimationTypes().typeC000,
+                'D000':                                 IEAS_AnimationTypes().typeD000,
+                'E000':                                 IEAS_AnimationTypes().typeE000,
+                'F000':                                 IEAS_AnimationTypes().typeF000,
+            }
+        return animationTypeHandlers
+    
+    @classmethod
+    def retrieveAnimationToggles(cls, context):
+        """Dictionary wrapper function - returns the current values of the animation toggle check boxes when called (e.g., A1 for attack 1)."""
+        animationToggles = {
+            'A1':       context.scene.IEAS_properties.Use_A1,       'A2': context.scene.IEAS_properties.Use_A2,
+            'A3':       context.scene.IEAS_properties.Use_A3,       'A4': context.scene.IEAS_properties.Use_A4,
+            'A5':       context.scene.IEAS_properties.Use_A5,       'TW': context.scene.IEAS_properties.Use_TW,
+            'CA':       context.scene.IEAS_properties.Use_CA,       'DE': context.scene.IEAS_properties.Use_DE,
+            'GH':       context.scene.IEAS_properties.Use_GH,       'GU': context.scene.IEAS_properties.Use_GU,
+            'SC':       context.scene.IEAS_properties.Use_SC,       'SD': context.scene.IEAS_properties.Use_SD,
+            'SL':       context.scene.IEAS_properties.Use_SL,       'SP': context.scene.IEAS_properties.Use_SP,
+            'WK':       context.scene.IEAS_properties.Use_WK,       'EMERGE':   context.scene.IEAS_properties.Use_Emerge,
+            'Effect':   context.scene.IEAS_properties.Use_Effect,   'HIDE':     context.scene.IEAS_properties.Use_Hide,                      
+            # Type 5000/6000 Boolean Properties
+            'WK2':      context.scene.IEAS_properties.Use_WK2,
+            'A6':       context.scene.IEAS_properties.Use_A6,       'A7': context.scene.IEAS_properties.Use_A7,
+            'A8':       context.scene.IEAS_properties.Use_A8,       'A9': context.scene.IEAS_properties.Use_A9,
+            'SA':       context.scene.IEAS_properties.Use_SA,       'SS': context.scene.IEAS_properties.Use_SS,
+            'SX':       context.scene.IEAS_properties.Use_SX,       'CA1': context.scene.IEAS_properties.Use_CA1,
+            'CA2':      context.scene.IEAS_properties.Use_CA2,      'CA3': context.scene.IEAS_properties.Use_CA3,
+            'CA4':      context.scene.IEAS_properties.Use_CA4,      'SP1': context.scene.IEAS_properties.Use_SP1,
+            'SP2':      context.scene.IEAS_properties.Use_SP2,      'SP3': context.scene.IEAS_properties.Use_SP3,
+            'SP4':      context.scene.IEAS_properties.Use_SP4,      'SC1': context.scene.IEAS_properties.Use_SC1,
+            'SC2':      context.scene.IEAS_properties.Use_SC2,      'SD1': context.scene.IEAS_properties.Use_SD1,
+            'SD2':      context.scene.IEAS_properties.Use_SD2,      'SD3': context.scene.IEAS_properties.Use_SD3,
+            'SL1':      context.scene.IEAS_properties.Use_SL1,      'SL2': context.scene.IEAS_properties.Use_SL2,
+            # PST Boolean Properties
+            'AT1':      context.scene.IEAS_properties.Use_AT1,      'AT2': context.scene.IEAS_properties.Use_AT2,
+            'AT3':      context.scene.IEAS_properties.Use_AT3,      'HIT': context.scene.IEAS_properties.Use_HIT,
+            'RUN':      context.scene.IEAS_properties.Use_RUN,      'WLK': context.scene.IEAS_properties.Use_WLK,
+            'SP1':      context.scene.IEAS_properties.Use_SP1,      'SP2': context.scene.IEAS_properties.Use_SP2,
+            'SP3':      context.scene.IEAS_properties.Use_SP3,      'GUP': context.scene.IEAS_properties.Use_GUP,
+            'DFB1':     context.scene.IEAS_properties.Use_DFB1,     'DFB2': context.scene.IEAS_properties.Use_DFB2,
+            'DFB3':     context.scene.IEAS_properties.Use_DFB3,     'TK1': context.scene.IEAS_properties.Use_TK1,
+            'TK2':      context.scene.IEAS_properties.Use_TK2,      'TK3': context.scene.IEAS_properties.Use_TK3,
+            'STD':      context.scene.IEAS_properties.Use_STD,      'STDF1': context.scene.IEAS_properties.Use_STDF1,
+            'STDF2':    context.scene.IEAS_properties.Use_STDF2,    'STC': context.scene.IEAS_properties.Use_STC,
+            'STCF1':    context.scene.IEAS_properties.Use_STCF1,    'STCF2': context.scene.IEAS_properties.Use_STCF2,
+            'STCtoSTD': context.scene.IEAS_properties.Use_STCtoSTD, 'STDtoSTC': context.scene.IEAS_properties.Use_STDtoSTC,
+            'MISC1':    context.scene.IEAS_properties.Use_MISC1,    'MISC2': context.scene.IEAS_properties.Use_MISC2,
+            'MISC3':    context.scene.IEAS_properties.Use_MISC3,    'MISC4': context.scene.IEAS_properties.Use_MISC4,
+            'MISC5':    context.scene.IEAS_properties.Use_MISC5,    'MISC6': context.scene.IEAS_properties.Use_MISC6,
+            'MISC7':    context.scene.IEAS_properties.Use_MISC7,    'MISC8': context.scene.IEAS_properties.Use_MISC8,
+            'MISC9':    context.scene.IEAS_properties.Use_MISC9,    'MISC10': context.scene.IEAS_properties.Use_MISC10,
+            'MISC11':   context.scene.IEAS_properties.Use_MISC11,   'MISC12': context.scene.IEAS_properties.Use_MISC12,
+            'MISC13':   context.scene.IEAS_properties.Use_MISC13,   'MISC14': context.scene.IEAS_properties.Use_MISC14,
+            'MISC15':   context.scene.IEAS_properties.Use_MISC15,   'MISC16': context.scene.IEAS_properties.Use_MISC16,
+            'MISC17':   context.scene.IEAS_properties.Use_MISC17,   'MISC18': context.scene.IEAS_properties.Use_MISC18,
+            'MISC19':   context.scene.IEAS_properties.Use_MISC19,   'MISC20': context.scene.IEAS_properties.Use_MISC20
+        }
+
+        return animationToggles
+   
+    @classmethod
+    def retrieveAnimationWeaponToggles(cls, context):
+        """Dictionary wrapper function - returns the current values of the animation toggle buttons when called (e.g., A1 for attack 1)."""
+        animationWeaponToggles  = {
+            'AX': context.scene.IEAS_properties.Use_AX,         'SR': context.scene.IEAS_properties.Use_SR,
+            'BS': context.scene.IEAS_properties.Use_BS,         'MC': context.scene.IEAS_properties.Use_MC,
+            'BW': context.scene.IEAS_properties.Use_BW,         'M2': context.scene.IEAS_properties.Use_M2,
+            'CB': context.scene.IEAS_properties.Use_CB,         'F2': context.scene.IEAS_properties.Use_F2,
+            'SI': context.scene.IEAS_properties.Use_SI,         'FS': context.scene.IEAS_properties.Use_FS,
+            'CL': context.scene.IEAS_properties.Use_CL,         'S0': context.scene.IEAS_properties.Use_S0,
+            'DD': context.scene.IEAS_properties.Use_DD,         'S1': context.scene.IEAS_properties.Use_S1,
+            'SS': context.scene.IEAS_properties.Use_SS,         'S2': context.scene.IEAS_properties.Use_S2,
+            'FL': context.scene.IEAS_properties.Use_FL,         'S3': context.scene.IEAS_properties.Use_S3,
+            'F0': context.scene.IEAS_properties.Use_F0,         'ST': context.scene.IEAS_properties.Use_ST,
+            'F1': context.scene.IEAS_properties.Use_F1,         'MS': context.scene.IEAS_properties.Use_MS,
+            'F3': context.scene.IEAS_properties.Use_F3,         'WH': context.scene.IEAS_properties.Use_WH,
+            'HB': context.scene.IEAS_properties.Use_HB,         'QS': context.scene.IEAS_properties.Use_QS,
+            'Q2': context.scene.IEAS_properties.Use_Q2,         'Q3': context.scene.IEAS_properties.Use_Q3,
+            'Q4': context.scene.IEAS_properties.Use_Q4,         'GS': context.scene.IEAS_properties.Use_GS,
+        }
+
+        return animationWeaponToggles
+        
+        
+# --------
+# Purpose:
+# --------
 # Collection of methods for preparing animation types for rendering.
 # ------------------------------------------------------------------
 class IEAS_AnimationTypes():
@@ -2547,14 +2661,107 @@ class IEAS_OT_ShadingNodes(Operator):
 # Operator to handle INI files.
 # -----------------------------
 class IEAS_OT_IniFiles(Operator):
-    """This class offers a function which creates INI files which can be used to automate the BAM pre creation process in e.g. Near Infinity"""
-    bl_idname = "ieas.ini_files" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
-    bl_label = "CREATE" # Text displayed on the button in the UI.
+    """This class provides a function that creates INI files which can be used to automate the BAM pre-creation process, e.g., in Near Infinity."""
+    bl_idname   = "ieas.ini_files" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    bl_label    = "CREATE" # Text displayed on the button in the UI.
     
     # Blender specific function which is executed in this case when CREATE button is pressed
     def execute(self, context):
-        pass
+        # Retrieves the base save path from user input.            
+        pathSaveAt              = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
+        # Combines prefix and resref for use in filename construction.      
+        filenamePrefix          = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
+        # Retrieves the animation type name of the type list from the UI settings.
+        selectedType            = context.scene.IEAS_properties.Type
+        # Gets dictionary of animation toggle check box values.
+        animationToggles        = IEAS_Data.retrieveAnimationToggles(context)
+        # Gets dictionary of weapon toggle check box values.
+        animationWeaponToggles  = IEAS_Data.retrieveAnimationWeaponToggles(context)
+        # Stores existing sequences that is used as a dynamic flag.
+        foundSequences          = set()
+        
+        # TODO(delete it):HELLO WORLD EXAMPLE
+        exampleContent = (
+            "[Global]\n"
+            "version=2\n\n"
 
+            "[Frames]\n"
+            "0=D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\7000 Burning Man\sp0\00-walk\00south\!_BurningManWKG1_south_00001.png:0\n"
+
+            "\n[Cycles]\n"
+            "0=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14\n"
+        )      
+        # Creates the file
+        file = open("test.INI",'w')       
+        # Writes into file
+        file.write(exampleContent)
+        # Writes a line
+        file.writelines(["Hello World ", "You are welcome to Fcc\n"])
+        file.close()
+        
+        
+        
+        
+        # BUSINESS LOGIC
+        # Contains path and filename.
+        if (selectedType == '7000 monster split bams 0'):
+            # This is for accessing the animationToggles
+            sequences = {
+                'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
+                'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
+            }
+            fullPath = os.path.join(pathSaveAt, filenamePrefix + "_POSTFIX.INI")
+            animationSeq = sequences.get("<key>") # Gets e.g. G1. With '.get' 'None' is returned if the key doesn't exist.
+            
+            # INFO: TODO delete everything that follows till BUSINESS LOGIC!
+            #fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            
+            
+            # ----- Create INI Files
+            # <prefixResref><animationSeq><animationWeaponKey>.INI
+            
+            # first loop through animationToggles
+            for sequenceKey, sequence in sequences.items():
+                # sequences
+                print("1. for")
+                if(animationToggles[sequenceKey] == True):
+                    filenameSequence = filenamePrefix + sequence
+                    if(sequence in foundSequences):
+                        #
+                        fullPath = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        # TODO: Delete print
+                        print("fullPath:",fullPath)
+                        # Creates the file
+                        file = open(fullPath,'w')
+                        # TODO: Too early!
+                        file.close()
+                    #
+                    foundSequences.add(sequence)
+                    # Nested loop through animationWeaponToggles
+                    for weaponToggleKey, weaponAnimation in animationWeaponToggles.items():
+                        print("2. for")
+                        # 
+                        if(animationWeaponToggles[weaponToggleKey] == True):
+                            #
+                            filename = filenameSequence + weaponToggleKey
+                            fullPath = os.path.join(pathSaveAt, filename + ".INI")
+                            # TODO: Delete print
+                            print("fullPath:",fullPath)
+                            # Creates the file
+                            file = open(fullPath,'w')
+                            file.close()
+                    
+            # Use sequences to see if the toggles are active
+            # If true then: 
+            
+            # Within the nested loop the file can be created.
+            
+            # ----- Debugging
+            # TODO: Delete prints
+            print(f"animationSeq:{animationSeq}")
+            print(f"animationToggles:{animationToggles['SD']}")
+            
+        return {'FINISHED'}
 
 
 # --------
@@ -2795,7 +3002,7 @@ class IEAS_OT_Final(Operator):
         # Retrieves the base save path from user input.            
         pathSaveAt      = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
         # Combines prefix and resref for use in filename construction.      
-        prefixResref    = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref        
+        prefixResref    = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
         # ----- Init varibales(order is relevant)
         # Retrieves the animation type name of the type list from the UI settings.
         selectedType    = context.scene.IEAS_properties.Type
@@ -2926,7 +3133,7 @@ class IEAS_OT_Final(Operator):
             
             # Attempts to get the animation action data block.
             bpy.context.active_object.animation_data.action = bpy.data.actions.get(animation)
-            currentAction = bpy.context.active_object.animation_data.action
+            currentAction                                   = bpy.context.active_object.animation_data.action
             
             # Proceeds only if the animation is enabled by the user and the action exists in Blender. 
             if(animationToggles[animationKey] == True and currentAction != None):               
