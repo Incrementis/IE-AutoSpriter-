@@ -106,11 +106,79 @@ class IEAS_Data:
                 'D000':                                 IEAS_AnimationTypes().typeD000,
                 'E000':                                 IEAS_AnimationTypes().typeE000,
                 'F000':                                 IEAS_AnimationTypes().typeF000,
-            }
+        }           
         return animationTypeHandlers
-    
-    @classmethod
-    def retrieveAnimationToggles(cls, context):
+ 
+    @staticmethod
+    def retreiveAnimationFolderNames(context):
+        """Dictionary wrapper function - mapping internal keys to user-defined animation names."""
+        animationFolderNames = {
+            'A1':       context.scene.IEAS_properties.Attack1,      'A2': context.scene.IEAS_properties.Attack2,
+            'A3':       context.scene.IEAS_properties.Attack3,      'A4': context.scene.IEAS_properties.Attack4,
+            'A5':       context.scene.IEAS_properties.Attack5,      'TW': context.scene.IEAS_properties.Dead,
+            'CA':       context.scene.IEAS_properties.Cast,         'DE': context.scene.IEAS_properties.Death,
+            'GH':       context.scene.IEAS_properties.Get_Hit,      'GU': context.scene.IEAS_properties.Get_Up,
+            'SC':       context.scene.IEAS_properties.Ready,        'SD': context.scene.IEAS_properties.Idle,
+            'SL':       context.scene.IEAS_properties.Sleep,        'SP': context.scene.IEAS_properties.Conjure,
+            'WK':       context.scene.IEAS_properties.Walk,         'EMERGE': context.scene.IEAS_properties.Emerge,
+            'HIDE':     context.scene.IEAS_properties.Hide,         'Effect': context.scene.IEAS_properties.Effect,
+            # Type 5000/6000 Properties
+            'WK2':      context.scene.IEAS_properties.Walk2,
+            'A6':       context.scene.IEAS_properties.Attack6,      'A7': context.scene.IEAS_properties.Attack7,
+            'A8':       context.scene.IEAS_properties.Attack8,      'A9': context.scene.IEAS_properties.Attack9,
+            'SA':       context.scene.IEAS_properties.Attack10,     'SS': context.scene.IEAS_properties.Attack11,
+            'SX':       context.scene.IEAS_properties.Attack12,     'CA1': context.scene.IEAS_properties.Cast1,
+            'CA2':      context.scene.IEAS_properties.Cast2,        'CA3': context.scene.IEAS_properties.Cast3,
+            'CA4':      context.scene.IEAS_properties.Cast4,        'SP1': context.scene.IEAS_properties.Conjure1,
+            'SP2':      context.scene.IEAS_properties.Conjure2,     'SP3': context.scene.IEAS_properties.Conjure3,
+            'SP4':      context.scene.IEAS_properties.Conjure4,     'SC1': context.scene.IEAS_properties.Ready1,
+            'SC2':      context.scene.IEAS_properties.Ready2,       'SD1': context.scene.IEAS_properties.Idle1,
+            'SD2':      context.scene.IEAS_properties.Idle2,        'SD3': context.scene.IEAS_properties.Idle3,
+            'SL1':      context.scene.IEAS_properties.Sleep1,       'SL2': context.scene.IEAS_properties.Sleep2,
+            # PST String Properties
+            'AT1':      context.scene.IEAS_properties.PST_Attack1,  'AT2': context.scene.IEAS_properties.PST_Attack2,
+            'AT3':      context.scene.IEAS_properties.PST_Attack3,  'HIT': context.scene.IEAS_properties.PST_Get_Hit,
+            'RUN':      context.scene.IEAS_properties.PST_Run,      'WLK': context.scene.IEAS_properties.PST_Walk,
+            'SP1':      context.scene.IEAS_properties.PST_Spell1,   'SP2': context.scene.IEAS_properties.PST_Spell2,
+            'SP3':      context.scene.IEAS_properties.PST_Spell3,   'GUP': context.scene.IEAS_properties.PST_Get_Up,
+            'DFB1':     context.scene.IEAS_properties.PST_Death1,   'DFB2': context.scene.IEAS_properties.PST_Death2,
+            'DFB3':     context.scene.IEAS_properties.PST_Death3,   'TK1': context.scene.IEAS_properties.PST_Talk1,
+            'TK2':      context.scene.IEAS_properties.PST_Talk2,    'TK3': context.scene.IEAS_properties.PST_Talk3,
+            'STD':      context.scene.IEAS_properties.PST_Stand,    'STDF1': context.scene.IEAS_properties.PST_StandF1,
+            'STDF2':    context.scene.IEAS_properties.PST_StandF2,  'STC': context.scene.IEAS_properties.PST_Stance,
+            'STCF1':    context.scene.IEAS_properties.PST_StanceF1, 'STCF2': context.scene.IEAS_properties.PST_StanceF2,
+            'STCtoSTD': context.scene.IEAS_properties.PST_Stance_to_Stand, 
+            'STDtoSTC': context.scene.IEAS_properties.PST_Stand_to_Stance,
+            'MISC1':    context.scene.IEAS_properties.PST_Misc1,    'MISC2': context.scene.IEAS_properties.PST_Misc2,
+            'MISC3':    context.scene.IEAS_properties.PST_Misc3,    'MISC4': context.scene.IEAS_properties.PST_Misc4,
+            'MISC5':    context.scene.IEAS_properties.PST_Misc5,    'MISC6': context.scene.IEAS_properties.PST_Misc6,
+            'MISC7':    context.scene.IEAS_properties.PST_Misc7,    'MISC8': context.scene.IEAS_properties.PST_Misc8,
+            'MISC9':    context.scene.IEAS_properties.PST_Misc9,    'MISC10': context.scene.IEAS_properties.PST_Misc10,
+            'MISC11':   context.scene.IEAS_properties.PST_Misc11,   'MISC12': context.scene.IEAS_properties.PST_Misc12,
+            'MISC13':   context.scene.IEAS_properties.PST_Misc13,   'MISC14': context.scene.IEAS_properties.PST_Misc14,
+            'MISC15':   context.scene.IEAS_properties.PST_Misc15,   'MISC16': context.scene.IEAS_properties.PST_Misc16,
+            'MISC17':   context.scene.IEAS_properties.PST_Misc17,   'MISC18': context.scene.IEAS_properties.PST_Misc18,
+            'MISC19':   context.scene.IEAS_properties.PST_Misc19,   'MISC20': context.scene.IEAS_properties.PST_Misc20
+        }       
+        return animationFolderNames
+
+    @staticmethod
+    def retrieveCameraPosFolderNames(context):
+        """Dictionary wrapper function - mapping internal keys to user-defined orientation names."""
+        cameraPosFolderNames = {
+                'south':        context.scene.IEAS_properties.South,        'south_south_west': context.scene.IEAS_properties.South_South_West,
+                'south_west':   context.scene.IEAS_properties.South_West,   'west_south_west':  context.scene.IEAS_properties.West_South_West,
+                'west':         context.scene.IEAS_properties.West,         'west_north_west':  context.scene.IEAS_properties.West_North_West,
+                'north_west':   context.scene.IEAS_properties.North_West,   'north_north_west': context.scene.IEAS_properties.North_North_West,
+                'north':        context.scene.IEAS_properties.North,        'north_north_east': context.scene.IEAS_properties.North_North_East,
+                'north_east':   context.scene.IEAS_properties.North_East,   'east_north_east':  context.scene.IEAS_properties.East_North_East,
+                'east':         context.scene.IEAS_properties.East,         'east_south_east':  context.scene.IEAS_properties.East_South_East,
+                'south_east':   context.scene.IEAS_properties.South_East,   'south_south_east': context.scene.IEAS_properties.South_South_East
+        }
+        return cameraPosFolderNames
+
+    @staticmethod
+    def retrieveAnimationToggles(context):
         """Dictionary wrapper function - returns the current values of the animation toggle check boxes when called (e.g., A1 for attack 1)."""
         animationToggles = {
             'A1':       context.scene.IEAS_properties.Use_A1,       'A2': context.scene.IEAS_properties.Use_A2,
@@ -159,12 +227,26 @@ class IEAS_Data:
             'MISC17':   context.scene.IEAS_properties.Use_MISC17,   'MISC18': context.scene.IEAS_properties.Use_MISC18,
             'MISC19':   context.scene.IEAS_properties.Use_MISC19,   'MISC20': context.scene.IEAS_properties.Use_MISC20
         }
-
         return animationToggles
-   
-    @classmethod
-    def retrieveAnimationWeaponToggles(cls, context):
-        """Dictionary wrapper function - returns the current values of the animation toggle buttons when called (e.g., A1 for attack 1)."""
+    
+    @staticmethod
+    def retrieveCameraPosToggles(context):
+        """Dictionary wrapper function - returns the current values of the orientation toggle check boxes when called."""
+        cameraPosToggles = {
+                'south':        context.scene.IEAS_properties.Use_SO, 'south_south_west':   context.scene.IEAS_properties.Use_SSW,
+                'south_west':   context.scene.IEAS_properties.Use_SW, 'west_south_west':    context.scene.IEAS_properties.Use_WSW,
+                'west':         context.scene.IEAS_properties.Use_WE, 'west_north_west':    context.scene.IEAS_properties.Use_WNW,
+                'north_west':   context.scene.IEAS_properties.Use_NW, 'north_north_west':   context.scene.IEAS_properties.Use_NNW,
+                'north':        context.scene.IEAS_properties.Use_NO, 'north_north_east':   context.scene.IEAS_properties.Use_NNE,
+                'north_east':   context.scene.IEAS_properties.Use_NE, 'east_north_east':    context.scene.IEAS_properties.Use_ENE,
+                'east':         context.scene.IEAS_properties.Use_ES, 'east_south_east':    context.scene.IEAS_properties.Use_ESE,
+                'south_east':   context.scene.IEAS_properties.Use_SE, 'south_south_east':   context.scene.IEAS_properties.Use_SSE
+        }
+        return cameraPosToggles
+    
+    @staticmethod
+    def retrieveAnimationWeaponToggles(context):
+        """Dictionary wrapper function - returns the current values of the animation toggle buttons when called (e.g., AX for axe)."""
         animationWeaponToggles  = {
             'AX': context.scene.IEAS_properties.Use_AX,         'SR': context.scene.IEAS_properties.Use_SR,
             'BS': context.scene.IEAS_properties.Use_BS,         'MC': context.scene.IEAS_properties.Use_MC,
@@ -182,8 +264,25 @@ class IEAS_Data:
             'Q2': context.scene.IEAS_properties.Use_Q2,         'Q3': context.scene.IEAS_properties.Use_Q3,
             'Q4': context.scene.IEAS_properties.Use_Q4,         'GS': context.scene.IEAS_properties.Use_GS,
         }
-
         return animationWeaponToggles
+
+    @staticmethod
+    def retrieveSequencesType7000_monster_sp0():
+        """Dictionary wrapper animation type 7000 split_bams=0 function - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesType7000_monster_sp0 = {
+                'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
+                'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
+        }   
+        return sequencesType7000_monster_sp0
+
+    @staticmethod
+    def retrieveSequencesType7000_monster_sp1():
+        """Dictionary wrapper animation type 7000 split_bams=1 function - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesType7000_monster_sp1 = {
+            'SC':'G1', 'WK':'G11','SD':'G12', 'GH':'G13and14', 'DE':'G14', 'TW':'G14and15', 'GU':'G14', 'SL':'G14',
+            'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
+        } 
+        return sequencesType7000_monster_sp1
         
         
 # --------
@@ -2152,8 +2251,12 @@ class IEAS_PGT_Inputs(PropertyGroup):
             'Use_MISC16', 'Use_MISC17', 'Use_MISC18', 'Use_MISC19', 'Use_MISC20',
         ]
         weaponToggles = [
-            'Use_A', 'Use_B', 'Use_C', 'Use_D', 'Use_F', 'Use_H',
-            'Use_M', 'Use_S', 'Use_W', 'Use_Q'
+            'Use_AX', 'Use_BS', 'Use_BW', 'Use_CB', 'Use_SI',
+            'Use_CL', 'Use_DD', 'Use_SS', 'Use_FL', 'Use_F0',
+            'Use_F1', 'Use_F3', 'Use_HB', 'Use_SR', 'Use_MC',
+            'Use_M2', 'Use_F2', 'Use_FS', 'Use_S0', 'Use_S1',
+            'Use_S2', 'Use_S3', 'Use_ST', 'Use_MS', 'Use_WH',
+            'Use_QS', 'Use_Q2', 'Use_Q3', 'Use_Q4', 'Use_GS',                        
         ]
         armorToggles = [
             'Use_ARMOR1', 'Use_ARMOR2', 'Use_ARMOR3', 'Use_ARMOR4',
@@ -2675,10 +2778,25 @@ class IEAS_OT_IniFiles(Operator):
         selectedType            = context.scene.IEAS_properties.Type
         # Gets dictionary of animation toggle check box values.
         animationToggles        = IEAS_Data.retrieveAnimationToggles(context)
+        # Gets dictionary of orientation toggle check box values.
+        cameraPosToggles        = IEAS_Data.retrieveCameraPosToggles(context)      
+        # Gets dictionary of animation folder values(string properties).
+        animationFolderNames    = IEAS_Data.retreiveAnimationFolderNames(context)
+        # Gets dictionary of creature position/orientation folder values(string properties).
+        cameraPosFolderNames    = IEAS_Data.retrieveCameraPosFolderNames(context)
         # Gets dictionary of weapon toggle check box values.
         animationWeaponToggles  = IEAS_Data.retrieveAnimationWeaponToggles(context)
         # Stores existing sequences that is used as a dynamic flag.
         foundSequences          = set()
+        # Global content that is written to every INI file.
+        globalContent           = (
+            "[Global]\n"
+            "version=2\n"
+        )
+        # Depending on the value, not every frame in the INI file needs to be used.
+        Every_X_Frame           = context.scene.IEAS_properties.Every_X_Frame
+        pngFile                 = "NULL"
+        positionTracker         = {}
         
         # TODO(delete it):HELLO WORLD EXAMPLE
         exampleContent = (
@@ -2706,14 +2824,18 @@ class IEAS_OT_IniFiles(Operator):
         # Contains path and filename.
         if (selectedType == '7000 monster split bams 0'):
             # This is for accessing the animationToggles
-            sequences = {
-                'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
-                'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
-            }
-            fullPath = os.path.join(pathSaveAt, filenamePrefix + "_POSTFIX.INI")
+            sequences = IEAS_Data.retrieveSequencesType7000_monster_sp0()
+            # 
+            orientations = [
+                'south',        'south_south_west',
+                'south_west',   'west_south_west',
+                'west',         'west_north_west',
+                'north_west',   'north_north_west',
+                'north',
+            ]
             animationSeq = sequences.get("<key>") # Gets e.g. G1. With '.get' 'None' is returned if the key doesn't exist.
             
-            # INFO: TODO delete everything that follows till BUSINESS LOGIC!
+            # INFO: TODO delete
             #fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             
@@ -2723,39 +2845,60 @@ class IEAS_OT_IniFiles(Operator):
             # first loop through animationToggles
             for sequenceKey, sequence in sequences.items():
                 # sequences
-                print("1. for")
                 if(animationToggles[sequenceKey] == True):
                     filenameSequence = filenamePrefix + sequence
-                    if(sequence in foundSequences):
+                    if(sequence not in foundSequences):
                         #
-                        fullPath = os.path.join(pathSaveAt, filenameSequence + ".INI")
-                        # TODO: Delete print
-                        print("fullPath:",fullPath)
-                        # Creates the file
-                        file = open(fullPath,'w')
-                        # TODO: Too early!
-                        file.close()
-                    #
-                    foundSequences.add(sequence)
+                        fullPath    = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        animation   = animationFolderNames[sequenceKey]
+                        # Creates, opens, writes and closes the file
+                       
+                        if(sequence not in positionTracker):
+                            positionTracker[sequence] = 0
+                            mode = "w"
+                        else:
+                            mode = "a"
+
+                        # Gets current position
+                        position = positionTracker[sequence]
+                        
+                        with open(fullPath, mode) as file:
+                            # Content when INI is first time generated.
+                            if(mode == 'w'):
+                                file.write(globalContent+"\n")
+                                file.write("[Frames]\n")
+                            
+                            # Init loop variables
+                            frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
+                            frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])                      
+                            #positions       = positions + frameEnd
+                            #
+                            for orientation in orientations:
+                                print(cameraPosToggles[orientation])
+                                # Writes to the file only if the model orientation is checked by the user.
+                                if(cameraPosToggles[orientation]):
+                                    orientationFolder = cameraPosFolderNames[orientation]
+                                    for frame in range(frameStart,frameEnd+1):
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,animation,orientationFolder,pngFile)
+                                        file.write(f"{position}={fullFramePath}:0\n")
+                                        position       += 1
+                                        
+                        #
+                        foundSequences.add(sequence)
+                        # 
+                        positionTracker[sequence] = position
                     # Nested loop through animationWeaponToggles
                     for weaponToggleKey, weaponAnimation in animationWeaponToggles.items():
-                        print("2. for")
                         # 
                         if(animationWeaponToggles[weaponToggleKey] == True):
                             #
                             filename = filenameSequence + weaponToggleKey
                             fullPath = os.path.join(pathSaveAt, filename + ".INI")
-                            # TODO: Delete print
-                            print("fullPath:",fullPath)
                             # Creates the file
                             file = open(fullPath,'w')
                             file.close()
-                    
-            # Use sequences to see if the toggles are active
-            # If true then: 
-            
-            # Within the nested loop the file can be created.
-            
+                 
             # ----- Debugging
             # TODO: Delete prints
             print(f"animationSeq:{animationSeq}")

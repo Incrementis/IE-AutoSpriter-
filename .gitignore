@@ -4,9 +4,6 @@
 /demos/test bams/type b000/!_HorseG1E.ini
 /demos/test bams/type c000/!_SlaveG1.ini
 /demos/test bams/type c000/!_SlaveG1E.ini
-/demos/blender4.5.5 LTS/pre testings/!_Demo4000_Sleeping_Fat_Man_Blender_4.5.5 - BODY-BAK13.blend
-/demos/test bams/type 4000/!_SleepingFatMan.ini
-/demos/blender4.5.5 LTS/pre testings/!_Demo4000_Sleeping_Fat_Man_Blender_4.5.5 - BAK30_PRE_TESTING.blend
 /demos/test bams/type 4000/ARE/AR0021.ARE
 /demos/test bams/type 4000/ARE/AR0156.ARE
 /demos/test bams/type 4000/ARE/AR0164.ARE
@@ -22,6 +19,14 @@
 /demos/test bams/type 4000/ARE/AR4902.ARE
 /demos/test bams/type 4000/CRE/SLEEPFAT.CRE
 /demos/blender4.5.5 LTS/pre testings
+/demos/blender4.5.5 LTS/7000 Fishman
+/demos/blender4.5.5 LTS/0000 Magical Orb
+/demos/blender4.5.5 LTS/4000 Sleeping Fat Man
+/demos/blender4.5.5 LTS/7000 Burning Man
+/demos/blender4.5.5 LTS/7000 Wolf
+/demos/blender4.5.5 LTS/B000 Horse
+/demos/blender4.5.5 LTS/C000 Slave
+/demos/blender4.5.5 LTS/D000 Eagle
 /demos/blender4.0(legacy)/*.blend1
 *.blend1
 *.png
