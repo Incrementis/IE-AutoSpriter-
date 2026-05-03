@@ -2865,7 +2865,6 @@ class IEAS_OT_IniFiles(Operator):
                             #positions       = positions + frameEnd
                             #
                             for orientation in orientations:
-                                print(cameraPosToggles[orientation])
                                 # Writes to the file only if the model orientation is checked by the user.
                                 if(cameraPosToggles[orientation]):
                                     orientation = cameraPosFolderNames[orientation]
@@ -2897,7 +2896,6 @@ class IEAS_OT_IniFiles(Operator):
                                     #positions       = positions + frameEnd
                                     #
                                     for orientation in orientations:
-                                        print(cameraPosToggles[orientation])
                                         # Writes to the file only if the model orientation is checked by the user.
                                         if(cameraPosToggles[orientation]):
                                             orientation = cameraPosFolderNames[orientation]
@@ -2911,7 +2909,58 @@ class IEAS_OT_IniFiles(Operator):
                         foundSequences.add(sequence)
                         # 
                         positionTracker[sequence] = position
-                        
+                    else:
+                        filenameSequence = filenamePrefix + sequence
+                        # Gets current position
+                        position = positionTracker[sequence]
+                        #
+                        fullPath    = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        animation   = animationFolderNames[sequenceKey]
+                        with open(fullPath, 'a') as file:                        
+                            # Init loop variables
+                            frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
+                            frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])                      
+                            #positions       = positions + frameEnd
+                            #
+                            for orientation in orientations:
+                                # Writes to the file only if the model orientation is checked by the user.
+                                if(cameraPosToggles[orientation]):
+                                    orientation = cameraPosFolderNames[orientation]
+                                    for frame in range(frameStart,frameEnd+1):
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientation,pngFile)
+                                        file.write(f"{position}={fullFramePath}:0\n")
+                                        position       += 1
+                                                                
+                        # Nested loop through animationWeaponToggles
+                        for weaponKey, weaponAnimation in animationWeaponToggles.items():
+                            # 
+                            if(animationWeaponToggles[weaponKey] == True):
+                                #
+                                filename    = filenameSequence + weaponKey
+                                fullPath    = os.path.join(pathSaveAt, filename + ".INI")
+                                weapon      = animationWeaponFolderNames[weaponKey]
+                                # Gets current position
+                                position = positionTracker[sequence]
+                                                               
+                                with open(fullPath, 'a') as file:                          
+                                    # Init loop variables
+                                    frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
+                                    frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])                      
+                                    #positions       = positions + frameEnd
+                                    #
+                                    for orientation in orientations:
+                                        # Writes to the file only if the model orientation is checked by the user.
+                                        if(cameraPosToggles[orientation]):
+                                            orientation = cameraPosFolderNames[orientation]
+                                            for frame in range(frameStart,frameEnd+1):
+                                                pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
+                                                fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientation,pngFile)
+                                                file.write(f"{position}={fullFramePath}:0\n")
+                                                position       += 1
+                        # 
+                        positionTracker[sequence] = position
+                    
             # ----- Debugging
             # TODO: Delete prints
             print(f"animationSeq:{animationSeq}")
