@@ -110,7 +110,7 @@ class IEAS_Data:
         return animationTypeHandlers
  
     @staticmethod
-    def retreiveAnimationFolderNames(context):
+    def retrieveAnimationFolderNames(context):
         """Dictionary wrapper function - mapping internal keys to user-defined animation names."""
         animationFolderNames = {
             'A1':       context.scene.IEAS_properties.Attack1,      'A2': context.scene.IEAS_properties.Attack2,
@@ -161,7 +161,28 @@ class IEAS_Data:
             'MISC19':   context.scene.IEAS_properties.PST_Misc19,   'MISC20': context.scene.IEAS_properties.PST_Misc20
         }       
         return animationFolderNames
-
+    
+    @staticmethod
+    def retrieveAnimationWeaponFolderNames(context):
+        animationWeaponFolderNames = {
+            'AX': context.scene.IEAS_properties.Axe,                 'SR': context.scene.IEAS_properties.Spear,
+            'BS': context.scene.IEAS_properties.Shortbow,            'MC': context.scene.IEAS_properties.Mace,
+            'BW': context.scene.IEAS_properties.Longbow,             'M2': context.scene.IEAS_properties.Mace1,
+            'CB': context.scene.IEAS_properties.Crossbow,            'F2': context.scene.IEAS_properties.Flaming_Short_Sword,
+            'SI': context.scene.IEAS_properties.Sling,               'FS': context.scene.IEAS_properties.Flaming_Sword,
+            'CL': context.scene.IEAS_properties.Club,                'S0': context.scene.IEAS_properties.Bastardsword,
+            'DD': context.scene.IEAS_properties.Dagger,              'S1': context.scene.IEAS_properties.Longsword,
+            'SS': context.scene.IEAS_properties.Short_Sword,         'S2': context.scene.IEAS_properties.Greatsword,
+            'FL': context.scene.IEAS_properties.Flail,               'S3': context.scene.IEAS_properties.Katana,
+            'F0': context.scene.IEAS_properties.Flail1,              'ST': context.scene.IEAS_properties.Scimitar,
+            'F1': context.scene.IEAS_properties.Flail2,              'MS': context.scene.IEAS_properties.Morning_Star,
+            'F3': context.scene.IEAS_properties.Flail3,              'WH': context.scene.IEAS_properties.Warhammer,
+            'HB': context.scene.IEAS_properties.Halberd,             'QS': context.scene.IEAS_properties.Quarterstaff,
+            'Q2': context.scene.IEAS_properties.Quarterstaff1,       'Q3': context.scene.IEAS_properties.Quarterstaff2,
+            'Q4': context.scene.IEAS_properties.Quarterstaff3,       'GS': context.scene.IEAS_properties.Glowing_Staff,          
+        }
+        return animationWeaponFolderNames
+    
     @staticmethod
     def retrieveCameraPosFolderNames(context):
         """Dictionary wrapper function - mapping internal keys to user-defined orientation names."""
@@ -2771,61 +2792,42 @@ class IEAS_OT_IniFiles(Operator):
     # Blender specific function which is executed in this case when CREATE button is pressed
     def execute(self, context):
         # Retrieves the base save path from user input.            
-        pathSaveAt              = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
+        pathSaveAt                  = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
         # Combines prefix and resref for use in filename construction.      
-        filenamePrefix          = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
+        filenamePrefix              = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
         # Retrieves the animation type name of the type list from the UI settings.
-        selectedType            = context.scene.IEAS_properties.Type
+        selectedType                = context.scene.IEAS_properties.Type
         # Gets dictionary of animation toggle check box values.
-        animationToggles        = IEAS_Data.retrieveAnimationToggles(context)
+        animationToggles            = IEAS_Data.retrieveAnimationToggles(context)
         # Gets dictionary of orientation toggle check box values.
-        cameraPosToggles        = IEAS_Data.retrieveCameraPosToggles(context)      
+        cameraPosToggles            = IEAS_Data.retrieveCameraPosToggles(context)      
         # Gets dictionary of animation folder values(string properties).
-        animationFolderNames    = IEAS_Data.retreiveAnimationFolderNames(context)
+        animationFolderNames        = IEAS_Data.retrieveAnimationFolderNames(context)
+        # Gets dictionary of weapon animation folder values(string properties).
+        animationWeaponFolderNames  = IEAS_Data.retrieveAnimationWeaponFolderNames(context)
         # Gets dictionary of creature position/orientation folder values(string properties).
-        cameraPosFolderNames    = IEAS_Data.retrieveCameraPosFolderNames(context)
+        cameraPosFolderNames        = IEAS_Data.retrieveCameraPosFolderNames(context)
         # Gets dictionary of weapon toggle check box values.
-        animationWeaponToggles  = IEAS_Data.retrieveAnimationWeaponToggles(context)
+        animationWeaponToggles      = IEAS_Data.retrieveAnimationWeaponToggles(context)
         # Stores existing sequences that is used as a dynamic flag.
-        foundSequences          = set()
+        foundSequences              = set()
         # Global content that is written to every INI file.
-        globalContent           = (
+        globalContent               = (
             "[Global]\n"
             "version=2\n"
         )
         # Depending on the value, not every frame in the INI file needs to be used.
-        Every_X_Frame           = context.scene.IEAS_properties.Every_X_Frame
-        pngFile                 = "NULL"
-        positionTracker         = {}
-        
-        # TODO(delete it):HELLO WORLD EXAMPLE
-        exampleContent = (
-            "[Global]\n"
-            "version=2\n\n"
-
-            "[Frames]\n"
-            "0=D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\7000 Burning Man\sp0\00-walk\00south\!_BurningManWKG1_south_00001.png:0\n"
-
-            "\n[Cycles]\n"
-            "0=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14\n"
-        )      
-        # Creates the file
-        file = open("test.INI",'w')       
-        # Writes into file
-        file.write(exampleContent)
-        # Writes a line
-        file.writelines(["Hello World ", "You are welcome to Fcc\n"])
-        file.close()
-        
-        
-        
-        
-        # BUSINESS LOGIC
+        Every_X_Frame               = context.scene.IEAS_properties.Every_X_Frame
+        #
+        pngFile                     = "NULL"
+        #
+        positionTracker             = {}
+         
         # Contains path and filename.
         if (selectedType == '7000 monster split bams 0'):
             # This is for accessing the animationToggles
             sequences = IEAS_Data.retrieveSequencesType7000_monster_sp0()
-            # 
+            # The position of the orientations within the list are as in iesdp.
             orientations = [
                 'south',        'south_south_west',
                 'south_west',   'west_south_west',
@@ -2833,14 +2835,8 @@ class IEAS_OT_IniFiles(Operator):
                 'north_west',   'north_north_west',
                 'north',
             ]
+            # TODO: Delete if not useful for further development!
             animationSeq = sequences.get("<key>") # Gets e.g. G1. With '.get' 'None' is returned if the key doesn't exist.
-            
-            # INFO: TODO delete
-            #fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-            
-            
-            # ----- Create INI Files
-            # <prefixResref><animationSeq><animationWeaponKey>.INI
             
             # first loop through animationToggles
             for sequenceKey, sequence in sequences.items():
@@ -2852,21 +2848,16 @@ class IEAS_OT_IniFiles(Operator):
                         fullPath    = os.path.join(pathSaveAt, filenameSequence + ".INI")
                         animation   = animationFolderNames[sequenceKey]
                         # Creates, opens, writes and closes the file
-                       
-                        if(sequence not in positionTracker):
-                            positionTracker[sequence] = 0
-                            mode = "w"
-                        else:
-                            mode = "a"
-
+                        
+                        # 
+                        positionTracker[sequence] = 0
                         # Gets current position
                         position = positionTracker[sequence]
                         
-                        with open(fullPath, mode) as file:
+                        with open(fullPath, 'w') as file:
                             # Content when INI is first time generated.
-                            if(mode == 'w'):
-                                file.write(globalContent+"\n")
-                                file.write("[Frames]\n")
+                            file.write(globalContent+"\n")
+                            file.write("[Frames]\n")
                             
                             # Init loop variables
                             frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
@@ -2877,28 +2868,50 @@ class IEAS_OT_IniFiles(Operator):
                                 print(cameraPosToggles[orientation])
                                 # Writes to the file only if the model orientation is checked by the user.
                                 if(cameraPosToggles[orientation]):
-                                    orientationFolder = cameraPosFolderNames[orientation]
+                                    orientation = cameraPosFolderNames[orientation]
                                     for frame in range(frameStart,frameEnd+1):
                                         pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
-                                        fullFramePath   = os.path.join(pathSaveAt,animation,orientationFolder,pngFile)
+                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientation,pngFile)
                                         file.write(f"{position}={fullFramePath}:0\n")
                                         position       += 1
-                                        
+                                                                
+                        # Nested loop through animationWeaponToggles
+                        for weaponKey, weaponAnimation in animationWeaponToggles.items():
+                            # 
+                            if(animationWeaponToggles[weaponKey] == True):
+                                #
+                                filename    = filenameSequence + weaponKey
+                                fullPath    = os.path.join(pathSaveAt, filename + ".INI")
+                                weapon      = animationWeaponFolderNames[weaponKey]
+                                # Gets current position
+                                position = positionTracker[sequence]
+                                                               
+                                with open(fullPath, 'w') as file:
+                                # Content when INI is first time generated.
+                                    file.write(globalContent+"\n")
+                                    file.write("[Frames]\n")
+                                    
+                                    # Init loop variables
+                                    frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
+                                    frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])                      
+                                    #positions       = positions + frameEnd
+                                    #
+                                    for orientation in orientations:
+                                        print(cameraPosToggles[orientation])
+                                        # Writes to the file only if the model orientation is checked by the user.
+                                        if(cameraPosToggles[orientation]):
+                                            orientation = cameraPosFolderNames[orientation]
+                                            for frame in range(frameStart,frameEnd+1):
+                                                pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
+                                                fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientation,pngFile)
+                                                file.write(f"{position}={fullFramePath}:0\n")
+                                                position       += 1
+                 
                         #
                         foundSequences.add(sequence)
                         # 
                         positionTracker[sequence] = position
-                    # Nested loop through animationWeaponToggles
-                    for weaponToggleKey, weaponAnimation in animationWeaponToggles.items():
-                        # 
-                        if(animationWeaponToggles[weaponToggleKey] == True):
-                            #
-                            filename = filenameSequence + weaponToggleKey
-                            fullPath = os.path.join(pathSaveAt, filename + ".INI")
-                            # Creates the file
-                            file = open(fullPath,'w')
-                            file.close()
-                 
+                        
             # ----- Debugging
             # TODO: Delete prints
             print(f"animationSeq:{animationSeq}")
