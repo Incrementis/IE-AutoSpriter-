@@ -2839,44 +2839,45 @@ class IEAS_OT_IniFiles(Operator):
                 'north_west',   'north_north_west',
                 'north',
             ]           
-            #
-            
-            
+                                   
             # first loop through animationToggles
             for sequenceKey, sequence in sequences.items():
                 # sequences
                 if(animationToggles[sequenceKey] == True):
-                    filenameSequence = filenamePrefix + sequence
-                    if(sequence not in foundSequences):
-                        #
-                        fullPath    = os.path.join(pathSaveAt, filenameSequence + ".INI")
-                        animation   = animationFolderNames[sequenceKey]
-                        #
-                        cycles[sequence] = {}
-                        Allfilenames[sequence] = []
-                        Allfilenames[sequence].append(fullPath)
-                        cycles[sequence][sequenceKey] = {}
-                        # 
-                        positionTracker[sequence] = 0
-                        # Gets current position
-                        position = positionTracker[sequence]
+                    filenameSequence    = filenamePrefix + sequence
+                    animation           = animationFolderNames[sequenceKey]
+                    frameStart          = int(bpy.data.actions.get(animation).frame_range[0])
+                    frameEnd            = int(bpy.data.actions.get(animation).frame_range[1])
+                    # ----- Calculates neccessary frame numbers.
+                    # numberOfFrames  = math.floor(frameEnd/Every_X_Frame)
+                    # AllFrames       = []
+                    # for currentFrame in range(1,numberOfFrames+1):      
+                        # calculatedFrame = (currentFrame*Every_X_Frame) + (frameStart-1)         
+                        # if calculatedFrame > frameEnd:
+                            # break                          
+                        # AllFrames.append(calculatedFrame)
+                    AllFrames = list(range(frameStart, frameEnd + 1, Every_X_Frame))
                         
+                    if(sequence not in foundSequences):
+                        fullPath                        = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        cycles[sequence]                = {}
+                        cycles[sequence][sequenceKey]   = {}
+                        Allfilenames[sequence]          = [fullPath]
+                        positionTracker[sequence]       = 0
+                        position                        = positionTracker[sequence]
+                                                
                         # Creates, opens, writes and closes the file
                         with open(fullPath, 'w') as file:
                             # Content when INI is first time generated.
                             file.write(globalContent+"\n")
-                            file.write("[Frames]\n")
-                            
-                            # Init loop variables
-                            frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
-                            frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])
+                            file.write("[Frames]\n")                                                     
                             #
                             for orientation in orientations:
                                 # Writes to the file only if the model orientation is checked by the user.
                                 if(cameraPosToggles[orientation]):
                                     orientationFolder = cameraPosFolderNames[orientation]
                                     cycles[sequence][sequenceKey][orientation] = []
-                                    for frame in range(frameStart,frameEnd+1):
+                                    for frame in AllFrames:
                                         cycles[sequence][sequenceKey][orientation].append(str(position))
                                         pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
                                         fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
@@ -2889,34 +2890,26 @@ class IEAS_OT_IniFiles(Operator):
                         for weaponKey, weaponAnimation in animationWeaponToggles.items():
                             # 
                             if(weaponAnimation == True):
-                                #
                                 filename    = filenameSequence + weaponKey
                                 fullPath    = os.path.join(pathSaveAt, filename + ".INI")
                                 weapon      = animationWeaponFolderNames[weaponKey]
-                                # Gets current position
-                                position = positionTracker[sequence]
-                                #
-                                Allfilenames[sequence].append(fullPath)
-                                
+                                position    = positionTracker[sequence]
+                                Allfilenames[sequence].append(fullPath)                             
                                 # Creates, opens, writes and closes the file                               
                                 with open(fullPath, 'w') as file:
                                 # Content when INI is first time generated.
                                     file.write(globalContent+"\n")
-                                    file.write("[Frames]\n")
-                                    
-                                    # Init loop variables
-                                    frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
-                                    frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])                      
+                                    file.write("[Frames]\n")                     
                                     #
                                     for orientation in orientations:
                                         orientationFolder   = cameraPosFolderNames[orientation]
                                         # Writes to the file only if the model orientation is checked by the user.
                                         if(cameraPosToggles[orientation]):
-                                            for frame in range(frameStart,frameEnd+1):
-                                                    pngFile             = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
-                                                    fullFramePath       = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
-                                                    file.write(f"{position}={fullFramePath}:0\n")
-                                                    position           += 1
+                                            for frame in AllFrames:
+                                                pngFile             = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
+                                                fullFramePath       = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
+                                                file.write(f"{position}={fullFramePath}:0\n")
+                                                position           += 1
                                         else:
                                             cycles[sequence][sequenceKey][orientation] = []
                         #
@@ -2924,28 +2917,19 @@ class IEAS_OT_IniFiles(Operator):
                         # 
                         positionTracker[sequence] = position
                     else:
-                        filenameSequence = filenamePrefix + sequence
-                        # Gets current position
-                        position = positionTracker[sequence]
-                        #
-                        fullPath    = os.path.join(pathSaveAt, filenameSequence + ".INI")
-                        #
-                        animation   = animationFolderNames[sequenceKey]
-                        #
-                        cycles[sequence][sequenceKey] = {}
+                        position                        = positionTracker[sequence]
+                        fullPath                        = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        animation                       = animationFolderNames[sequenceKey]
+                        cycles[sequence][sequenceKey]   = {}
                         # Creates, opens, writes and closes the file
                         with open(fullPath, 'a') as file:                        
-                            # Init loop variables
-                            frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
-                            frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])                      
-                            #positions       = positions + frameEnd
                             #
                             for orientation in orientations:
                                 # Writes to the file only if the model orientation is checked by the user.
                                 if(cameraPosToggles[orientation]):
                                     orientationFolder                           = cameraPosFolderNames[orientation]
                                     cycles[sequence][sequenceKey][orientation]  = []
-                                    for frame in range(frameStart,frameEnd+1):
+                                    for frame in AllFrames:
                                         cycles[sequence][sequenceKey][orientation].append(str(position))
                                         pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
                                         fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
@@ -2964,17 +2948,12 @@ class IEAS_OT_IniFiles(Operator):
                                 # Gets current position
                                 position = positionTracker[sequence]
                                 # Creates, opens, writes and closes the file                               
-                                with open(fullPath, 'a') as file:                          
-                                    # Init loop variables
-                                    frameStart      = int(bpy.data.actions.get(animation).frame_range[0])
-                                    frameEnd        = int(bpy.data.actions.get(animation).frame_range[1])                      
-                                    #positions       = positions + frameEnd
-                                    #
+                                with open(fullPath, 'a') as file:                                                
                                     for orientation in orientations:
                                         # Writes to the file only if the model orientation is checked by the user.
                                         if(cameraPosToggles[orientation]):
                                             orientationFolder = cameraPosFolderNames[orientation]
-                                            for frame in range(frameStart,frameEnd+1):
+                                            for frame in AllFrames:
                                                 pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
                                                 fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
                                                 file.write(f"{position}={fullFramePath}:0\n")
@@ -2986,9 +2965,9 @@ class IEAS_OT_IniFiles(Operator):
         
         # # TODO: Delete prints
         # #print(cycles)
-        cyclePosition = 0
-        for sequence,fullPaths in Allfilenames.items():          
+        for sequence,fullPaths in Allfilenames.items():
             for fullPath in fullPaths:
+                cyclePosition = 0
                 with open(fullPath, 'a') as file:
                     file.write("\n[Cycles]\n")
                     for sequenceKey in sequences.keys():
@@ -2996,10 +2975,11 @@ class IEAS_OT_IniFiles(Operator):
                             if(cycles[sequence].get(sequenceKey) != None):
                                 if (len(cycles[sequence][sequenceKey][orientation]) != 0):
                                     file.write(f"{cyclePosition}=" + ','.join(cycles[sequence][sequenceKey][orientation])+"\n")
-                                    cyclePosition += 1 
+                                    cyclePosition += 1
                                 else:
                                     file.write(f"{cyclePosition}=\n")
-                                    cyclePosition += 1 
+                                    cyclePosition += 1
+                                    
         
         return {'FINISHED'}
 
@@ -3434,15 +3414,16 @@ class IEAS_OT_Final(Operator):
                             return {'CANCELLED'}
 
                         # ----- Calculates neccessary frame numbers.
-                        numberOfFrames  = math.floor(frameEnd/Every_X_Frame)
-                        AllFrames       = []
-                        for frame in range(1,numberOfFrames+1):      
-                            calculatedFrame = (frame*Every_X_Frame) + (frameStart-1)         
-                            # This is necessary, otherwise the sprite names will be incorrect.
-                            if calculatedFrame > frameEnd:
-                                break
-                            # This list contains frames which will be rendered.                          
-                            AllFrames.append(calculatedFrame)
+                        # numberOfFrames  = math.floor(frameEnd/Every_X_Frame)
+                        # AllFrames       = []
+                        # for frame in range(1,numberOfFrames+1):      
+                            # calculatedFrame = (frame*Every_X_Frame) + (frameStart-1)         
+                            # # This is necessary, otherwise the sprite names will be incorrect.
+                            # if calculatedFrame > frameEnd:
+                                # break
+                            # # This list contains frames which will be rendered.                          
+                            # AllFrames.append(calculatedFrame)
+                        AllFrames = list(range(frameStart, frameEnd + 1, Every_X_Frame))
                                                     
                         #  ----- Nested/Inner loop 
                         # Loops through frames within the animation's range, stepping by 'Every_X_Frame'.
