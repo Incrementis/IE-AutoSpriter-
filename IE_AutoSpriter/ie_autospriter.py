@@ -2788,9 +2788,29 @@ class IEAS_OT_IniFiles(Operator):
     """This class provides a function that creates INI files which can be used to automate the BAM pre-creation process, e.g., in Near Infinity."""
     bl_idname   = "ieas.ini_files" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label    = "CREATE" # Text displayed on the button in the UI.
-    
+         
     # Blender specific function which is executed in this case when CREATE button is pressed
     def execute(self, context):
+        # The list order matters! The position of the orientations within the list are as in iesdp.
+        orientations9D = [
+            'south',        'south_south_west',
+            'south_west',   'west_south_west',
+            'west',         'west_north_west',
+            'north_west',   'north_north_west',
+            'north',
+        ]
+        NIfilters = (
+            "\n[Filters]\n"
+            "name_0=Center BAM frames\n"
+            "config_0=0;0;0;0;false;128;155\n"
+            "enabled_0=1\n"
+            "name_2=Resize BAM frames\n"
+            "config_2=5;0;0.6;1.0;1.0;true\n"
+            "enabled_2=1\n"
+            "name_3=Trim BAM frames\n"
+            "config_3=true;true;true;true;0;true"
+            "enabled_3=1\n"
+        )
         # Retrieves the base save path from user input.            
         pathSaveAt                  = bpy.path.abspath(context.scene.IEAS_properties.Save_at)
         # Combines prefix and resref for use in filename construction.      
@@ -2831,15 +2851,9 @@ class IEAS_OT_IniFiles(Operator):
         if (selectedType == '7000 monster split bams 0'):
             # This is for accessing the animationToggles
             sequences = IEAS_Data.retrieveSequencesType7000_monster_sp0()
-            # The position of the orientations within the list are as in iesdp.
-            orientations = [
-                'south',        'south_south_west',
-                'south_west',   'west_south_west',
-                'west',         'west_north_west',
-                'north_west',   'north_north_west',
-                'north',
-            ]           
-                                   
+            orientations = orientations9D                                  
+            
+            # ----- [FRAMES]
             # first loop through animationToggles
             for sequenceKey, sequence in sequences.items():
                 # sequences
@@ -2963,23 +2977,29 @@ class IEAS_OT_IniFiles(Operator):
                         # 
                         positionTracker[sequence] = position
         
-        # # TODO: Delete prints
-        # #print(cycles)
-        for sequence,fullPaths in Allfilenames.items():
-            for fullPath in fullPaths:
-                cyclePosition = 0
-                with open(fullPath, 'a') as file:
-                    file.write("\n[Cycles]\n")
-                    for sequenceKey in sequences.keys():
-                        for orientation in orientations:
-                            if(cycles[sequence].get(sequenceKey) != None):
-                                if (len(cycles[sequence][sequenceKey][orientation]) != 0):
-                                    file.write(f"{cyclePosition}=" + ','.join(cycles[sequence][sequenceKey][orientation])+"\n")
-                                    cyclePosition += 1
-                                else:
-                                    file.write(f"{cyclePosition}=\n")
-                                    cyclePosition += 1
-                                    
+            # ----- [CYCLES]
+            for sequence,fullPaths in Allfilenames.items():
+                for fullPath in fullPaths:
+                    cyclePosition = 0
+                    with open(fullPath, 'a') as file:
+                        file.write("\n[Cycles]\n")
+                        for sequenceKey in sequences.keys():
+                            for orientation in orientations:
+                                if(cycles[sequence].get(sequenceKey) != None):
+                                    if (len(cycles[sequence][sequenceKey][orientation]) != 0):
+                                        file.write(f"{cyclePosition}=" + ','.join(cycles[sequence][sequenceKey][orientation])+"\n")
+                                        cyclePosition += 1
+                                    else:
+                                        file.write(f"{cyclePosition}=\n")
+                                        cyclePosition += 1
+                                        
+            # ----- [FILTERS]
+            for sequence,fullPaths in Allfilenames.items():
+                for fullPath in fullPaths:
+                    with open(fullPath,'a') as file:
+                        file.write(NIfilters)
+                    
+        
         
         return {'FINISHED'}
 
