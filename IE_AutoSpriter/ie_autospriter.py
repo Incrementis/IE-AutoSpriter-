@@ -2788,7 +2788,69 @@ class IEAS_OT_IniFiles(Operator):
     """This class provides a function that creates INI files which can be used to automate the BAM pre-creation process, e.g., in Near Infinity."""
     bl_idname   = "ieas.ini_files" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label    = "CREATE" # Text displayed on the button in the UI.
-         
+    
+    @classmethod
+    def writeFramesType7000_monster_sp0(cls, mode, AllFrames, fullPath, pathSaveAt, 
+                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                    orientations, cycles, sequence, sequenceKey, 
+                                    animation, filenamePrefix, currentPosition, 
+                                    weapon="", weaponKey=None):
+                                        
+        position = currentPosition
+        with open(fullPath, mode) as file:
+            # Content when INI is first time generated.
+            if (mode == 'w'):
+                file.write(globalContent+"\n")
+                file.write("[Frames]\n")                                                     
+            #
+            for orientation in orientations:
+                # Writes to the file only if the model orientation is checked by the user.
+                if(cameraPosToggles[orientation]):
+                    orientationFolder = cameraPosFolderNames[orientation]
+                    if (weapon == ""):
+                        cycles[sequence][sequenceKey][orientation] = []
+                        
+                    for frame in AllFrames:
+                        if (weapon != ""):
+                            pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
+                            fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
+                        else:
+                            cycles[sequence][sequenceKey][orientation].append(str(position))                                                              
+                            pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                            fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                            
+                        file.write(f"{position}={fullFramePath}:0\n")
+                        position       += 1
+                else:
+                    cycles[sequence][sequenceKey][orientation] = []
+                                                                
+            return (position, cycles)
+      
+    @classmethod
+    def writeCycles(cls, allfilenames, cycles, sequences, orientations):
+      for sequence,fullPaths in allfilenames.items():
+            for fullPath in fullPaths:
+                cyclePosition = 0
+                with open(fullPath, 'a') as file:
+                    file.write("\n[Cycles]\n")
+                    for sequenceKey in sequences.keys():
+                        for orientation in orientations:
+                            if(cycles[sequence].get(sequenceKey) != None):
+                                if (len(cycles[sequence][sequenceKey][orientation]) != 0):
+                                    file.write(f"{cyclePosition}=" + ','.join(cycles[sequence][sequenceKey][orientation])+"\n")
+                                    cyclePosition += 1
+                                else:
+                                    file.write(f"{cyclePosition}=\n")
+                                    cyclePosition += 1
+            
+    @classmethod
+    def writeFilters(cls, allfilenames, NIfilters):
+        for sequence,fullPaths in allfilenames.items():
+            for fullPath in fullPaths:
+                with open(fullPath,'a') as file:
+                    file.write(NIfilters)
+    
+    
     # Blender specific function which is executed in this case when CREATE button is pressed
     def execute(self, context):
         # The list order matters! The position of the orientations within the list are as in iesdp.
@@ -2845,7 +2907,7 @@ class IEAS_OT_IniFiles(Operator):
         # Saves the cycles.
         cycles                      = {}
         #
-        Allfilenames                = {}
+        allfilenames                = {}
          
         # Contains path and filename.
         if (selectedType == '7000 monster split bams 0'):
@@ -2862,43 +2924,21 @@ class IEAS_OT_IniFiles(Operator):
                     animation           = animationFolderNames[sequenceKey]
                     frameStart          = int(bpy.data.actions.get(animation).frame_range[0])
                     frameEnd            = int(bpy.data.actions.get(animation).frame_range[1])
-                    # ----- Calculates neccessary frame numbers.
-                    # numberOfFrames  = math.floor(frameEnd/Every_X_Frame)
-                    # AllFrames       = []
-                    # for currentFrame in range(1,numberOfFrames+1):      
-                        # calculatedFrame = (currentFrame*Every_X_Frame) + (frameStart-1)         
-                        # if calculatedFrame > frameEnd:
-                            # break                          
-                        # AllFrames.append(calculatedFrame)
+                    # Calculates neccessary frame numbers.
                     AllFrames = list(range(frameStart, frameEnd + 1, Every_X_Frame))
                         
                     if(sequence not in foundSequences):
                         fullPath                        = os.path.join(pathSaveAt, filenameSequence + ".INI")
                         cycles[sequence]                = {}
                         cycles[sequence][sequenceKey]   = {}
-                        Allfilenames[sequence]          = [fullPath]
+                        allfilenames[sequence]          = [fullPath]
                         positionTracker[sequence]       = 0
                         position                        = positionTracker[sequence]
-                                                
-                        # Creates, opens, writes and closes the file
-                        with open(fullPath, 'w') as file:
-                            # Content when INI is first time generated.
-                            file.write(globalContent+"\n")
-                            file.write("[Frames]\n")                                                     
-                            #
-                            for orientation in orientations:
-                                # Writes to the file only if the model orientation is checked by the user.
-                                if(cameraPosToggles[orientation]):
-                                    orientationFolder = cameraPosFolderNames[orientation]
-                                    cycles[sequence][sequenceKey][orientation] = []
-                                    for frame in AllFrames:
-                                        cycles[sequence][sequenceKey][orientation].append(str(position))
-                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
-                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
-                                        file.write(f"{position}={fullFramePath}:0\n")
-                                        position       += 1
-                                else:
-                                    cycles[sequence][sequenceKey][orientation] = []
+                            
+                        _, cycles = self.writeFramesType7000_monster_sp0(  'w', AllFrames, fullPath, pathSaveAt, 
+                                                                        globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                        orientations, cycles, sequence, sequenceKey, 
+                                                                        animation, filenamePrefix, currentPosition = position)
                                                                 
                         # Nested loop through animationWeaponToggles
                         for weaponKey, weaponAnimation in animationWeaponToggles.items():
@@ -2908,24 +2948,13 @@ class IEAS_OT_IniFiles(Operator):
                                 fullPath    = os.path.join(pathSaveAt, filename + ".INI")
                                 weapon      = animationWeaponFolderNames[weaponKey]
                                 position    = positionTracker[sequence]
-                                Allfilenames[sequence].append(fullPath)                             
-                                # Creates, opens, writes and closes the file                               
-                                with open(fullPath, 'w') as file:
-                                # Content when INI is first time generated.
-                                    file.write(globalContent+"\n")
-                                    file.write("[Frames]\n")                     
-                                    #
-                                    for orientation in orientations:
-                                        orientationFolder   = cameraPosFolderNames[orientation]
-                                        # Writes to the file only if the model orientation is checked by the user.
-                                        if(cameraPosToggles[orientation]):
-                                            for frame in AllFrames:
-                                                pngFile             = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
-                                                fullFramePath       = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
-                                                file.write(f"{position}={fullFramePath}:0\n")
-                                                position           += 1
-                                        else:
-                                            cycles[sequence][sequenceKey][orientation] = []
+                                allfilenames[sequence].append(fullPath)                             
+
+                            position, cycles = self.writeFramesType7000_monster_sp0(  'w', AllFrames, fullPath, pathSaveAt, 
+                                                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                    orientations, cycles, sequence, sequenceKey, 
+                                                                    animation, filenamePrefix, currentPosition=position, 
+                                                                    weapon=weapon, weaponKey=weaponKey)
                         #
                         foundSequences.add(sequence)
                         # 
@@ -2934,24 +2963,13 @@ class IEAS_OT_IniFiles(Operator):
                         position                        = positionTracker[sequence]
                         fullPath                        = os.path.join(pathSaveAt, filenameSequence + ".INI")
                         animation                       = animationFolderNames[sequenceKey]
-                        cycles[sequence][sequenceKey]   = {}
-                        # Creates, opens, writes and closes the file
-                        with open(fullPath, 'a') as file:                        
-                            #
-                            for orientation in orientations:
-                                # Writes to the file only if the model orientation is checked by the user.
-                                if(cameraPosToggles[orientation]):
-                                    orientationFolder                           = cameraPosFolderNames[orientation]
-                                    cycles[sequence][sequenceKey][orientation]  = []
-                                    for frame in AllFrames:
-                                        cycles[sequence][sequenceKey][orientation].append(str(position))
-                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
-                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
-                                        file.write(f"{position}={fullFramePath}:0\n")
-                                        position       += 1
-                                else:
-                                    cycles[sequence][sequenceKey][orientation] = []                            
-                        # Nested loop through animationWeaponToggles
+                        cycles[sequence][sequenceKey]   = {} 
+                        
+                        _, cycles = self.writeFramesType7000_monster_sp0(  'a', AllFrames, fullPath, pathSaveAt, 
+                                                                        globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                        orientations, cycles, sequence, sequenceKey, 
+                                                                        animation, filenamePrefix, currentPosition = position)
+                                                                        
                         for weaponKey, weaponAnimation in animationWeaponToggles.items():
                             # 
                             if(animationWeaponToggles[weaponKey] == True):
@@ -2961,45 +2979,19 @@ class IEAS_OT_IniFiles(Operator):
                                 weapon      = animationWeaponFolderNames[weaponKey]
                                 # Gets current position
                                 position = positionTracker[sequence]
-                                # Creates, opens, writes and closes the file                               
-                                with open(fullPath, 'a') as file:                                                
-                                    for orientation in orientations:
-                                        # Writes to the file only if the model orientation is checked by the user.
-                                        if(cameraPosToggles[orientation]):
-                                            orientationFolder = cameraPosFolderNames[orientation]
-                                            for frame in AllFrames:
-                                                pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
-                                                fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
-                                                file.write(f"{position}={fullFramePath}:0\n")
-                                                position       += 1
-                                        else:
-                                            cycles[sequence][sequenceKey][orientation] = []
+                                
+                                position, cycles = self.writeFramesType7000_monster_sp0(  'a', AllFrames, fullPath, pathSaveAt, 
+                                                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                    orientations, cycles, sequence, sequenceKey, 
+                                                                    animation, filenamePrefix, currentPosition=position, 
+                                                                    weapon=weapon, weaponKey=weaponKey)
                         # 
                         positionTracker[sequence] = position
         
             # ----- [CYCLES]
-            for sequence,fullPaths in Allfilenames.items():
-                for fullPath in fullPaths:
-                    cyclePosition = 0
-                    with open(fullPath, 'a') as file:
-                        file.write("\n[Cycles]\n")
-                        for sequenceKey in sequences.keys():
-                            for orientation in orientations:
-                                if(cycles[sequence].get(sequenceKey) != None):
-                                    if (len(cycles[sequence][sequenceKey][orientation]) != 0):
-                                        file.write(f"{cyclePosition}=" + ','.join(cycles[sequence][sequenceKey][orientation])+"\n")
-                                        cyclePosition += 1
-                                    else:
-                                        file.write(f"{cyclePosition}=\n")
-                                        cyclePosition += 1
-                                        
-            # ----- [FILTERS]
-            for sequence,fullPaths in Allfilenames.items():
-                for fullPath in fullPaths:
-                    with open(fullPath,'a') as file:
-                        file.write(NIfilters)
-                    
-        
+            self.writeCycles(allfilenames, cycles, sequences, orientations)                                      
+            # ----- [FILTERS]                 
+            self.writeFilters(allfilenames, NIfilters)
         
         return {'FINISHED'}
 
