@@ -2876,14 +2876,14 @@ class IEAS_OT_IniFiles(Operator):
         NIfilters = (
             "\n[Filters]\n"
             "name_0=Center BAM frames\n"
-            "config_0=0;0;0;0;false;128;155\n"
-            "enabled_0=1\n"
+            "config_0=0;0;0;0;false;129;145\n"
+            "enabled_0=0\n"
             "name_2=Resize BAM frames\n"
             "config_2=5;0;0.6;1.0;1.0;true\n"
-            "enabled_2=1\n"
+            "enabled_2=0\n"
             "name_3=Trim BAM frames\n"
-            "config_3=true;true;true;true;0;true"
-            "enabled_3=1\n"
+            "config_3=true;true;true;true;0;true\n"
+            "enabled_3=0\n"
         )
         # Global content that is written to every INI file.
         globalContent = (
