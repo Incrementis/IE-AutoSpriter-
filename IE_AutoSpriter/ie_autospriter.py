@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 00),
+    "version": (0, 37, 4),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -300,7 +300,7 @@ class IEAS_Data:
     def retrieveSequencesType7000_monster_sp1():
         """Dictionary wrapper animation type 7000 split_bams=1 function - returns the sequence with respect to the animation(e.g. SD for idle)."""
         sequencesType7000_monster_sp1 = {
-            'SC':'G1', 'WK':'G11','SD':'G12', 'GH':'G13and14', 'DE':'G14', 'TW':'G14and15', 'GU':'G14', 'SL':'G14',
+            'SC':'G1', 'WK':'G11','SD':'G12', 'GH':'G13', 'DE':'G14', 'TW':'G15',
             'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
         } 
         return sequencesType7000_monster_sp1
@@ -390,10 +390,10 @@ class IEAS_AnimationTypes():
                 'SD':'G2', 'SC':'G2', 'GH':'G2', 'DE':'G2', 'TW':'G2',
                 'A1':'G3', 'A2':'G3', 'A3':'G3',
             }
-            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            width           = bpy.context.scene.render.resolution_x
-            height          = bpy.context.scene.render.resolution_y
-            fileName        = "temp.png"
+            animationSequence   = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            width               = bpy.context.scene.render.resolution_x
+            height              = bpy.context.scene.render.resolution_y
+            fileName            = "temp.png"
             # Used to identify which quadrant has which coordinates for slicing.
             # Since the image is divided into four parts, a divisor of 2 is required.
             quadrants = {
@@ -431,9 +431,9 @@ class IEAS_AnimationTypes():
             for quadrant, coordinate in quadrants.items():                                                          
                 # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
                 if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                    fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{quadrantsNumbers[quadrant]}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 else:
-                    fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
                 # Zeroes out the pixels of all quadrants except the current one.
                 # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
@@ -481,10 +481,10 @@ class IEAS_AnimationTypes():
                 'GH':'G4', 'DE':'G4', 'SL':'G4', 'GU':'G4', 'DE':'G4', 'TW':'G4',
                 'SP':'G5', 'CA':'G5',
             }
-            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            width           = bpy.context.scene.render.resolution_x
-            height          = bpy.context.scene.render.resolution_y
-            fileName        = "temp.png"
+            animationSequence   = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            width               = bpy.context.scene.render.resolution_x
+            height              = bpy.context.scene.render.resolution_y
+            fileName            = "temp.png"
             # Used to identify which quadrant has which coordinates for slicing.
             # Since the image is divided into four parts, a divisor of 2 is required.
             quadrants = {
@@ -521,7 +521,7 @@ class IEAS_AnimationTypes():
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
                 # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
                 # Zeroes out the pixels of all quadrants except the current one.
                 # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
@@ -569,10 +569,10 @@ class IEAS_AnimationTypes():
                 'GH':'G4', 'DE':'G4', 'SL':'G4', 'GU':'G4', 'DE':'G4', 'TW':'G4',
                 'SP':'G5', 'CA':'G5',
             }
-            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            width           = bpy.context.scene.render.resolution_x
-            height          = bpy.context.scene.render.resolution_y
-            fileName        = "temp.png"
+            animationSequence   = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            width               = bpy.context.scene.render.resolution_x
+            height              = bpy.context.scene.render.resolution_y
+            fileName            = "temp.png"
             # Used to identify which quadrant has which coordinates for slicing.
             # Since the image is divided into nine parts, a divisor of 3 is required.
             rowsA       = slice((2*height)//3, height)
@@ -648,7 +648,7 @@ class IEAS_AnimationTypes():
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
                 # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}{directions[typeParameters.positionKey]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{quadrantsNumbers[quadrant]}{directions[typeParameters.positionKey]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
                 # Zeroes out the pixels of all quadrants except the current one.
                 # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
@@ -693,10 +693,10 @@ class IEAS_AnimationTypes():
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
                 'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
             }
-            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            width           = bpy.context.scene.render.resolution_x
-            height          = bpy.context.scene.render.resolution_y
-            fileName        = "temp.png"
+            animationSequence   = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            width               = bpy.context.scene.render.resolution_x
+            height              = bpy.context.scene.render.resolution_y
+            fileName            = "temp.png"
             # Used to identify which quadrant has which coordinates for slicing.
             # Since the image is divided into four parts, a divisor of 2 is required.
             quadrants = {
@@ -733,7 +733,7 @@ class IEAS_AnimationTypes():
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
                 # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
                 # Zeroes out the pixels of all quadrants except the current one.
                 # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
@@ -778,10 +778,10 @@ class IEAS_AnimationTypes():
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
                 'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
             }
-            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
-            width           = bpy.context.scene.render.resolution_x
-            height          = bpy.context.scene.render.resolution_y
-            fileName        = "temp.png"
+            animationSequence   = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            width               = bpy.context.scene.render.resolution_x
+            height              = bpy.context.scene.render.resolution_y
+            fileName            = "temp.png"
             # Used to identify which quadrant has which coordinates for slicing.
             # Since the image is divided into four parts, a divisor of 2 is required.
             quadrants = {
@@ -818,7 +818,7 @@ class IEAS_AnimationTypes():
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
                 # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileNameQuadrant = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{quadrantsNumbers[quadrant]}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
                 # Zeroes out the pixels of all quadrants except the current one.
                 # This clever approach avoids the need for if-statements to handle each quadrant's logic separately.
@@ -877,13 +877,13 @@ class IEAS_AnimationTypes():
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
                 'A1':'G2', 'A2':'G2', 'A3':'G2', 'SP':'G2', 'CA':'G2',
             }
-            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                           
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
@@ -938,9 +938,9 @@ class IEAS_AnimationTypes():
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
                     if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -1005,7 +1005,7 @@ class IEAS_AnimationTypes():
                 'SC':'G2', 'EMERGE':'G2',   'HIDE':'G2',
                 'A1':'G3', 'CA':'G3',
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Makes the main/upper creature collection visible for rendering.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render  = False
@@ -1015,9 +1015,9 @@ class IEAS_AnimationTypes():
             # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
             # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1047,9 +1047,9 @@ class IEAS_AnimationTypes():
             # Constructs the full filename for the current sprite (for the lower part), using the 'D' prefix.
             # East-facing sprites get an 'E' suffix.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
              # Sets Blender's render output filepath for the current lower-part image.
             bpy.context.scene.render.filepath = os.path.join(lowerpart_position_folder, fileName)
@@ -1092,7 +1092,7 @@ class IEAS_AnimationTypes():
                 'SC':'G2', 'EMERGE':'G2',   'HIDE':'G2',
                 'A1':'G3', 'CA':'G3',
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Makes the main/upper creature collection visible for rendering.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render  = False
@@ -1100,7 +1100,7 @@ class IEAS_AnimationTypes():
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = True
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1128,7 +1128,7 @@ class IEAS_AnimationTypes():
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = False
             
             # Constructs the full filename for the current sprite (for the lower part), using the 'D' prefix.
-            fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets Blender's render output filepath for the current lower-part image.
             bpy.context.scene.render.filepath = os.path.join(lowerpart_position_folder, fileName)
@@ -1187,15 +1187,15 @@ class IEAS_AnimationTypes():
                 'CA1':'CA','SP1':'CA','CA2':'CA','SP2':'CA','CA3':'CA','SP3':'CA','CA4':'CA',
                 'SP4':'CA',
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # For no armor type
             if(typeParameters.animationArmorToggles['ARMOR1'] == True):
                 armor       = typeParameters.animationArmorFolderNames['ARMOR1']
-                if (animationKey != typeParameters.animationKey):
-                    fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                if (animationSequence != typeParameters.animationKey):
+                    fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 else:
-                    fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 # Constructs the base output folder path for the current weapon.
                 armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
                 armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
@@ -1240,10 +1240,10 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     armor = typeParameters.animationArmorFolderNames[armor]
-                    if (animationKey != typeParameters.animationKey):
-                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    if (animationSequence != typeParameters.animationKey):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
-                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)                
@@ -1297,15 +1297,15 @@ class IEAS_AnimationTypes():
                 'CA1':'CA','SP1':'CA','CA2':'CA','SP2':'CA','CA3':'CA','SP3':'CA','CA4':'CA',
                 'SP4':'CA',
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # For no armor type
             if(typeParameters.animationArmorToggles['ARMOR1'] == True):
                 armor       = typeParameters.animationArmorFolderNames['ARMOR1']
-                if (animationKey != typeParameters.animationKey):
-                    fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                if (animationSequence != typeParameters.animationKey):
+                    fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 else:
-                    fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 # Constructs the base output folder path for the current weapon.
                 armor_folder            = os.path.join(typeParameters.pathSaveAt, armor)
                 armor_animation_folder  = os.path.join(armor_folder, typeParameters.animation)
@@ -1350,10 +1350,10 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     armor = typeParameters.animationArmorFolderNames[armor]
-                    if (animationKey != typeParameters.animationKey):
-                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    if (animationSequence != typeParameters.animationKey):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
-                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(armor_position_folder, fileName)                
@@ -1408,7 +1408,7 @@ class IEAS_AnimationTypes():
                 'SP4':'CA',
                 'WK2':'W2',
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Both lists are used to identify which sprite file is defined for which direction regarding walk2 as specified in iesdp. 
             positionKeysWK2         = [ 'south_south_west', 'west_south_west', 
@@ -1424,7 +1424,7 @@ class IEAS_AnimationTypes():
             fileName = 0
             # ----- Debugging
             # TODO: Delete print
-            print("animationKey:",animationKey)
+            print("animationKey:",animationSequence)
             print("typeParameters.positionKey:",typeParameters.positionKey)
             
              # ----- For no armor type
@@ -1432,21 +1432,21 @@ class IEAS_AnimationTypes():
                 armor = typeParameters.animationArmorFolderNames['ARMOR1']             
                 # If statement order is important!
                 # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                if(animationKey == 'W2'):
+                if(animationSequence == 'W2'):
                     if any(typeParameters.positionKey == position for position in positionKeysWK2):
-                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     elif any(typeParameters.positionKey == position for position in positionKeysWK2East):
-                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                                   
-                elif(animationKey != typeParameters.animationKey and isNotWK2Position):                                                            
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                                   
+                elif(animationSequence != typeParameters.animationKey and isNotWK2Position):                                                            
                     if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):         
-                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:        
-                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                elif(animationKey == typeParameters.animationKey and isNotWK2Position):
+                        fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                elif(animationSequence == typeParameters.animationKey and isNotWK2Position):
                     if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
-                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
-                        fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                 # A valid file name is found.
                 if(fileName != 0):
@@ -1496,16 +1496,16 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     armor = typeParameters.animationArmorFolderNames[armor]
-                    if (animationKey != typeParameters.animationKey):
+                    if (animationSequence != typeParameters.animationKey):
                         if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
-                            fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                            fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         else:
-                            fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
+                            fileName    = f"{typeParameters.prefixResref}{armor}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
                     else:
                         if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):
-                            fileName    = f"{typeParameters.prefixResref}{armor}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                            fileName    = f"{typeParameters.prefixResref}{armor}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         else:
-                            ffileName   = f"{typeParameters.prefixResref}{armor}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
+                            ffileName   = f"{typeParameters.prefixResref}{armor}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"                    
                         
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
@@ -1555,10 +1555,10 @@ class IEAS_AnimationTypes():
                 'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
                 'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
             }
-            animationSeq = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
@@ -1611,7 +1611,7 @@ class IEAS_AnimationTypes():
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -1668,14 +1668,11 @@ class IEAS_AnimationTypes():
             print("type7000: Executing 'exclude' logic for type7000 monster sp1 type.")
         else:
             # Used to identify which sprite file is defined for which sequence
-            sequences = {
-                'SC':'G1', 'WK':'G11','SD':'G12', 'GH':'G13and14', 'DE':'G14', 'TW':'G14and15', 'GU':'G14', 'SL':'G14',
-                'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
-            }
-            animationSeq = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            sequences = IEAS_Data.retrieveSequencesType7000_monster_sp1()
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
-            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1726,9 +1723,15 @@ class IEAS_AnimationTypes():
                     if not os.path.exists(weapon_position_folder):
                         os.makedirs(weapon_position_folder)
                     
+                    # Weapon animation is always stored as an unsplit BAM
+                    if("G2" in animationSequence):
+                        animationSequence = "G2"
+                    else:
+                        animationSequence = "G1"
+                    
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSeq}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -1775,13 +1778,13 @@ class IEAS_AnimationTypes():
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1','DE':'G1', 'TW':'G1',
                 'A1':'G2', 'CA':'G2', 'A3':'G2'
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                        
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1816,13 +1819,13 @@ class IEAS_AnimationTypes():
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
                 'A1':'G2', 'A2':'G2', 'A3':'G2', 'SP':'G2', 'CA':'G2',
             }
-            animationKey    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
+            animationSequence    = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                           
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
@@ -1877,9 +1880,9 @@ class IEAS_AnimationTypes():
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
                     if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -1927,13 +1930,13 @@ class IEAS_AnimationTypes():
                 'A1':'G2', 'A2':'G2',
                 'A3':'G3', 'GH':'G3', 'DE':'G3', 'TW':'G3'
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                        
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1955,13 +1958,13 @@ class IEAS_AnimationTypes():
                 'SD':'G2', 'SC':'G2', 'GH':'G3', 'DE':'G3', 'TW':'G3',
                 'A1':'G2', 'A2':'G2', 'A3':'G3', 
             }
-            animationKey = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                        
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -1981,12 +1984,12 @@ class IEAS_AnimationTypes():
             sequences = {
                 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
             }
-            animationKey = sequences[typeParameters.animationKey]
+            animationSequence = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                        
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -2006,12 +2009,12 @@ class IEAS_AnimationTypes():
             sequences = {
                 'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
             }
-            animationKey = sequences[typeParameters.animationKey]
+            animationSequence = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationKey}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                        
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)
@@ -2820,7 +2823,45 @@ class IEAS_OT_IniFiles(Operator):
                             fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
                             
                         file.write(f"{position}={fullFramePath}:0\n")
-                        position       += 1
+                        position += 1
+                else:
+                    # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
+                    cycles[sequence][sequenceKey][orientation] = []
+                                                                
+            return (position, cycles)
+            
+    @classmethod
+    def writeFramesType7000_monster_sp1(cls, mode, allFrames, fullPath, pathSaveAt, 
+                                        globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                        orientations, cycles, sequence, sequenceKey, 
+                                        animation, filenamePrefix, currentPosition, 
+                                        weapon="", weaponKey=None):
+        """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""                             
+        position = currentPosition
+        with open(fullPath, mode) as file:
+            # Content when INI is first time generated.
+            if (mode == 'w'):
+                file.write(globalContent+"\n")
+                file.write("[Frames]\n")                                                     
+            # Like south, north, etc.
+            for orientation in orientations:
+                # Writes to the file only if the model orientation is checked by the user.
+                if(cameraPosToggles[orientation]):
+                    orientationFolder = cameraPosFolderNames[orientation]
+                    if (weapon == ""):
+                        cycles[sequence][sequenceKey][orientation] = []
+                    # Writes all selected frames to the INI file.
+                    for frame in allFrames:
+                        if (weapon != ""):
+                            pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
+                            fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
+                        else:
+                            cycles[sequence][sequenceKey][orientation].append(str(position))                                                              
+                            pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                            fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                            
+                        file.write(f"{position}={fullFramePath}:0\n")
+                        position += 1
                 else:
                     # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
                     cycles[sequence][sequenceKey][orientation] = []
@@ -2978,6 +3019,109 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCycles(allFilenames, cycles, orientations, animationOrder)                                      
             # ----- [FILTERS]                 
             self.writeFilters(allFilenames, NIfilters)
+            
+            
+        # Contains path and filename.
+        if (selectedType == '7000 monster split bams 1'):
+            sequences       = IEAS_Data.retrieveSequencesType7000_monster_sp1()
+            orientations    = orientations9D
+            # TODO: May not work!
+            animationOrder  = {'G1':["SC"], 'G11':["WK"], 'G12':["SD"], 'G13':["GH", "DE", "TW"], 'G14':["TW"],'G15':["TW"],
+                               'G2':["A1"], 'G21':["A2"], 'G22':["A3"], 'G23':["A4"], 'G24':["A5"], 'G25':["SP"], 'G26':["CA"]}
+            # ----- [FRAMES]
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    filenameSequence    = filenamePrefix + sequence
+                    animation           = animationFolderNames[sequenceKey]
+                    frameStart          = int(bpy.data.actions.get(animation).frame_range[0])
+                    frameEnd            = int(bpy.data.actions.get(animation).frame_range[1])
+                    # Calculates neccessary frame numbers.
+                    allFrames           = list(range(frameStart, frameEnd + 1, Every_X_Frame))
+                        
+                    if(sequence not in foundSequences):
+                        fullPath                        = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        cycles[sequence]                = {}
+                        cycles[sequence][sequenceKey]   = {}
+                        allFilenames[sequence]          = [fullPath]
+                        positionTracker[sequence]       = 0
+                        position                        = positionTracker[sequence]
+                        # First INI files.    
+                        _, cycles = self.writeFramesType7000_monster_sp1(  'w', allFrames, fullPath, pathSaveAt, 
+                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                            orientations, cycles, sequence, sequenceKey, 
+                                                                            animation, filenamePrefix, currentPosition=position)
+                        
+
+                        # TODO: The position needs to be reseted apropiately and counting needs to be different in 'w'???!
+                        for weaponKey, weaponAnimation in animationWeaponToggles.items():
+                            if(weaponAnimation == True):
+                                filename    = filenameSequence + weaponKey
+                                fullPath    = os.path.join(pathSaveAt, filename + ".INI")
+                                weapon      = animationWeaponFolderNames[weaponKey]
+                                position    = positionTracker[sequence]
+                               
+                                # Weapon overlay INI files.
+                                if((sequence == 'G1') or (sequence =='G2')):
+                                    position, cycles = self.writeFramesType7000_monster_sp1(    'w', allFrames, fullPath, pathSaveAt, 
+                                                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                orientations, cycles, sequence, sequenceKey, 
+                                                                                                animation, filenamePrefix, currentPosition=position, 
+                                                                                                weapon=weapon, weaponKey=weaponKey)
+                                                                                            
+                                elif('G1' in sequence):
+                                    filename    = filenamePrefix + "G1" + weaponKey
+                                    fullPath    = os.path.join(pathSaveAt, filename + ".INI")
+                                    position, cycles = self.writeFramesType7000_monster_sp1(    'a', allFrames, fullPath, pathSaveAt, 
+                                                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                orientations, cycles, sequence, sequenceKey, 
+                                                                                                animation, filenamePrefix, currentPosition=position, 
+                                                                                                weapon=weapon, weaponKey=weaponKey)
+                                
+                                elif('G2' in sequence):
+                                    filename    = filenamePrefix + "G2" + weaponKey
+                                    fullPath    = os.path.join(pathSaveAt, filename + ".INI")
+                                    position, cycles = self.writeFramesType7000_monster_sp1(    'a', allFrames, fullPath, pathSaveAt, 
+                                                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                orientations, cycles, sequence, sequenceKey, 
+                                                                                                animation, filenamePrefix, currentPosition=position, 
+                                                                                                weapon=weapon, weaponKey=weaponKey)
+                                
+                                allFilenames[sequence].append(fullPath)
+                                
+                        # E.g. animation in sequence G1 is used.
+                        foundSequences.add(sequence)
+                        # E.g. position=71 for G1, since G1 has 72 sequences.
+                        positionTracker[sequence] = position
+                    # else:
+                        # position                        = positionTracker[sequence]
+                        # fullPath                        = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        # animation                       = animationFolderNames[sequenceKey]
+                        # cycles[sequence][sequenceKey]   = {} 
+                        # # Appends e.g. in G1 INI file.
+                        # _, cycles = self.writeFramesType7000_monster_sp1(  'a', allFrames, fullPath, pathSaveAt, 
+                                                                            # globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                            # orientations, cycles, sequence, sequenceKey, 
+                                                                            # animation, filenamePrefix, currentPosition = position)
+                                                                        
+                        # for weaponKey, weaponAnimation in animationWeaponToggles.items():
+                            # if(animationWeaponToggles[weaponKey] == True):
+                                # filename    = filenameSequence + weaponKey
+                                # fullPath    = os.path.join(pathSaveAt, filename + ".INI")
+                                # weapon      = animationWeaponFolderNames[weaponKey]
+                                # position    = positionTracker[sequence]
+                                # # 
+                                # position, cycles = self.writeFramesType7000_monster_sp1(    'a', allFrames, fullPath, pathSaveAt, 
+                                                                                            # globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                            # orientations, cycles, sequence, sequenceKey, 
+                                                                                            # animation, filenamePrefix, currentPosition=position, 
+                                                                                            # weapon=weapon, weaponKey=weaponKey)
+                        # # E.g. position=71 for G1, since G1 has 72 sequences 
+                        # positionTracker[sequence] = position
+        
+            # ----- [CYCLES]
+            #self.writeCycles(allFilenames, cycles, orientations, animationOrder)                                      
+            # ----- [FILTERS]                 
+            #self.writeFilters(allFilenames, NIfilters)
         
         return {'FINISHED'}
 
@@ -3959,7 +4103,6 @@ class IEAS_PT_Animation(Panel):
             'Cast':     context.scene.IEAS_properties.Use_CA, 'Death':    context.scene.IEAS_properties.Use_DE,
             'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
             'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
-            'Get_Up':   context.scene.IEAS_properties.Use_GU, 'Sleep':    context.scene.IEAS_properties.Use_SL,
             'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles7000_monster_old = {
