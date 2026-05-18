@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 5),
+    "version": (0, 37, 6),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2879,12 +2879,15 @@ class IEAS_OT_IniFiles(Operator):
                     file.write("\n[Cycles]\n")
                     for animationType in currentOrder:
                         for orientation in orientations:
-                            if (animationType and orientation in cycles[sequence][animationType] and cycles[sequence][animationType][orientation]):
-                                frames = ",".join(cycles[sequence][animationType][orientation])
-                                file.write(f"{cyclePosition}={frames}\n")
+                            if(cycles[sequence].get(animationType)):
+                                if (animationType and orientation in cycles[sequence][animationType] and cycles[sequence][animationType][orientation]):
+                                    frames = ",".join(cycles[sequence][animationType][orientation])
+                                    file.write(f"{cyclePosition}={frames}\n")
+                                else:
+                                    file.write(f"{cyclePosition}=\n")
                             else:
                                 file.write(f"{cyclePosition}=\n")
-                            
+                        
                             cyclePosition += 1
             
     @classmethod
@@ -3020,6 +3023,8 @@ class IEAS_OT_IniFiles(Operator):
                         positionTracker[sequence] = position
         
             # ----- [CYCLES]
+            # TODO: Delete Print
+            print(cycles['G1']['WK'])
             self.writeCycles(allFilenames, cycles, orientations, animationOrder)                                      
             # ----- [FILTERS]                 
             self.writeFilters(allFilenames, NIfilters)
@@ -3088,6 +3093,7 @@ class IEAS_OT_IniFiles(Operator):
                             allFilenames[sequence].append(fullPath)
         
             # ----- [CYCLES]
+            # TODO: Delete Print
             print(cycles)
             #self.writeCycles(allFilenames, cycles, orientations, animationOrder)                                      
             # ----- [FILTERS]                 
