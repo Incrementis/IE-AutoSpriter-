@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 6),
+    "version": (0, 37, 7),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2986,12 +2986,12 @@ class IEAS_OT_IniFiles(Operator):
                                 weapon      = animationWeaponFolderNames[weaponKey]
                                 position    = positionTracker[sequence]
                                 allFilenames[sequence].append(fullPath)                             
-                            # Weapon overlay INI files.
-                            position, cycles = self.writeFramesType7000_monster_sp0(    'w', allFrames, fullPath, pathSaveAt, 
-                                                                                        globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                        orientations, cycles, sequence, sequenceKey, 
-                                                                                        animation, filenamePrefix, currentPosition=position, 
-                                                                                        weapon=weapon, weaponKey=weaponKey)
+                                # Weapon overlay INI files.
+                                position, cycles = self.writeFramesType7000_monster_sp0(    'w', allFrames, fullPath, pathSaveAt, 
+                                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                            orientations, cycles, sequence, sequenceKey, 
+                                                                                            animation, filenamePrefix, currentPosition=position, 
+                                                                                            weapon=weapon, weaponKey=weaponKey)
                         # E.g. animation in sequence G1 is used.
                         foundSequences.add(sequence)
                         # E.g. position=71 for G1, since G1 has 72 sequences.
