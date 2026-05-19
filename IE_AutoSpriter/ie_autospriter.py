@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 7),
+    "version": (0, 37, 8),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2793,7 +2793,7 @@ class IEAS_OT_IniFiles(Operator):
     bl_label    = "CREATE" # Text displayed on the button in the UI.
     
     @classmethod
-    def writeFramesType7000_monster_sp0(cls, mode, allFrames, fullPath, pathSaveAt, 
+    def writeFramesType7000_monster(cls, mode, allFrames, fullPath, pathSaveAt, 
                                         globalContent, cameraPosToggles, cameraPosFolderNames, 
                                         orientations, cycles, sequence, sequenceKey, 
                                         animation, filenamePrefix, currentPosition, 
@@ -2828,49 +2828,12 @@ class IEAS_OT_IniFiles(Operator):
                     # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
                     cycles[sequence][sequenceKey][orientation] = []
                                                                 
-            return (position, cycles)
-            
-    @classmethod
-    def writeFramesType7000_monster_sp1(cls, mode, allFrames, fullPath, pathSaveAt, 
-                                        globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                        orientations, cycles, sequence, sequenceKey, 
-                                        animation, filenamePrefix, currentPosition, 
-                                        weapon="", weaponKey=None):
-        """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""                             
-        position = currentPosition
-        with open(fullPath, mode) as file:
-            # Content when INI is first time generated.
-            if (mode == 'w'):
-                file.write(globalContent+"\n")
-                file.write("[Frames]\n")                                                     
-            # Like south, north, etc.
-            for orientation in orientations:
-                # Writes to the file only if the model orientation is checked by the user.
-                if(cameraPosToggles[orientation]):
-                    orientationFolder = cameraPosFolderNames[orientation]
-                    if (weapon == ""):
-                        cycles[sequence][sequenceKey][orientation] = []
-                    # Writes all selected frames to the INI file.
-                    for frame in allFrames:
-                        if (weapon != ""):
-                            pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
-                            fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
-                        else:
-                            cycles[sequence][sequenceKey][orientation].append(str(position))                                                              
-                            pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
-                            fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
-                            
-                        file.write(f"{position}={fullFramePath}:0\n")
-                        position += 1
-                else:
-                    # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
-                    cycles[sequence][sequenceKey][orientation] = []
-                                                                
-            return (position, cycles)
+            return (position, cycles)          
       
     @classmethod
     def writeCycles(cls, allFilenames, cycles, orientations, animationOrder):                  
         """Writes the cycles section of the INI file with fixed animation order."""
+        # {Sequence:{Animation:{Orientation:[Positions of frames]}}}
         for sequence, fullPaths in allFilenames.items():
             currentOrder = animationOrder[sequence]
             for fullPath in fullPaths:
@@ -2974,7 +2937,7 @@ class IEAS_OT_IniFiles(Operator):
                         positionTracker[sequence]       = 0
                         position                        = positionTracker[sequence]
                         # First INI files.    
-                        _, cycles                       = self.writeFramesType7000_monster_sp0( 'w', allFrames, fullPath, pathSaveAt, 
+                        _, cycles                       = self.writeFramesType7000_monster( 'w', allFrames, fullPath, pathSaveAt, 
                                                                                                 globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                                 orientations, cycles, sequence, sequenceKey, 
                                                                                                 animation, filenamePrefix, currentPosition = position)
@@ -2987,7 +2950,7 @@ class IEAS_OT_IniFiles(Operator):
                                 position    = positionTracker[sequence]
                                 allFilenames[sequence].append(fullPath)                             
                                 # Weapon overlay INI files.
-                                position, cycles = self.writeFramesType7000_monster_sp0(    'w', allFrames, fullPath, pathSaveAt, 
+                                position, cycles = self.writeFramesType7000_monster(    'w', allFrames, fullPath, pathSaveAt, 
                                                                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                             orientations, cycles, sequence, sequenceKey, 
                                                                                             animation, filenamePrefix, currentPosition=position, 
@@ -3002,7 +2965,7 @@ class IEAS_OT_IniFiles(Operator):
                         animation                       = animationFolderNames[sequenceKey]
                         cycles[sequence][sequenceKey]   = {} 
                         # Appends e.g. in G1 INI file.
-                        _, cycles                       = self.writeFramesType7000_monster_sp0( 'a', allFrames, fullPath, pathSaveAt, 
+                        _, cycles                       = self.writeFramesType7000_monster( 'a', allFrames, fullPath, pathSaveAt, 
                                                                                                 globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                                 orientations, cycles, sequence, sequenceKey, 
                                                                                                 animation, filenamePrefix, currentPosition = position)
@@ -3014,7 +2977,7 @@ class IEAS_OT_IniFiles(Operator):
                                 weapon              = animationWeaponFolderNames[weaponKey]
                                 position            = positionTracker[sequence]
                                 # 
-                                position, cycles    = self.writeFramesType7000_monster_sp0(    'a', allFrames, fullPath, pathSaveAt, 
+                                position, cycles    = self.writeFramesType7000_monster(    'a', allFrames, fullPath, pathSaveAt, 
                                                                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                             orientations, cycles, sequence, sequenceKey, 
                                                                                             animation, filenamePrefix, currentPosition=position, 
@@ -3039,8 +3002,19 @@ class IEAS_OT_IniFiles(Operator):
             weaponPositionTracker['G1'] = 0
             weaponPositionTracker['G2'] = 0
             # TODO: May not work!
-            animationOrder  = {'G1':["WK","SC","SD","GH","DE","TW"],            
-                               'G2':["A1","A2","A3","A4","A5","SP","CA"]}
+            animationOrder  = {'G1':["WK","SC","SD","GH","DE","TW"],
+                               'G11':["WK","SC","SD","GH","DE","TW"],
+                               'G12':["WK","SC","SD","GH","DE","TW"],
+                               'G13':["WK","SC","SD","GH","DE","TW"],
+                               'G14':["WK","SC","SD","GH","DE","TW"],
+                               'G15':["WK","SC","SD","GH","DE","TW"],
+                               'G2':["A1","A2","A3","A4","A5","SP","CA"],
+                               'G21':["A1","A2","A3","A4","A5","SP","CA"],
+                               'G22':["A1","A2","A3","A4","A5","SP","CA"],
+                               'G23':["A1","A2","A3","A4","A5","SP","CA"],
+                               'G24':["A1","A2","A3","A4","A5","SP","CA"],
+                               'G25':["A1","A2","A3","A4","A5","SP","CA"],
+                               'G26':["A1","A2","A3","A4","A5","SP","CA"]}
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -3056,7 +3030,7 @@ class IEAS_OT_IniFiles(Operator):
                     position                        = 0
                     mode                            = 'w'                       
                     # First INI files.    
-                    position, cycles                = self.writeFramesType7000_monster_sp1( mode, allFrames, fullPath, pathSaveAt, 
+                    position, cycles                = self.writeFramesType7000_monster( mode, allFrames, fullPath, pathSaveAt, 
                                                                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                             orientations, cycles, sequence, sequenceKey, 
                                                                                             animation, filenamePrefix, currentPosition=position)  
@@ -3085,7 +3059,7 @@ class IEAS_OT_IniFiles(Operator):
                                 mode            = 'a'
                             # Either create and write or append in INI file.
                             fullPath    = os.path.join(pathSaveAt, filename + ".INI")
-                            weaponPositionTracker[mainSequence], cycles = self.writeFramesType7000_monster_sp1( mode, allFrames, fullPath, pathSaveAt, 
+                            weaponPositionTracker[mainSequence], cycles = self.writeFramesType7000_monster( mode, allFrames, fullPath, pathSaveAt, 
                                                                                                                 globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                                                 orientations, cycles, sequence, sequenceKey, 
                                                                                                                 animation, filenamePrefix, currentPosition=weaponPosition, 
@@ -3093,11 +3067,55 @@ class IEAS_OT_IniFiles(Operator):
                             allFilenames[sequence].append(fullPath)
         
             # ----- [CYCLES]
+            restructeredCycles          = {}
+            #restructeredCycles['G1']    = {}
+            #restructeredCycles['G2']    = {}
+            emptyOrientations           = { 'south':[],        'south_south_west':[],
+                                            'south_west':[],   'west_south_west':[],
+                                            'west':[],         'west_north_west':[],
+                                            'north_west':[],   'north_north_west':[],
+                                            'north':[]}
+            # for sequence, animation in cycles.items():
+                # # TODO: Delete Print
+                # print(sequence)
+                # for animationKey, orientation in animation.items(): 
+                    # # TODO: Delete Print
+                    # print(animationKey)
+                    # if('G1' in sequence):
+                        # restructeredCycles['G1'][animationKey] = orientation
+                        # # Retrieves or creates the dictionary for 'sequence' and assigns the value from 'G1':
+                        # #restructeredCycles.setdefault(sequence, {})[animationKey] = restructeredCycles['G1'][animationKey]
+                    # elif('G2' in sequence):
+                        # restructeredCycles['G2'][animationKey] = orientation
+                        # # Retrieves or creates the dictionary for 'sequence' and assigns the value from 'G2':
+                        # #restructeredCycles.setdefault(sequence, {})[animationKey] = restructeredCycles['G2'][animationKey]
+            
+            # for sequence in cycles.keys():
+                # for animationKey, orientation in animation.items(): 
+                    # # TODO: Delete Print
+                    # print(animationKey)
+                    # if('G1' in sequence):
+                        # restructeredCycles[sequence] = restructeredCycles['G1']
+                    # elif('G2' in sequence):
+                        # restructeredCycles[sequence] = restructeredCycles['G2']
+                                               
+            # Empty structure taken from cycles.
+            restructeredCycles = {
+                seq: {anim: {orient: [] for orient in orient_dict} for anim, orient_dict in anim_dict.items()}
+                for seq, anim_dict in cycles.items()}
+            # Takes the existing values from cycles and gives them restructeredCycles.
+            for sequence, animation in cycles.items(): 
+                for animationKey, orientation in animation.items():
+                    restructeredCycles[sequence][animationKey] = orientation
+                
             # TODO: Delete Print
-            print(cycles)
-            #self.writeCycles(allFilenames, cycles, orientations, animationOrder)                                      
+            print(restructeredCycles)
+        
+            # TODO: Delete Print
+            #print(cycles.keys())
+            self.writeCycles(allFilenames, restructeredCycles, orientations, animationOrder)                                      
             # ----- [FILTERS]                 
-            self.writeFilters(allFilenames, NIfilters)
+            #self.writeFilters(allFilenames, NIfilters)
         
         return {'FINISHED'}
 
