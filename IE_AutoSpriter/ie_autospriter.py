@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 8),
+    "version": (0, 37, 9),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2917,8 +2917,7 @@ class IEAS_OT_IniFiles(Operator):
         if (selectedType == '7000 monster split bams 0'):
             sequences       = IEAS_Data.retrieveSequencesType7000_monster_sp0()
             orientations    = orientations9D
-            animationOrder  = {'G1':["WK","SC","SD","GH","DE","TW","SL","GU"],            
-                               'G2':["A1","A2","A3","A4","A5","SP","CA"]}
+            
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -2983,15 +2982,14 @@ class IEAS_OT_IniFiles(Operator):
                                                                                             animation, filenamePrefix, currentPosition=position, 
                                                                                             weapon=weapon, weaponKey=weaponKey)
                         # Stores positions for next iteration, so the frames next start position in INI is known.
-                        positionTracker[sequence] = position
-        
-            # ----- [CYCLES]
-            # TODO: Delete Print
-            print(cycles['G1']['WK'])
-            self.writeCycles(allFilenames, cycles, orientations, animationOrder)                                      
-            # ----- [FILTERS]                 
-            self.writeFilters(allFilenames, NIfilters)
-                      
+                        positionTracker[sequence] = position 
+                        
+            # ----- [CYCLES] - 7000 monster split bams 0
+            animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW","SL","GU"],
+                                'G2':["A1","A2","A3","A4","A5","SP","CA"]}
+            self.writeCycles(allFilenames, cycles, orientations, animationOrder)          
+            # ----- [FILTERS] - 7000 monster split bams 0
+            self.writeFilters(allFilenames, NIfilters)                     
         # -------------------------
         # 7000 monster split bams 1
         # -------------------------
@@ -3001,20 +2999,10 @@ class IEAS_OT_IniFiles(Operator):
             weaponPosition              = 0
             weaponPositionTracker['G1'] = 0
             weaponPositionTracker['G2'] = 0
-            # TODO: May not work!
-            animationOrder  = {'G1':["WK","SC","SD","GH","DE","TW"],
-                               'G11':["WK","SC","SD","GH","DE","TW"],
-                               'G12':["WK","SC","SD","GH","DE","TW"],
-                               'G13':["WK","SC","SD","GH","DE","TW"],
-                               'G14':["WK","SC","SD","GH","DE","TW"],
-                               'G15':["WK","SC","SD","GH","DE","TW"],
-                               'G2':["A1","A2","A3","A4","A5","SP","CA"],
-                               'G21':["A1","A2","A3","A4","A5","SP","CA"],
-                               'G22':["A1","A2","A3","A4","A5","SP","CA"],
-                               'G23':["A1","A2","A3","A4","A5","SP","CA"],
-                               'G24':["A1","A2","A3","A4","A5","SP","CA"],
-                               'G25':["A1","A2","A3","A4","A5","SP","CA"],
-                               'G26':["A1","A2","A3","A4","A5","SP","CA"]}
+            weaponFilenames             = {}
+            weaponFilenames['G1']       = []
+            weaponFilenames['G2']       = []
+            
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -3031,11 +3019,11 @@ class IEAS_OT_IniFiles(Operator):
                     mode                            = 'w'                       
                     # First INI files.    
                     position, cycles                = self.writeFramesType7000_monster( mode, allFrames, fullPath, pathSaveAt, 
-                                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                            orientations, cycles, sequence, sequenceKey, 
-                                                                                            animation, filenamePrefix, currentPosition=position)  
-                    #
-                    weaponPosition = weaponPositionTracker["G1" if "G1" in sequence else "G2" ]
+                                                                                        globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                        orientations, cycles, sequence, sequenceKey, 
+                                                                                        animation, filenamePrefix, currentPosition=position)  
+                    # Weapon fram position in INI
+                    weaponPosition = weaponPositionTracker["G1" if "G1" in sequence else "G2"]
                     
                     # TODO: Delete print
                     #print(f"positionTracker[{sequence}]:{positionTracker[sequence]}")
@@ -3060,62 +3048,65 @@ class IEAS_OT_IniFiles(Operator):
                             # Either create and write or append in INI file.
                             fullPath    = os.path.join(pathSaveAt, filename + ".INI")
                             weaponPositionTracker[mainSequence], cycles = self.writeFramesType7000_monster( mode, allFrames, fullPath, pathSaveAt, 
-                                                                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                                                orientations, cycles, sequence, sequenceKey, 
-                                                                                                                animation, filenamePrefix, currentPosition=weaponPosition, 
-                                                                                                                weapon=weapon, weaponKey=weaponKey)
-                            allFilenames[sequence].append(fullPath)
+                                                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                            orientations, cycles, mainSequence, sequenceKey, 
+                                                                                                            animation, filenamePrefix, currentPosition=weaponPosition, 
+                                                                                                            weapon=weapon, weaponKey=weaponKey)
+                            # We need the filename only once in a specific sequence.
+                            if (sequence == "G1") or (sequence == "G2"):
+                                weaponFilenames[sequence].append(fullPath)
         
-            # ----- [CYCLES]
-            restructeredCycles          = {}
-            #restructeredCycles['G1']    = {}
-            #restructeredCycles['G2']    = {}
-            emptyOrientations           = { 'south':[],        'south_south_west':[],
-                                            'south_west':[],   'west_south_west':[],
-                                            'west':[],         'west_north_west':[],
-                                            'north_west':[],   'north_north_west':[],
-                                            'north':[]}
-            # for sequence, animation in cycles.items():
-                # # TODO: Delete Print
-                # print(sequence)
-                # for animationKey, orientation in animation.items(): 
-                    # # TODO: Delete Print
-                    # print(animationKey)
-                    # if('G1' in sequence):
-                        # restructeredCycles['G1'][animationKey] = orientation
-                        # # Retrieves or creates the dictionary for 'sequence' and assigns the value from 'G1':
-                        # #restructeredCycles.setdefault(sequence, {})[animationKey] = restructeredCycles['G1'][animationKey]
-                    # elif('G2' in sequence):
-                        # restructeredCycles['G2'][animationKey] = orientation
-                        # # Retrieves or creates the dictionary for 'sequence' and assigns the value from 'G2':
-                        # #restructeredCycles.setdefault(sequence, {})[animationKey] = restructeredCycles['G2'][animationKey]
-            
-            # for sequence in cycles.keys():
-                # for animationKey, orientation in animation.items(): 
-                    # # TODO: Delete Print
-                    # print(animationKey)
-                    # if('G1' in sequence):
-                        # restructeredCycles[sequence] = restructeredCycles['G1']
-                    # elif('G2' in sequence):
-                        # restructeredCycles[sequence] = restructeredCycles['G2']
-                                               
+            # ----- [CYCLES] No Weapons INI - 7000 monster split bams 1
+            animationOrder  = { 'G1':   ["WK","SC","SD","GH","DE","TW"],        'G11':["WK","SC","SD","GH","DE","TW"],
+                                'G12':  ["WK","SC","SD","GH","DE","TW"],        'G13':["WK","SC","SD","GH","DE","TW"],
+                                'G14':  ["WK","SC","SD","GH","DE","TW"],        'G15':["WK","SC","SD","GH","DE","TW"],
+                                'G2':   ["A1","A2","A3","A4","A5","SP","CA"],   'G21':["A1","A2","A3","A4","A5","SP","CA"],
+                                'G22':  ["A1","A2","A3","A4","A5","SP","CA"],   'G23':["A1","A2","A3","A4","A5","SP","CA"],
+                                'G24':  ["A1","A2","A3","A4","A5","SP","CA"],   'G25':["A1","A2","A3","A4","A5","SP","CA"],
+                                'G26':  ["A1","A2","A3","A4","A5","SP","CA"]}
             # Empty structure taken from cycles.
             restructeredCycles = {
-                seq: {anim: {orient: [] for orient in orient_dict} for anim, orient_dict in anim_dict.items()}
-                for seq, anim_dict in cycles.items()}
-            # Takes the existing values from cycles and gives them restructeredCycles.
-            for sequence, animation in cycles.items(): 
-                for animationKey, orientation in animation.items():
-                    restructeredCycles[sequence][animationKey] = orientation
-                
-            # TODO: Delete Print
-            print(restructeredCycles)
-        
-            # TODO: Delete Print
-            #print(cycles.keys())
-            self.writeCycles(allFilenames, restructeredCycles, orientations, animationOrder)                                      
-            # ----- [FILTERS]                 
+                seq: {anim: {orient: [] for orient in orientDict} for anim, orientDict in animDict.items()}
+                for seq, animDict in cycles.items()}
+            # Transfers existing values ​​from the cycles and assigns them to the restructured cycles, else incompatible with writeCycles.
+            for sequence, animations in cycles.items():
+                for animationKey, directions in animations.items():
+                    restructeredCycles[sequence][animationKey] = directions
+
+            self.writeCycles(allFilenames, restructeredCycles, orientations, animationOrder)
+            
+            # ----- [CYCLES] Weapons INI - 7000 monster split bams 1
+            animationOrderWeapons  = {  'G1':["WK","SC","SD","GH","DE","TW"],
+                                        'G2':["A1","A2","A3","A4","A5","SP","CA"],}                                   
+            # Empty structure taken from cycles(only for G1 and G2 sequences).
+            restructeredWeaponCycles = {
+                seq: {anim: {orient: [] for orient in orientDict} for anim, orientDict in animDict.items()}
+                for seq, animDict in cycles.items() if (seq == "G1" or seq == "G2")}
+            # Transfers existing values ​​from the cycles and assigns them to the restructured cycles, else incompatible with writeCycles.
+            for sequence, animations in cycles.items():
+                for animationKey, directions in animations.items():
+                    restructeredWeaponCycles['G1' if 'G1' in sequence else 'G2'][animationKey] = directions
+            # Adjusts the frame positions to prevent them to start by 0 for every animation.        
+            for sequence, animations in restructeredWeaponCycles.items():
+                positionCounter = 0
+                for animationKey, directions in animations.items():
+                  for directionKey, framePositions in directions.items():
+                      tempframePositions = []
+                      for frameIndex, framePosition in enumerate(framePositions):
+                          tempframePositions.append(str(positionCounter))
+                          positionCounter += 1
+                      restructeredWeaponCycles[sequence][animationKey][directionKey] = tempframePositions
+                          
+
+            # TODO: Delete Prints
+            #print(len(weaponFilenames['G1']))
+            #print(weaponFilenames['G1'])
+            print(restructeredWeaponCycles)
+            
+            self.writeCycles(weaponFilenames, restructeredWeaponCycles, orientations, animationOrderWeapons)
+            # ----- [FILTERS]
             #self.writeFilters(allFilenames, NIfilters)
+            #self.writeFilters(weaponFilenames, NIfilters)
         
         return {'FINISHED'}
 
