@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 10),
+    "version": (0, 37, 11),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -1721,13 +1721,7 @@ class IEAS_AnimationTypes():
                     # Creates a subfolder for the specific weapon and camera angle.
                     weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
                     if not os.path.exists(weapon_position_folder):
-                        os.makedirs(weapon_position_folder)
-                    
-                    # Weapon animation is always stored as an unsplit BAM
-                    if("G2" in animationSequence):
-                        animationSequence = "G2"
-                    else:
-                        animationSequence = "G1"
+                        os.makedirs(weapon_position_folder)                  
                     
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
@@ -3016,7 +3010,7 @@ class IEAS_OT_IniFiles(Operator):
                     cycles[sequence][sequenceKey]   = {}
                     allFilenames[sequence]          = [fullPath]
                     position                        = 0
-                    mode                            = 'w'                       
+                    mode                            = 'w'
                     # First INI files.    
                     position, cycles                = self.writeFramesType7000_monster( mode, allFrames, fullPath, pathSaveAt, 
                                                                                         globalContent, cameraPosToggles, cameraPosFolderNames, 
@@ -3053,8 +3047,8 @@ class IEAS_OT_IniFiles(Operator):
                                                                                                             animation, filenamePrefix, currentPosition=weaponPosition, 
                                                                                                             weapon=weapon, weaponKey=weaponKey)
                             # We need the filename only once in a specific sequence.
-                            if (sequence == "G1") or (sequence == "G2"):
-                                weaponFilenames[sequence].append(fullPath)
+                            if fullPath not in weaponFilenames[mainSequence]:
+                                weaponFilenames[mainSequence].append(fullPath)
         
             # ----- [CYCLES] No Weapons INI - 7000 monster split bams 1
             animationOrder  = { 'G1':   ["WK","SC","SD","GH","DE","TW"],        'G11':["WK","SC","SD","GH","DE","TW"],
@@ -3072,7 +3066,7 @@ class IEAS_OT_IniFiles(Operator):
             for sequence, animations in cycles.items():
                 for animationKey, directions in animations.items():
                     restructeredCycles[sequence][animationKey] = directions
-
+            # Writes into INI        
             self.writeCycles(allFilenames, restructeredCycles, orientations, animationOrder)
             
             # ----- [CYCLES] Weapons INI - 7000 monster split bams 1
@@ -3085,6 +3079,9 @@ class IEAS_OT_IniFiles(Operator):
             # Transfers existing values ​​from the cycles and assigns them to the restructured cycles, else incompatible with writeCycles.
             for sequence, animations in cycles.items():
                 for animationKey, directions in animations.items():
+                    currentSeequence = 'G1' if 'G1' in sequence else 'G2'
+                    if(currentSeequence not in restructeredWeaponCycles):
+                        restructeredWeaponCycles[currentSeequence] = {}
                     restructeredWeaponCycles['G1' if 'G1' in sequence else 'G2'][animationKey] = directions
             # Adjusts the frame positions to prevent them to start by 0 for every animation.        
             for sequence, animations in restructeredWeaponCycles.items():
@@ -3095,18 +3092,13 @@ class IEAS_OT_IniFiles(Operator):
                       for frameIndex, framePosition in enumerate(framePositions):
                           tempframePositions.append(str(positionCounter))
                           positionCounter += 1
-                      restructeredWeaponCycles[sequence][animationKey][directionKey] = tempframePositions
-                          
-
-            # TODO: Delete Prints
-            #print(len(weaponFilenames['G1']))
-            #print(weaponFilenames['G1'])
-            #print(restructeredWeaponCycles)
+                      restructeredWeaponCycles[sequence][animationKey][directionKey] = tempframePositions                         
             
             self.writeCycles(weaponFilenames, restructeredWeaponCycles, orientations, animationOrderWeapons)
-            # ----- [FILTERS]
-            #self.writeFilters(allFilenames, NIfilters)
-            #self.writeFilters(weaponFilenames, NIfilters)
+            
+            # ----- [FILTERS] - 7000 monster split bams 1
+            self.writeFilters(allFilenames, NIfilters)
+            self.writeFilters(weaponFilenames, NIfilters)
         
         return {'FINISHED'}
 
