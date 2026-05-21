@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 9),
+    "version": (0, 37, 10),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2818,7 +2818,7 @@ class IEAS_OT_IniFiles(Operator):
                             pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
                             fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
                         else:
-                            cycles[sequence][sequenceKey][orientation].append(str(position))                                                              
+                            cycles[sequence][sequenceKey][orientation].append(str(position))                            
                             pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
                             fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
                             
@@ -3049,7 +3049,7 @@ class IEAS_OT_IniFiles(Operator):
                             fullPath    = os.path.join(pathSaveAt, filename + ".INI")
                             weaponPositionTracker[mainSequence], cycles = self.writeFramesType7000_monster( mode, allFrames, fullPath, pathSaveAt, 
                                                                                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                                            orientations, cycles, mainSequence, sequenceKey, 
+                                                                                                            orientations, cycles, sequence, sequenceKey, 
                                                                                                             animation, filenamePrefix, currentPosition=weaponPosition, 
                                                                                                             weapon=weapon, weaponKey=weaponKey)
                             # We need the filename only once in a specific sequence.
@@ -3101,7 +3101,7 @@ class IEAS_OT_IniFiles(Operator):
             # TODO: Delete Prints
             #print(len(weaponFilenames['G1']))
             #print(weaponFilenames['G1'])
-            print(restructeredWeaponCycles)
+            #print(restructeredWeaponCycles)
             
             self.writeCycles(weaponFilenames, restructeredWeaponCycles, orientations, animationOrderWeapons)
             # ----- [FILTERS]
