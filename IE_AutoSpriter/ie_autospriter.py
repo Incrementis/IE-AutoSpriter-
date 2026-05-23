@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 11),
+    "version": (0, 37, 13),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -3023,24 +3023,25 @@ class IEAS_OT_IniFiles(Operator):
                     #print(f"positionTracker[{sequence}]:{positionTracker[sequence]}")
                     for weaponKey, weaponAnimation in animationWeaponToggles.items():
                         if(weaponAnimation == True):                           
-                            weapon = animationWeaponFolderNames[weaponKey]                                                        
-                            # First time weapon INI files are created and written
+                            weapon          = animationWeaponFolderNames[weaponKey]
+                            mainSequence    = "G1" if "G1" in sequence else "G2"                            
+                            # For G1 and G2
                             if((sequence == 'G1') or (sequence =='G2')):
-                                mainSequence    = "G1" if "G1" in sequence else "G2"
-                                filename        = filenameSequence + weaponKey
-                                mode            = 'w'                            
-                            # Weapon G1 INI files already exist.
+                                filename        = filenameSequence + weaponKey                            
+                            # For G11, G12, etc.
                             elif('G1' in sequence):
-                                mainSequence    = 'G1'
                                 filename        = filenamePrefix + mainSequence + weaponKey
-                                mode            = 'a'
-                            # Weapon G2 INI files already exist. 
+                            # For G21, G22, etc.
                             elif('G2' in sequence):
-                                mainSequence    = 'G2'
-                                filename        = filenamePrefix + mainSequence + weaponKey 
-                                mode            = 'a'
+                                filename        = filenamePrefix + mainSequence + weaponKey
+                                
                             # Either create and write or append in INI file.
                             fullPath    = os.path.join(pathSaveAt, filename + ".INI")
+                            if(os.path.exists(fullPath)):
+                                mode            = 'a'
+                            else:
+                                mode            = 'w'
+                                
                             weaponPositionTracker[mainSequence], cycles = self.writeFramesType7000_monster( mode, allFrames, fullPath, pathSaveAt, 
                                                                                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                                             orientations, cycles, sequence, sequenceKey, 
@@ -3071,7 +3072,7 @@ class IEAS_OT_IniFiles(Operator):
             
             # ----- [CYCLES] Weapons INI - 7000 monster split bams 1
             animationOrderWeapons  = {  'G1':["WK","SC","SD","GH","DE","TW"],
-                                        'G2':["A1","A2","A3","A4","A5","SP","CA"],}                                   
+                                        'G2':["A1","A2","A3","A4","A5","SP","CA"],}
             # Empty structure taken from cycles(only for G1 and G2 sequences).
             restructeredWeaponCycles = {
                 seq: {anim: {orient: [] for orient in orientDict} for anim, orientDict in animDict.items()}
@@ -3083,7 +3084,7 @@ class IEAS_OT_IniFiles(Operator):
                     if(currentSeequence not in restructeredWeaponCycles):
                         restructeredWeaponCycles[currentSeequence] = {}
                     restructeredWeaponCycles['G1' if 'G1' in sequence else 'G2'][animationKey] = directions
-            # Adjusts the frame positions to prevent them to start by 0 for every animation.        
+            # Adjusts the frame positions to prevent them to start by 0 for every animation.
             for sequence, animations in restructeredWeaponCycles.items():
                 positionCounter = 0
                 for animationKey, directions in animations.items():
@@ -3092,7 +3093,7 @@ class IEAS_OT_IniFiles(Operator):
                       for frameIndex, framePosition in enumerate(framePositions):
                           tempframePositions.append(str(positionCounter))
                           positionCounter += 1
-                      restructeredWeaponCycles[sequence][animationKey][directionKey] = tempframePositions                         
+                      restructeredWeaponCycles[sequence][animationKey][directionKey] = tempframePositions
             
             self.writeCycles(weaponFilenames, restructeredWeaponCycles, orientations, animationOrderWeapons)
             
