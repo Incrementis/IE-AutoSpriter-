@@ -57,7 +57,7 @@ The functions are explained in detail in the manual.
 * English
 
 ## Special Thanks
-Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server users and Infinity Engine discord server users who helped me with hints and information:
+Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server users, SHS discord server users and Infinity Engine discord server users who helped me with hints and information:
 * The Artisan
 * CamDawg
 * Argent77
@@ -65,6 +65,7 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * moggadeet
 * Bubb
 * lynx
+* skellytz
 
 ## Sources and Learning Materials
 * [INI file format: Creature Animations](https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm)
