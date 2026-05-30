@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 16),
+    "version": (0, 37, 21),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -3464,6 +3464,10 @@ class IEAS_OT_Final(Operator):
         # Stores the current object in the scene with the specific user given name.
         objectCurrent   = context.scene.objects.get(objectName)
         
+        # Checks if no direction/orientation is selected.
+        if(not any(cameraPosToggles.values())):
+            self.report({'ERROR'}, f"ERROR: No direction selected in 'Step 3: Camera'. At least one must be selected.")
+            return {'CANCELLED'}
         # Checks if the object exist.
         if (objectCurrent is None):
             self.report({'ERROR'}, f"ERROR: Object '{objectCurrent}' does not exist!")
