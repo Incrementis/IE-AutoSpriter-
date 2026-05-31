@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 21),
+    "version": (0, 37, 23),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -304,6 +304,15 @@ class IEAS_Data:
             'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
         } 
         return sequencesType7000_monster_sp1
+        
+    @staticmethod
+    def retrieveSequencesType7000_monster_old():
+        """Dictionary wrapper animation type 7000 monster old function - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesType7000_monster_old = {
+            'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1','DE':'G1', 'TW':'G1',
+            'A1':'G2', 'CA':'G2', 'A3':'G2'
+        } 
+        return sequencesType7000_monster_old
         
         
 # --------
@@ -1768,10 +1777,7 @@ class IEAS_AnimationTypes():
         """Method for handling 7000 monster_old type logic."""
         if (typeParameters.exclude == False):
              # Used to identify which sprite file is defined for which sequence
-            sequences = {
-                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1','DE':'G1', 'TW':'G1',
-                'A1':'G2', 'CA':'G2', 'A3':'G2'
-            }
+            sequences = IEAS_Data.retrieveSequencesType7000_monster_old()
             animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
@@ -2802,7 +2808,6 @@ class IEAS_OT_IniFiles(Operator):
             for orientation in orientations:
                 if(animation=="" and animationKey=='LOWER'):
                     cycles[animation][animationKey][orientation] = []
-                    print("cycles:",cycles)
                 # Writes to the file only if the model orientation is checked by the user.
                 if(cameraPosToggles[orientation]):
                     orientationFolder = cameraPosFolderNames[orientation]
@@ -2857,6 +2862,88 @@ class IEAS_OT_IniFiles(Operator):
                                 file.write(f"{cyclePosition}=\n")
                         
                             cyclePosition += 1
+    
+    @classmethod
+    def writeFramesType7000_monster_old(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
+                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                    orientations,orientationsEast, cycles, sequence, sequenceKey, 
+                                    animation, filenamePrefix, currentPosition):
+        """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
+        fullPath    = {'West': fullPathWest, 'East': fullPathEast}
+        
+        for pathKey, path in fullPath.items():
+            position        = currentPosition
+            positionEast    = currentPosition
+            with open(path, mode) as file:
+                # Content when INI is first time generated.
+                if (mode == 'w'):
+                    file.write(globalContent+"\n")
+                    file.write("[Frames]\n")
+                # Like south, north, etc.
+                for orientation in orientations:
+                    cycles[sequence][sequenceKey][orientation] = []
+                    # Writes to the file only if the model orientation is checked by the user.
+                    if(cameraPosToggles[orientation]):
+                        orientationFolder = cameraPosFolderNames[orientation]                                                   
+                        # Writes all selected frames to the INI file.
+                        for frame in allFrames:
+                            if(pathKey=="West"):
+                                if(orientation in orientationsEast):
+                                    print("East in West:",orientation)
+                                    cycles[sequence][sequenceKey][orientation].append(str(positionEast))
+                                    positionEast += 1
+                                else:
+                                    print("West:",orientation)
+                                    cycles[sequence][sequenceKey][orientation].append(str(position))
+                                    pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                    fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                                    file.write(f"{position}={fullFramePath}:0\n")
+                                    position += 1
+                            if(pathKey=="East"):
+                                if(orientation in orientationsEast):
+                                    print("East:",orientation)
+                                    cycles[sequence][sequenceKey][orientation].append(str(position))
+                                    pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                    fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                                    file.write(f"{position}={fullFramePath}:0\n")
+                                    position += 1
+                            
+                                
+                            # cycles[sequence][sequenceKey][orientation].append(str(position))
+                            # pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                            # fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                                
+                            # file.write(f"{position}={fullFramePath}:0\n")
+                            # position += 1
+                    else:
+                        # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
+                        cycles[sequence][sequenceKey][orientation] = []
+                                                                
+            return (position, cycles)          
+      
+    @classmethod
+    def writeCyclesType7000_monster_old(cls, allFilenames, cycles, orientations, animationOrder):                  
+        """Writes the cycles section of the INI file with fixed animation order."""
+        # {Sequence:{Animation:{Orientation:[Positions of frames]}}}
+        for sequence, fullPaths in allFilenames.items():
+            currentOrder = animationOrder[sequence]
+            for fullPath in fullPaths:
+                cyclePosition = 0
+                with open(fullPath, 'a') as file:
+                    file.write("\n[Cycles]\n")
+                    for animationType in currentOrder:
+                        for orientation in orientations:
+                            if(cycles[sequence].get(animationType)):
+                                if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                    frames = ",".join(cycles[sequence][animationType][orientation])
+                                    file.write(f"{cyclePosition}={frames}\n")
+                                else:
+                                    file.write(f"{cyclePosition}=\n")
+                            else:
+                                file.write(f"{cyclePosition}=\n")
+                        
+                            cyclePosition += 1
+    
     
     @classmethod
     def writeFramesType7000_monster(cls, mode, allFrames, fullPath, pathSaveAt, 
@@ -2939,7 +3026,9 @@ class IEAS_OT_IniFiles(Operator):
         animationWeaponToggles      = IEAS_Data.retrieveAnimationWeaponToggles(context)
         # The list order matters! 
         orientations1D              = ['south']
-        #orientations2D              = ['MAIN', 'LOWER']
+        # The list order matters! The position of the orientations within the list are as in iesdp.
+        orientations8D              = [ 'south', 'south_west', 'west', 'north_west', 
+                                        'north', 'north_east', 'east', 'south_east']
         # The list order matters! The position of the orientations within the list are as in iesdp.
         orientations9D              = [ 'south',        'south_south_west',
                                         'south_west',   'west_south_west',
@@ -2985,7 +3074,14 @@ class IEAS_OT_IniFiles(Operator):
             frameEnd            = int(bpy.data.actions.get(animationParts['MAIN']).frame_range[1])
             # Calculates neccessary frame numbers.
             allFrames           = list(range(frameStart, frameEnd + 1, Every_X_Frame))
+            CollectionNames     = [child.name for child in bpy.context.collection.children]
             
+            # Sanity checks           
+            if(context.scene.IEAS_properties.Creature not in CollectionNames):
+                self.report({'ERROR'}, f"'{context.scene.IEAS_properties.Creature}' in 'Step 4 : Animation' not found in the active collection!" 
+                f"Please enter a valid collection name in 'Step 4 : Animation' and ensure you have selected the correct parent collection in the Outliner window.")
+                return {'CANCELLED'}
+                          
             # ----- [FRAMES]
             for animationPartKey, animationPart in animationParts.items():
                 cycles[animationPart]                   = {}
@@ -3016,7 +3112,46 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
-            
+        
+        # ----------------
+        # 7000 monster old 
+        # ----------------
+        if (selectedType == '7000 monster old'):
+            sequences       = IEAS_Data.retrieveSequencesType7000_monster_sp0()
+            orientations    = orientations8D
+            orientationsEast= ['north_east', 'east', 'south_east']
+            # ----- [FRAMES]
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    filenameSequence                = filenamePrefix + sequence
+                    animation                       = animationFolderNames[sequenceKey]
+                    frameStart                      = int(bpy.data.actions.get(animation).frame_range[0])
+                    frameEnd                        = int(bpy.data.actions.get(animation).frame_range[1])
+                    # Calculates neccessary frame numbers.
+                    allFrames                       = list(range(frameStart, frameEnd + 1, Every_X_Frame))
+                    # Prevents the need of if statments.
+                    cycles.setdefault(sequence,{})
+                    cycles[sequence].setdefault(sequenceKey,{})
+                    
+                    if(sequence not in foundSequences):
+                        fullPathWest                        = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        fullPathEast                    = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")                   
+                        allFilenames[sequence]          = [fullPathWest, fullPathEast]
+                        positionTracker[sequence]       = 0
+                        position                        = positionTracker[sequence]
+                        mode                            = 'w'
+                        # E.g. animation in sequence G1 is used.
+                        foundSequences.add(sequence) 
+                    else:
+                        position                        = positionTracker[sequence]
+                        mode                            = 'a'
+                        
+                    # First INI files.    
+                    positionTracker[sequence], cycles  = self.writeFramesType7000_monster_old(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
+                                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                            orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                            animation, filenamePrefix, currentPosition = position)
+        
         # -------------------------
         # 7000 monster split bams 0
         # -------------------------
