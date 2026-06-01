@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 23),
+    "version": (0, 37, 24),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2870,8 +2870,9 @@ class IEAS_OT_IniFiles(Operator):
                                     animation, filenamePrefix, currentPosition):
         """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
         fullPath    = {'West': fullPathWest, 'East': fullPathEast}
-        
         for pathKey, path in fullPath.items():
+            print("pathKey:",pathKey)
+            #print("path:",path)
             position        = currentPosition
             positionEast    = currentPosition
             with open(path, mode) as file:
@@ -2889,11 +2890,11 @@ class IEAS_OT_IniFiles(Operator):
                         for frame in allFrames:
                             if(pathKey=="West"):
                                 if(orientation in orientationsEast):
-                                    print("East in West:",orientation)
+                                    #print("East in West:",orientation)
                                     cycles[sequence][sequenceKey][orientation].append(str(positionEast))
                                     positionEast += 1
                                 else:
-                                    print("West:",orientation)
+                                    #print("West:",orientation)
                                     cycles[sequence][sequenceKey][orientation].append(str(position))
                                     pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
                                     fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
@@ -2901,9 +2902,9 @@ class IEAS_OT_IniFiles(Operator):
                                     position += 1
                             if(pathKey=="East"):
                                 if(orientation in orientationsEast):
-                                    print("East:",orientation)
+                                    #print("East:",orientation)
                                     cycles[sequence][sequenceKey][orientation].append(str(position))
-                                    pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                    pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
                                     fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
                                     file.write(f"{position}={fullFramePath}:0\n")
                                     position += 1
@@ -2919,7 +2920,7 @@ class IEAS_OT_IniFiles(Operator):
                         # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
                         cycles[sequence][sequenceKey][orientation] = []
                                                                 
-            return (position, cycles)          
+        return (position, cycles)          
       
     @classmethod
     def writeCyclesType7000_monster_old(cls, allFilenames, cycles, orientations, animationOrder):                  
@@ -3148,9 +3149,9 @@ class IEAS_OT_IniFiles(Operator):
                         
                     # First INI files.    
                     positionTracker[sequence], cycles  = self.writeFramesType7000_monster_old(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
-                                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                            orientations, orientationsEast, cycles, sequence, sequenceKey, 
-                                                                                            animation, filenamePrefix, currentPosition = position)
+                                                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                                animation, filenamePrefix, currentPosition = position)
         
         # -------------------------
         # 7000 monster split bams 0
