@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 25),
+    "version": (0, 37, 26),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2888,14 +2888,14 @@ class IEAS_OT_IniFiles(Operator):
                         for frame in allFrames:
                             if(pathKey=="Westside"):
                                 if(orientation in orientationsEast):
-                                    cycles[sequence][sequenceKey][orientation].append(str(positionWest))
-                                    #positionWest += 1
+                                    cycles[sequence][sequenceKey][orientation].append('')
                                 else:
                                     cycles[sequence][sequenceKey][orientation].append(str(positionWest))
                                     pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
                                     fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
                                     file.write(f"{positionWest}={fullFramePath}:0\n")
                                     positionWest += 1
+                                    
                             if(pathKey=="Eastside"):
                                 if(orientation in orientationsEast):
                                     cycles[sequence][sequenceKey][orientation].append(str(positionEast))
@@ -2903,38 +2903,52 @@ class IEAS_OT_IniFiles(Operator):
                                     fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
                                     file.write(f"{positionEast}={fullFramePath}:0\n")
                                     positionEast += 1
-                                # else:
-                                    # positionEast += 1
                     else:
                         # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
                         cycles[sequence][sequenceKey][orientation] = []
                         
         position = {'Westside': positionWest, 'Eastside': positionEast}
-        print(position)
         return (position, cycles)                 
-  
+
     @classmethod
-    def writeCyclesType7000_monster_old(cls, allFilenames, cycles, orientations, animationOrder):                  
+    def writeCyclesType7000_monster_old(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
         """Writes the cycles section of the INI file with fixed animation order."""
         # {Sequence:{Animation:{Orientation:[Positions of frames]}}}
         for sequence, fullPaths in allFilenames.items():
             currentOrder = animationOrder[sequence]
-            for fullPath in fullPaths:
+            for fullPathKey, fullPath in fullPaths.items():
                 cyclePosition = 0
                 with open(fullPath, 'a') as file:
                     file.write("\n[Cycles]\n")
                     for animationType in currentOrder:
                         for orientation in orientations:
-                            if(cycles[sequence].get(animationType)):
-                                if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
-                                    frames = ",".join(cycles[sequence][animationType][orientation])
-                                    file.write(f"{cyclePosition}={frames}\n")
+                            if(fullPathKey == 'Westside'):
+                                if(orientation not in orientationsEast):
+                                    if(cycles[sequence].get(animationType)):
+                                        if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                            frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                            file.write(f"{cyclePosition}={frames}\n")
+                                        else:
+                                            file.write(f"{cyclePosition}=\n")
+                                    else:
+                                            file.write(f"{cyclePosition}=\n")
                                 else:
-                                    file.write(f"{cyclePosition}=\n")
-                            else:
-                                file.write(f"{cyclePosition}=\n")
+                                    file.write(f"{cyclePosition}=\n") 
+                            elif(fullPathKey == 'Eastside'):
+                                if(orientation in orientationsEast):
+                                    if(cycles[sequence].get(animationType)):
+                                        if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                            frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                            file.write(f"{cyclePosition}={frames}\n")
+                                        else:
+                                            file.write(f"{cyclePosition}=\n")          
+                                    else:
+                                        file.write(f"{cyclePosition}=\n")
+                                else:
+                                    file.write(f"{cyclePosition}=\n")    
                         
                             cyclePosition += 1
+                            print("cyclePosition:",cyclePosition)
     
     
     @classmethod
@@ -3126,8 +3140,8 @@ class IEAS_OT_IniFiles(Operator):
                     
                     if(sequence not in foundSequences):
                         fullPathWest                    = os.path.join(pathSaveAt, filenameSequence + ".INI")
-                        fullPathEast                    = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")                   
-                        allFilenames[sequence]          = [fullPathWest, fullPathEast]
+                        fullPathEast                    = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")
+                        allFilenames[sequence]          = {'Westside':fullPathWest, 'Eastside':fullPathEast}
                         positionTracker[sequence]       = {'Westside': 0, 'Eastside': 0}
                         position                        = positionTracker[sequence]
                         mode                            = 'w'
@@ -3143,11 +3157,11 @@ class IEAS_OT_IniFiles(Operator):
                                                                                                 orientations, orientationsEast, cycles, sequence, sequenceKey, 
                                                                                                 animation, filenamePrefix, currentPosition = position)
         # ----- [CYCLES]
-        #print(f"cycles:{cycles}")
-        print(positionTracker)
+        print(f"cycles:{cycles['G1']['TW']}")
+        print(f"allFilenames:{allFilenames}")
         animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
                             'G2':["A1","A3","CA"]}
-        self.writeCyclesType7000_monster_old(allFilenames, cycles, orientations, animationOrder)
+        self.writeCyclesType7000_monster_old(allFilenames, cycles, orientations, orientationsEast, animationOrder)
         
         # -------------------------
         # 7000 monster split bams 0
