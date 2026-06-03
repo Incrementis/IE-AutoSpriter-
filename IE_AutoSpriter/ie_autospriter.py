@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 26),
+    "version": (0, 37, 29),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2922,34 +2922,25 @@ class IEAS_OT_IniFiles(Operator):
                     file.write("\n[Cycles]\n")
                     for animationType in currentOrder:
                         for orientation in orientations:
-                            if(fullPathKey == 'Westside'):
-                                if(orientation not in orientationsEast):
-                                    if(cycles[sequence].get(animationType)):
-                                        if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
-                                            frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
-                                            file.write(f"{cyclePosition}={frames}\n")
-                                        else:
-                                            file.write(f"{cyclePosition}=\n")
-                                    else:
-                                            file.write(f"{cyclePosition}=\n")
+                            # Asks predefined conditions to prevent to many cascading if statements. 
+                            IsWestside = ((fullPathKey == 'Westside') and (orientation not in orientationsEast) and cycles[sequence].get(animationType))
+                            IsEastside = ((fullPathKey == 'Eastside') and (orientation in orientationsEast)     and cycles[sequence].get(animationType))
+                            if(IsWestside):
+                                if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                    frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                    file.write(f"{cyclePosition}={frames}\n")
                                 else:
-                                    file.write(f"{cyclePosition}=\n") 
-                            elif(fullPathKey == 'Eastside'):
-                                if(orientation in orientationsEast):
-                                    if(cycles[sequence].get(animationType)):
-                                        if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
-                                            frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
-                                            file.write(f"{cyclePosition}={frames}\n")
-                                        else:
-                                            file.write(f"{cyclePosition}=\n")          
-                                    else:
-                                        file.write(f"{cyclePosition}=\n")
+                                    file.write(f"{cyclePosition}=\n")                                 
+                            elif(IsEastside):
+                                if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                    frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                    file.write(f"{cyclePosition}={frames}\n")
                                 else:
-                                    file.write(f"{cyclePosition}=\n")    
-                        
-                            cyclePosition += 1
-                            print("cyclePosition:",cyclePosition)
-    
+                                    file.write(f"{cyclePosition}=\n")           
+                            else:
+                                file.write(f"{cyclePosition}=\n")
+                                
+                            cyclePosition += 1  
     
     @classmethod
     def writeFramesType7000_monster(cls, mode, allFrames, fullPath, pathSaveAt, 
@@ -3157,12 +3148,13 @@ class IEAS_OT_IniFiles(Operator):
                                                                                                 orientations, orientationsEast, cycles, sequence, sequenceKey, 
                                                                                                 animation, filenamePrefix, currentPosition = position)
         # ----- [CYCLES]
-        print(f"cycles:{cycles['G1']['TW']}")
-        print(f"allFilenames:{allFilenames}")
         animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
                             'G2':["A1","A3","CA"]}
         self.writeCyclesType7000_monster_old(allFilenames, cycles, orientations, orientationsEast, animationOrder)
-        
+        # ----- [FILTERS]
+        # Restructures for compatibility reasons.
+        restructeredFilenames = {seq: list(sides.values()) for seq, sides in allFilenames.items()}
+        self.writeFilters(restructeredFilenames, NIfilters)
         # -------------------------
         # 7000 monster split bams 0
         # -------------------------
@@ -3227,7 +3219,6 @@ class IEAS_OT_IniFiles(Operator):
                                 fullPath            = os.path.join(pathSaveAt, filename + ".INI")
                                 weapon              = animationWeaponFolderNames[weaponKey]
                                 position            = positionTracker[sequence]
-                                # 
                                 position, cycles    = self.writeFramesType7000_monster( 'a', allFrames, fullPath, pathSaveAt, 
                                                                                         globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                         orientations, cycles, sequence, sequenceKey, 
