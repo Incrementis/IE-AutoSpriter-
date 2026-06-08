@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 29),
+    "version": (0, 37, 37),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -300,8 +300,8 @@ class IEAS_Data:
     def retrieveSequencesType7000_monster_sp0():
         """Dictionary wrapper animation type 7000 split_bams=0 function - returns the sequence with respect to the animation(e.g. SD for idle)."""
         sequencesType7000_monster_sp0 = {
-                'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
-                'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
+            'SD':'G1', 'SC':'G1', 'SL':'G1', 'WK':'G1', 'GH':'G1', 'GU':'G1', 'DE':'G1', 'TW':'G1', 
+            'A1':'G2', 'A2':'G2', 'A3':'G2', 'A4':'G2', 'A5':'G2', 'SP':'G2', 'CA':'G2',
         }   
         return sequencesType7000_monster_sp0
 
@@ -313,6 +313,14 @@ class IEAS_Data:
             'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
         } 
         return sequencesType7000_monster_sp1
+        
+    @staticmethod
+    def retrieveSequencesTypeB000():
+        """Dictionary wrapper animation type B000 - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesTypeB000 = {
+            'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+        } 
+        return sequencesTypeB000
         
                
 # --------
@@ -1981,9 +1989,7 @@ class IEAS_AnimationTypes():
         """Method for handling B000 type logic."""
         if (typeParameters.exclude == False):
             # Used to identify which sprite file is defined for which sequence
-            sequences = {
-                'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
-            }
+            sequences = IEAS_Data.retrieveSequencesTypeB000()
             animationSequence = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
@@ -2864,10 +2870,10 @@ class IEAS_OT_IniFiles(Operator):
                             cyclePosition += 1
     
     @classmethod
-    def writeFramesType7000_monster_old(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
-                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                    orientations,orientationsEast, cycles, sequence, sequenceKey, 
-                                    animation, filenamePrefix, currentPosition):
+    def writeFramesType7000_monster_old_B000(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
+                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                             orientations,orientationsEast, cycles, sequence, sequenceKey, 
+                                             animation, filenamePrefix, currentPosition):
         """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
         fullPath        = {'Westside': fullPathWest, 'Eastside': fullPathEast}
         positionWest    = currentPosition['Westside']
@@ -2911,7 +2917,7 @@ class IEAS_OT_IniFiles(Operator):
         return (position, cycles)                 
 
     @classmethod
-    def writeCyclesType7000_monster_old(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
+    def writeCyclesType7000_monster_old_B000(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
         """Writes the cycles section of the INI file with fixed animation order."""
         # {Sequence:{Animation:{Orientation:[Positions of frames]}}}
         for sequence, fullPaths in allFilenames.items():
@@ -3002,7 +3008,8 @@ class IEAS_OT_IniFiles(Operator):
                                 file.write(f"{cyclePosition}=\n")
                         
                             cyclePosition += 1
- 
+                            
+                             
     @classmethod
     def writeFilters(cls, allFilenames, NIfilters):
         """Writes the filters section of the INI file."""
@@ -3059,7 +3066,7 @@ class IEAS_OT_IniFiles(Operator):
         cycles                      = {}
         allFilenames                = {}
         
-        
+        print(selectedType)
         # -----------
         # 0000 effect
         # -----------
@@ -3109,13 +3116,20 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)       
-        # ----------------
-        # 7000 monster old 
-        # ----------------
-        if (selectedType == '7000 monster old'):
-            sequences       = IEAS_Data.retrieveSequencesType7000_monster_sp0()
+        # ----------------------
+        # 7000 monster old, B000  
+        # ----------------------
+        if (selectedType == '7000 monster old' or selectedType == 'B000'):
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
+            
+            if(selectedType == '7000 monster old'):            
+                sequences       = IEAS_Data.retrieveSequencesType7000_monster_old()
+                animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
+                                    'G2':["A1","A3","CA"]}
+            elif(selectedType == 'B000'):
+                sequences       = IEAS_Data.retrieveSequencesTypeB000()
+                animationOrder  = { 'G1':["SC","SD","GH","DE","TW"]}
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -3143,18 +3157,16 @@ class IEAS_OT_IniFiles(Operator):
                         mode                            = 'a'
                         
                     # First INI files.    
-                    positionTracker[sequence], cycles  = self.writeFramesType7000_monster_old(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
-                                                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                                orientations, orientationsEast, cycles, sequence, sequenceKey, 
-                                                                                                animation, filenamePrefix, currentPosition = position)
-        # ----- [CYCLES]
-        animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
-                            'G2':["A1","A3","CA"]}
-        self.writeCyclesType7000_monster_old(allFilenames, cycles, orientations, orientationsEast, animationOrder)
-        # ----- [FILTERS]
-        # Restructures for compatibility reasons.
-        restructeredFilenames = {seq: list(sides.values()) for seq, sides in allFilenames.items()}
-        self.writeFilters(restructeredFilenames, NIfilters)
+                    positionTracker[sequence], cycles  = self.writeFramesType7000_monster_old_B000( mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
+                                                                                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                    orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                                    animation, filenamePrefix, currentPosition = position)
+            # ----- [CYCLES]      
+            self.writeCyclesType7000_monster_old_B000(allFilenames, cycles, orientations, orientationsEast, animationOrder)
+            # ----- [FILTERS]
+            # Restructures for compatibility reasons.
+            restructeredFilenames = {seq: list(sides.values()) for seq, sides in allFilenames.items()}
+            self.writeFilters(restructeredFilenames, NIfilters)
         # -------------------------
         # 7000 monster split bams 0
         # -------------------------
@@ -3349,9 +3361,8 @@ class IEAS_OT_IniFiles(Operator):
             # ----- [FILTERS] - 7000 monster split bams 1
             self.writeFilters(allFilenames, NIfilters)
             self.writeFilters(weaponFilenames, NIfilters)
-        
+            
         return {'FINISHED'}
-
 
 # --------
 # Purpose:
