@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 37),
+    "version": (0, 37, 44),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -322,7 +322,15 @@ class IEAS_Data:
         } 
         return sequencesTypeB000
         
-               
+    @staticmethod
+    def retrieveSequencesTypeC000():
+        """Dictionary wrapper animation type C000 - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesTypeC000 = {
+            'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+        }
+        return sequencesTypeC000
+
+
 # --------
 # Purpose:
 # --------
@@ -2012,9 +2020,7 @@ class IEAS_AnimationTypes():
         """Method for handling C000 type logic."""
         if (typeParameters.exclude == False):
             # Used to identify which sprite file is defined for which sequence
-            sequences = {
-                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
-            }
+            sequences = IEAS_Data.retrieveSequencesTypeC000()
             animationSequence = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
@@ -2870,10 +2876,10 @@ class IEAS_OT_IniFiles(Operator):
                             cyclePosition += 1
     
     @classmethod
-    def writeFramesType7000_monster_old_B000(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
-                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                             orientations,orientationsEast, cycles, sequence, sequenceKey, 
-                                             animation, filenamePrefix, currentPosition):
+    def writeFrames_withEastSequences(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
+                                     globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                     orientations,orientationsEast, cycles, sequence, sequenceKey, 
+                                     animation, filenamePrefix, currentPosition):
         """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
         fullPath        = {'Westside': fullPathWest, 'Eastside': fullPathEast}
         positionWest    = currentPosition['Westside']
@@ -2917,7 +2923,7 @@ class IEAS_OT_IniFiles(Operator):
         return (position, cycles)                 
 
     @classmethod
-    def writeCyclesType7000_monster_old_B000(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
+    def writeCycles_withEastSequences(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
         """Writes the cycles section of the INI file with fixed animation order."""
         # {Sequence:{Animation:{Orientation:[Positions of frames]}}}
         for sequence, fullPaths in allFilenames.items():
@@ -3116,10 +3122,10 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)       
-        # ----------------------
-        # 7000 monster old, B000  
-        # ----------------------
-        if (selectedType == '7000 monster old' or selectedType == 'B000'):
+        # ----------------------------
+        # 7000 monster old, B000, C000  
+        # ----------------------------
+        if (selectedType == '7000 monster old' or selectedType == 'B000' or selectedType == 'C000'):
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
             
@@ -3130,6 +3136,9 @@ class IEAS_OT_IniFiles(Operator):
             elif(selectedType == 'B000'):
                 sequences       = IEAS_Data.retrieveSequencesTypeB000()
                 animationOrder  = { 'G1':["SC","SD","GH","DE","TW"]}
+            elif(selectedType == 'C000'):
+                sequences       = IEAS_Data.retrieveSequencesTypeC000()
+                animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW"]}
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -3157,12 +3166,12 @@ class IEAS_OT_IniFiles(Operator):
                         mode                            = 'a'
                         
                     # First INI files.    
-                    positionTracker[sequence], cycles  = self.writeFramesType7000_monster_old_B000( mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
-                                                                                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                                    orientations, orientationsEast, cycles, sequence, sequenceKey, 
-                                                                                                    animation, filenamePrefix, currentPosition = position)
+                    positionTracker[sequence], cycles  = self.writeFrames_withEastSequences( mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
+                                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                            orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                            animation, filenamePrefix, currentPosition = position)
             # ----- [CYCLES]      
-            self.writeCyclesType7000_monster_old_B000(allFilenames, cycles, orientations, orientationsEast, animationOrder)
+            self.writeCycles_withEastSequences(allFilenames, cycles, orientations, orientationsEast, animationOrder)
             # ----- [FILTERS]
             # Restructures for compatibility reasons.
             restructeredFilenames = {seq: list(sides.values()) for seq, sides in allFilenames.items()}
@@ -3788,10 +3797,10 @@ class IEAS_OT_Final(Operator):
                         frameEnd        = bpy.context.scene.frame_end
                         Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
                         
-                        # Checks if every x frame is not too high. 
-                        if(Every_X_Frame > frameEnd):
-                            self.report({'ERROR'}, f"ERROR: Every x frame is with value '{Every_X_Frame}' too high. Fram end is '{frameEnd}'.")
-                            return {'CANCELLED'}
+                        # # Checks if every x frame is not too high. 
+                        # if(Every_X_Frame > frameEnd):
+                            # self.report({'ERROR'}, f"ERROR: Every x frame is with value '{Every_X_Frame}' too high. Fram end is '{frameEnd}'.")
+                            # return {'CANCELLED'}
                         # Negative frame start might be allowed in blender, but not in IE AutoSpriter.
                         if(frameStart <= 0):
                             self.report({'ERROR'}, f"ERROR: Frame start is set as '{frameStart}'. IE AutoSpriter does not support zero or negative frame numbers.")
