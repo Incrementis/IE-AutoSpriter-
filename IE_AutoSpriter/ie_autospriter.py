@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 44),
+    "version": (0, 37, 45),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2874,6 +2874,55 @@ class IEAS_OT_IniFiles(Operator):
                                 file.write(f"{cyclePosition}=\n")
                         
                             cyclePosition += 1
+
+    @classmethod
+    def writeFramesType4000(cls, mode, allFrames,fullPath, pathSaveAt, 
+                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                            orientations, cycles, animationKey, animationFolder, filenamePrefix, currentPosition):
+        """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
+        position = currentPosition
+        with open(fullPath, mode) as file:
+            # Content when INI is first time generated.
+            if (mode == 'w'):
+                file.write(globalContent+"\n")
+                file.write("[Frames]\n")
+            # Like south, north, etc.
+            for orientation in orientations:
+                cycles[animationKey].setdefault(orientation,[])
+                # Writes to the file only if the model orientation is checked by the user.
+                if(cameraPosToggles[orientation]):
+                    orientationFolder = cameraPosFolderNames[orientation]                                                   
+                    # Writes all selected frames to the INI file.
+                    for frame in allFrames:
+                        cycles[animationKey][orientation].append(str(position))
+                        pngFile         = f"{filenamePrefix}{animationKey}_{orientation}_{str(frame).zfill(5)}.png"
+                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animationFolder,orientationFolder,pngFile)
+                        file.write(f"{position}={fullFramePath}:0\n")
+                        position += 1
+                else:
+                    # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
+                    cycles[animationKey][orientation] = []
+                        
+        return (position, cycles)                 
+
+    @classmethod
+    def writeCyclesType4000(cls, fullPath, cycles, orientations, animationOrder):                  
+        """Writes the cycles section of the INI file with fixed animation order."""
+        cyclePosition = 0
+        with open(fullPath, 'a') as file:
+            file.write("\n[Cycles]\n")
+            for animationType in animationOrder:
+                for orientation in orientations:
+                    if(cycles.get(animationType)):
+                        if ((orientation in cycles[animationType]) and (cycles[animationType][orientation])):
+                            frames = ",".join(cycles[animationType][orientation])
+                            file.write(f"{cyclePosition}={frames}\n")
+                        else:
+                            file.write(f"{cyclePosition}=\n")                                 
+                    else:
+                        file.write(f"{cyclePosition}=\n")
+                        
+                    cyclePosition += 1  
     
     @classmethod
     def writeFrames_withEastSequences(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
@@ -3045,6 +3094,15 @@ class IEAS_OT_IniFiles(Operator):
                                         'west',         'west_north_west',
                                         'north_west',   'north_north_west',
                                         'north',]
+        # The list order matters! The position of the orientations within the list are as in iesdp.
+        orientations16D             = [ 'south',        'south_south_west',   
+                                        'south_west',   'west_south_west',   
+                                        'west',         'west_north_west',      
+                                        'north_west',   'north_north_west',  
+                                        'north',        'north_north_east',   
+                                        'north_east',   'east_north_east',   
+                                        'east',         'east_south_east',
+                                        'south_east',   'south_south_east']
         # Near Infinity filters that are written to every INI file.
         NIfilters                   = (   "\n[Filters]\n"
                                           "name_0=Center BAM frames\n"
@@ -3062,7 +3120,7 @@ class IEAS_OT_IniFiles(Operator):
         # UI element values.
         pathSaveAt                  = bpy.path.abspath(context.scene.IEAS_properties.Save_at)  
         filenamePrefix              = context.scene.IEAS_properties.Prefix + context.scene.IEAS_properties.Resref
-        selectedType                = context.scene.IEAS_properties.Type       
+        selectedType                = context.scene.IEAS_properties.Type
         Every_X_Frame               = context.scene.IEAS_properties.Every_X_Frame
         # Init empty Variables.
         foundSequences              = set()
@@ -3072,7 +3130,6 @@ class IEAS_OT_IniFiles(Operator):
         cycles                      = {}
         allFilenames                = {}
         
-        print(selectedType)
         # -----------
         # 0000 effect
         # -----------
@@ -3121,7 +3178,43 @@ class IEAS_OT_IniFiles(Operator):
             animationOrder  = { f'{animationFolderNames["Effect"]}': ["MAIN", "LOWER"]}
             self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
-            self.writeFilters(allFilenames, NIfilters)       
+            self.writeFilters(allFilenames, NIfilters)
+        # -----------
+        # 4000 effect
+        # -----------
+        if (selectedType == '4000'):
+            orientations        = orientations16D
+            position            = 0
+            fullPath            = os.path.join(pathSaveAt, filenamePrefix + ".INI")
+            # There is only one BAM; therefore, only one INI is required.
+            allFilenames['4000']= [fullPath]
+            
+            # ----- [FRAMES]
+            for animationKey, animationActive in animationToggles.items():
+                if(animationActive == True):
+                    animationFolder     = animationFolderNames[animationKey]
+                    frameStart          = int(bpy.data.actions.get(animationFolder).frame_range[0])
+                    frameEnd            = int(bpy.data.actions.get(animationFolder).frame_range[1])
+                    # Calculates neccessary frame numbers.
+                    allFrames           = list(range(frameStart, frameEnd + 1, Every_X_Frame))
+                    cycles[animationKey]= {}
+                    cycles[animationKey]= {}
+                    # Finds write or append mode.
+                    if(position==0):
+                        mode = 'w'
+                    elif(position>0):
+                        mode = 'a'
+                     
+                    position, cycles = self.writeFramesType4000(mode, allFrames, fullPath, pathSaveAt, 
+                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                orientations, cycles, animationKey, animationFolder, 
+                                                                filenamePrefix, position)
+                    
+            # ----- [CYCLES]
+            animationOrder = ["SC", "SD", "GH", "DE", "TW"]
+            self.writeCyclesType4000(fullPath, cycles, orientations, animationOrder)          
+            # ----- [FILTERS]
+            self.writeFilters(allFilenames, NIfilters)
         # ----------------------------
         # 7000 monster old, B000, C000  
         # ----------------------------
@@ -3797,6 +3890,7 @@ class IEAS_OT_Final(Operator):
                         frameEnd        = bpy.context.scene.frame_end
                         Every_X_Frame   = context.scene.IEAS_properties.Every_X_Frame
                         
+                        # TODO: Delte commented sanity check
                         # # Checks if every x frame is not too high. 
                         # if(Every_X_Frame > frameEnd):
                             # self.report({'ERROR'}, f"ERROR: Every x frame is with value '{Every_X_Frame}' too high. Fram end is '{frameEnd}'.")
@@ -3807,6 +3901,7 @@ class IEAS_OT_Final(Operator):
                             return {'CANCELLED'}
 
                         # ----- Calculates neccessary frame numbers.
+                        # TODO: Delete commented code.
                         # numberOfFrames  = math.floor(frameEnd/Every_X_Frame)
                         # AllFrames       = []
                         # for frame in range(1,numberOfFrames+1):      
