@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 46),
+    "version": (0, 37, 47),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2876,9 +2876,9 @@ class IEAS_OT_IniFiles(Operator):
                             cyclePosition += 1
 
     @classmethod
-    def writeFramesType4000(cls, mode, allFrames,fullPath, pathSaveAt, 
-                            globalContent, cameraPosToggles, cameraPosFolderNames, 
-                            orientations, cycles, animationKey, animationFolder, filenamePrefix, currentPosition):
+    def writeFrames_withNoSequences(cls, mode, allFrames,fullPath, pathSaveAt, 
+                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                    orientations, cycles, animationKey, animationFolder, filenamePrefix, currentPosition):
         """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
         position = currentPosition
         with open(fullPath, mode) as file:
@@ -2906,7 +2906,7 @@ class IEAS_OT_IniFiles(Operator):
         return (position, cycles)                 
 
     @classmethod
-    def writeCyclesType4000(cls, fullPath, cycles, orientations, animationOrder):                  
+    def writeCycles_withNoSequences(cls, fullPath, cycles, orientations, animationOrder):                  
         """Writes the cycles section of the INI file with fixed animation order."""
         cyclePosition = 0
         with open(fullPath, 'a') as file:
@@ -3211,14 +3211,13 @@ class IEAS_OT_IniFiles(Operator):
                     elif(position>0):
                         mode = 'a'
                      
-                    position, cycles = self.writeFramesType4000(mode, allFrames, fullPath, pathSaveAt, 
-                                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                orientations, cycles, animationKey, animationFolder, 
-                                                                filenamePrefix, position)
+                    position, cycles = self.writeFrames_withNoSequences(mode, allFrames, fullPath, pathSaveAt, 
+                                                                        globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                        orientations, cycles, animationKey, animationFolder, 
+                                                                        filenamePrefix, position)
                     
-            # ----- [CYCLES]
-            
-            self.writeCyclesType4000(fullPath, cycles, orientations, animationOrder)          
+            # ----- [CYCLES]           
+            self.writeCycles_withNoSequences(fullPath, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
         # ----------------------------
