@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 45),
+    "version": (0, 37, 46),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -3179,11 +3179,17 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
-        # -----------
-        # 4000 effect
-        # -----------
-        if (selectedType == '4000'):
-            orientations        = orientations16D
+        # ------------------------
+        # 4000 effect, D000 flying
+        # ------------------------
+        if (selectedType == '4000' or selectedType == 'D000'):
+            if(selectedType == '4000'):
+                orientations    = orientations16D
+                animationOrder  = ["SC", "SD", "GH", "DE", "TW"]
+            elif(selectedType == 'D000'):
+                orientations    = orientations9D
+                animationOrder  = ["SD", "WK"]
+                
             position            = 0
             fullPath            = os.path.join(pathSaveAt, filenamePrefix + ".INI")
             # There is only one BAM; therefore, only one INI is required.
@@ -3211,7 +3217,7 @@ class IEAS_OT_IniFiles(Operator):
                                                                 filenamePrefix, position)
                     
             # ----- [CYCLES]
-            animationOrder = ["SC", "SD", "GH", "DE", "TW"]
+            
             self.writeCyclesType4000(fullPath, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
