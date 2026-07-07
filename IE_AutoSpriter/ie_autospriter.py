@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 47),
+    "version": (0, 37, 58),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -180,6 +180,7 @@ class IEAS_Data:
             'HB': context.scene.IEAS_properties.Halberd,             'QS': context.scene.IEAS_properties.Quarterstaff,
             'Q2': context.scene.IEAS_properties.Quarterstaff1,       'Q3': context.scene.IEAS_properties.Quarterstaff2,
             'Q4': context.scene.IEAS_properties.Quarterstaff3,       'GS': context.scene.IEAS_properties.Glowing_Staff,          
+            '1H': context.scene.IEAS_properties.One_Handed,          '2H': context.scene.IEAS_properties.Two_Handed,          
         }
         return animationWeaponFolderNames
     
@@ -284,8 +285,18 @@ class IEAS_Data:
             'HB': context.scene.IEAS_properties.Use_HB,         'QS': context.scene.IEAS_properties.Use_QS,
             'Q2': context.scene.IEAS_properties.Use_Q2,         'Q3': context.scene.IEAS_properties.Use_Q3,
             'Q4': context.scene.IEAS_properties.Use_Q4,         'GS': context.scene.IEAS_properties.Use_GS,
+            '1H': context.scene.IEAS_properties.Use_1H,         '2H': context.scene.IEAS_properties.Use_2H,
         }
         return animationWeaponToggles
+        
+    @staticmethod
+    def retrieveSequencesType2000():
+        """Dictionary wrapper animation type 2000 - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesType2000 = {
+            'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+            'A1':'G2', 'A2':'G2', 'A3':'G2',
+        }
+        return sequencesType2000
         
     @staticmethod
     def retrieveSequencesType7000_monster_old():
@@ -625,12 +636,12 @@ class IEAS_AnimationTypes():
             }
             
             # --- Debugging: TODO - Delete all following prints
-#            print(f"rowsA: {rowsA.start} to {rowsA.stop}")
-#            print(f"rowsB: {rowsB.start} to {rowsB.stop}")
-#            print(f"rowsC: {rowsC.start} to {rowsC.stop}")
-#            print(f"columnsA: {columnsA.start} to {columnsA.stop}")
-#            print(f"columnsB: {columnsB.start} to {columnsB.stop}")
-#            print(f"columnsC: {columnsC.start} to {columnsC.stop}")
+           # print(f"rowsA: {rowsA.start} to {rowsA.stop}")
+           # print(f"rowsB: {rowsB.start} to {rowsB.stop}")
+           # print(f"rowsC: {rowsC.start} to {rowsC.stop}")
+           # print(f"columnsA: {columnsA.start} to {columnsA.stop}")
+           # print(f"columnsB: {columnsB.start} to {columnsB.stop}")
+           # print(f"columnsC: {columnsC.start} to {columnsC.stop}")
             
             # This tells Blender where to save the next (temporary) rendered image.
             temp_folder = os.path.join(typeParameters.position_folder, "temp")
@@ -898,10 +909,7 @@ class IEAS_AnimationTypes():
             print("type2000: Executing 'exclude' logic for 2000 type.")
         else:
             # Used to identify which sprite file is defined for which sequence.
-            sequences = {
-                'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
-                'A1':'G2', 'A2':'G2', 'A3':'G2', 'SP':'G2', 'CA':'G2',
-            }
+            sequences = IEAS_Data.retrieveSequencesType2000()
             animationSequence = sequences[typeParameters.animationKey]    # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
@@ -963,9 +971,9 @@ class IEAS_AnimationTypes():
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
                     if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                         
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
@@ -2292,7 +2300,8 @@ class IEAS_PGT_Inputs(PropertyGroup):
             'Use_F1', 'Use_F3', 'Use_HB', 'Use_SR', 'Use_MC',
             'Use_M2', 'Use_F2', 'Use_FS', 'Use_S0', 'Use_S1',
             'Use_S2', 'Use_S3', 'Use_ST', 'Use_MS', 'Use_WH',
-            'Use_QS', 'Use_Q2', 'Use_Q3', 'Use_Q4', 'Use_GS',                        
+            'Use_QS', 'Use_Q2', 'Use_Q3', 'Use_Q4', 'Use_GS',
+            'Use_1H', 'Use_2H'
         ]
         armorToggles = [
             'Use_ARMOR1', 'Use_ARMOR2', 'Use_ARMOR3', 'Use_ARMOR4',
@@ -2587,6 +2596,8 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Quarterstaff2:      bpy.props.StringProperty(name="Subfolder Q3",   default="quarterstaff(root like hilt)", description="This refers to the Blender collection for quarterstaff(alternet 2) animation. It also defines the name of the subfolder for the quarterstaff(alternet 2) animation")
     Quarterstaff3:      bpy.props.StringProperty(name="Subfolder Q4",   default="quarterstaff(heavily crooked)",description="This refers to the Blender collection for quarterstaff(alternet 3) animation. It also defines the name of the subfolder for the quarterstaff(alternet 3) animation")
     Glowing_Staff:      bpy.props.StringProperty(name="Subfolder GS",   default="glowing staff",                description="This refers to the Blender collection for glowing staff animation. It also defines the name of the subfolder for the glowing staff animation")
+    One_Handed:         bpy.props.StringProperty(name="Subfolder 1H",   default="one-handed weapon",            description="This refers to the Blender collection for one-handed weapon animation. It also defines the name of the subfolder for the one handed weapon animation")
+    Two_Handed:         bpy.props.StringProperty(name="Subfolder 2H",   default="two-handed weapon",            description="This refers to the Blender collection for two-handed weapon animation. It also defines the name of the subfolder for the two handed weapon animation")
     # String properties for various armor collection names(used for e.g. Typ 5000/6000).
     Armor1:             bpy.props.StringProperty(name="Subfolder ARMOR1", default="no_armor",   description="This refers to the Blender collection for Armor1 animation. It also defines the name of the subfolder for the Armor1(no armor) animation")
     Armor2:             bpy.props.StringProperty(name="Subfolder ARMOR2", default="leather",    description="This refers to the Blender collection for Armor2 animation. It also defines the name of the subfolder for the Armor2(e.g. leather armor) animation")
@@ -2673,6 +2684,8 @@ class IEAS_PGT_Inputs(PropertyGroup):
     Use_Q3: bpy.props.BoolProperty(name="Use Q3", default=False, description="This determines whether sprites for the Quarterstaff(alternate 2) animation are rendered and saved in the corresponding folder")
     Use_Q4: bpy.props.BoolProperty(name="Use Q4", default=False, description="This determines whether sprites for the Quarterstaff(alternate 3) animation are rendered and saved in the corresponding folder")
     Use_GS: bpy.props.BoolProperty(name="Use GS", default=False, description="This determines whether sprites for the Glowing Staff animation are rendered and saved in the corresponding folder")
+    Use_1H: bpy.props.BoolProperty(name="Use 1H", default=False, description="This determines whether sprites for the one-handed weapon animation are rendered and saved in the corresponding folder")
+    Use_2H: bpy.props.BoolProperty(name="Use 2H", default=False, description="This determines whether sprites for the two-handed weapon animation are rendered and saved in the corresponding folder")
     # Boolean toggles for rendering each animation for PST.
     Use_AT1:        bpy.props.BoolProperty(name="Use AT1",      default=False, description="This determines whether sprites for the PST Attack1 animation are rendered and saved in the corresponding folder")
     Use_AT2:        bpy.props.BoolProperty(name="Use AT2",      default=False, description="This determines whether sprites for the PST Attack2 animation are rendered and saved in the corresponding folder")
@@ -2923,6 +2936,96 @@ class IEAS_OT_IniFiles(Operator):
                         file.write(f"{cyclePosition}=\n")
                         
                     cyclePosition += 1  
+    
+    @classmethod
+    def writeFrames_withWeaponEastSequences(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
+                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                            orientations,orientationsEast, cycles, sequence, sequenceKey, 
+                                            animation, filenamePrefix, currentPosition, weapon="", weaponKey=None):
+        """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
+        fullPath        = {'Westside': fullPathWest, 'Eastside': fullPathEast}
+        positionWest    = currentPosition['Westside']
+        positionEast    = currentPosition['Eastside']
+        for pathKey, path in fullPath.items():
+            with open(path, mode) as file:
+                # Content when INI is first time generated.
+                if (mode == 'w'):
+                    file.write(globalContent+"\n")
+                    file.write("[Frames]\n")
+                # Like south, north, etc.
+                for orientation in orientations:
+                    cycles[sequence][sequenceKey].setdefault(orientation,[])
+                    # Writes to the file only if the model orientation is checked by the user.
+                    if(cameraPosToggles[orientation]):
+                        orientationFolder = cameraPosFolderNames[orientation]                                                   
+                        # Writes all selected frames to the INI file.
+                        for frame in allFrames:
+                            if(pathKey=="Westside"):
+                                if(orientation in orientationsEast):
+                                    cycles[sequence][sequenceKey][orientation].append('')
+                                else:
+                                    if (weapon != ""):
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{weaponKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
+                                    else:
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                                        cycles[sequence][sequenceKey][orientation].append(str(positionWest))
+                                        
+                                    file.write(f"{positionWest}={fullFramePath}:0\n")
+                                    positionWest += 1
+                                    
+                            if(pathKey=="Eastside"):
+                                if(orientation in orientationsEast):                             
+                                    if (weapon != ""):
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{weaponKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
+                                    else:                                     
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                                        cycles[sequence][sequenceKey][orientation].append(str(positionEast))
+                                        
+                                    file.write(f"{positionEast}={fullFramePath}:0\n")
+                                    positionEast += 1
+                    else:
+                        # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
+                        cycles[sequence][sequenceKey][orientation] = []
+                        
+        position = {'Westside': positionWest, 'Eastside': positionEast}
+        return (position, cycles)
+    
+    @classmethod
+    def writeCycles_withWeaponEastSequences(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
+        """Writes the cycles section of the INI file with fixed animation order."""
+        # allFilenames{sequence:{orientationKey:[filepaths]}}
+        for sequence, orientationKeys in allFilenames.items():
+            currentOrder = animationOrder[sequence]
+            for orientationKey, fullPaths in orientationKeys.items():
+                for fullPath in fullPaths:
+                    cyclePosition = 0
+                    with open(fullPath, 'a') as file:
+                        file.write("\n[Cycles]\n")
+                        for animationType in currentOrder:
+                            for orientation in orientations:
+                                # Asks predefined conditions to prevent to many cascading if statements. 
+                                IsWestside = ((orientationKey == 'Westside') and (orientation not in orientationsEast) and cycles[sequence].get(animationType))
+                                IsEastside = ((orientationKey == 'Eastside') and (orientation in orientationsEast)     and cycles[sequence].get(animationType))
+                                if(IsWestside):
+                                    if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                        frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                        file.write(f"{cyclePosition}={frames}\n")
+                                    else:
+                                        file.write(f"{cyclePosition}=\n")
+                                elif(IsEastside):
+                                    if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                        frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                        file.write(f"{cyclePosition}={frames}\n")
+                                    else:
+                                        file.write(f"{cyclePosition}=\n")           
+                                else:
+                                    file.write(f"{cyclePosition}=\n")
+                                    
+                                cyclePosition += 1  
     
     @classmethod
     def writeFrames_withEastSequences(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
@@ -3179,6 +3282,72 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
+        # --------------------------
+        # 2000 monster layered spell
+        # --------------------------
+        if (selectedType == '2000'):
+            orientations    = orientations8D
+            orientationsEast= ['north_east', 'east', 'south_east']
+            
+            if(selectedType == '2000'):
+               sequences        = IEAS_Data.retrieveSequencesType2000()
+               animationOrder  = { 'G1':["WK","SD","SC","GH","DE","TW",],
+                                   'G2':["A1","A2","A3"]}
+            # ----- [FRAMES]
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    filenameSequence                = filenamePrefix + sequence
+                    fullPathWest                    = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                    fullPathEast                    = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")
+                    animation                       = animationFolderNames[sequenceKey]
+                    frameStart                      = int(bpy.data.actions.get(animation).frame_range[0])
+                    frameEnd                        = int(bpy.data.actions.get(animation).frame_range[1])
+                    # Calculates neccessary frame numbers.
+                    allFrames                       = list(range(frameStart, frameEnd + 1, Every_X_Frame))
+                    # Prevents the need of if statments.
+                    cycles.setdefault(sequence,{})
+                    cycles[sequence].setdefault(sequenceKey,{})
+
+                    if(sequence not in foundSequences):
+                        allFilenames[sequence]          = {'Westside':[fullPathWest], 'Eastside':[fullPathEast]}
+                        positionTracker[sequence]       = {'Westside': 0, 'Eastside': 0}
+                        position                        = positionTracker[sequence]
+                        mode                            = 'w'                        
+                    else:
+                        position                        = positionTracker[sequence]
+                        mode                            = 'a'
+                    # No weapon overlay INI files.    
+                    positionTracker[sequence], cycles  = self.writeFrames_withWeaponEastSequences(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
+                                                                                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                    orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                                    animation, filenamePrefix, currentPosition = position)
+                    # Weapon overlay ini files
+                    for weaponKey, weaponAnimation in animationWeaponToggles.items():             
+                        if(weaponAnimation == True):                            
+                            filename        = filenamePrefix + weaponKey + sequence
+                            fullPathWest    = os.path.join(pathSaveAt, filename + ".INI")
+                            fullPathEast    = os.path.join(pathSaveAt, filename + "E" + ".INI")
+                            weapon          = animationWeaponFolderNames[weaponKey]
+                            if(sequence not in foundSequences):
+                                allFilenames[sequence]['Westside'].append(fullPathWest)     
+                                allFilenames[sequence]['Eastside'].append(fullPathEast)
+                                
+                            positionTracker[sequence], cycles  = self.writeFrames_withWeaponEastSequences(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
+                                                                                                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                                            orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                                            animation, filenamePrefix, currentPosition = position,
+                                                                                                            weapon=weapon, weaponKey=weaponKey)
+                    # E.g. animation in sequence G1 is used.
+                    if(sequence not in foundSequences):
+                        foundSequences.add(sequence)
+            # ----- [CYCLES]
+            self.writeCycles_withWeaponEastSequences(allFilenames, cycles, orientations, orientationsEast, animationOrder)
+            # ----- [FILTERS]
+            # Restructures for compatibility reasons.
+            restructeredFilenames = {seq: [path for paths in sides.values() for path in paths] for seq, sides in allFilenames.items()}
+            self.writeFilters(restructeredFilenames, NIfilters)
+        
+        
         # ------------------------
         # 4000 effect, D000 flying
         # ------------------------
@@ -3220,10 +3389,11 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCycles_withNoSequences(fullPath, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
-        # ----------------------------
-        # 7000 monster old, B000, C000  
-        # ----------------------------
-        if (selectedType == '7000 monster old' or selectedType == 'B000' or selectedType == 'C000'):
+        # ----------------------------------
+        # 7000 monster old B000, C000  
+        # ----------------------------------
+        if (selectedType == '7000 monster old'  or
+            selectedType == 'B000'              or selectedType == 'C000'):
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
             
@@ -3512,7 +3682,6 @@ class IEAS_OT_Final(Operator):
             'D000':                                 IEAS_AnimationTypes().typeD000,
             'E000':                                 IEAS_AnimationTypes().typeE000,
             'F000':                                 IEAS_AnimationTypes().typeF000,
-            'unique identifier':                    False, # TODO: delete 'unique identifier'
         }
         excludedAnimationTypes = [  '5000/6000 character split bams 0', 
                                     '5000/6000 character split bams 1', 
@@ -3650,40 +3819,8 @@ class IEAS_OT_Final(Operator):
             'MISC17':   context.scene.IEAS_properties.Use_MISC17,   'MISC18': context.scene.IEAS_properties.Use_MISC18,
             'MISC19':   context.scene.IEAS_properties.Use_MISC19,   'MISC20': context.scene.IEAS_properties.Use_MISC20
         }
-        animationWeaponFolderNames = {
-            'AX': context.scene.IEAS_properties.Axe,                 'SR': context.scene.IEAS_properties.Spear,
-            'BS': context.scene.IEAS_properties.Shortbow,            'MC': context.scene.IEAS_properties.Mace,
-            'BW': context.scene.IEAS_properties.Longbow,             'M2': context.scene.IEAS_properties.Mace1,
-            'CB': context.scene.IEAS_properties.Crossbow,            'F2': context.scene.IEAS_properties.Flaming_Short_Sword,
-            'SI': context.scene.IEAS_properties.Sling,               'FS': context.scene.IEAS_properties.Flaming_Sword,
-            'CL': context.scene.IEAS_properties.Club,                'S0': context.scene.IEAS_properties.Bastardsword,
-            'DD': context.scene.IEAS_properties.Dagger,              'S1': context.scene.IEAS_properties.Longsword,
-            'SS': context.scene.IEAS_properties.Short_Sword,         'S2': context.scene.IEAS_properties.Greatsword,
-            'FL': context.scene.IEAS_properties.Flail,               'S3': context.scene.IEAS_properties.Katana,
-            'F0': context.scene.IEAS_properties.Flail1,              'ST': context.scene.IEAS_properties.Scimitar,
-            'F1': context.scene.IEAS_properties.Flail2,              'MS': context.scene.IEAS_properties.Morning_Star,
-            'F3': context.scene.IEAS_properties.Flail3,              'WH': context.scene.IEAS_properties.Warhammer,
-            'HB': context.scene.IEAS_properties.Halberd,             'QS': context.scene.IEAS_properties.Quarterstaff,
-            'Q2': context.scene.IEAS_properties.Quarterstaff1,       'Q3': context.scene.IEAS_properties.Quarterstaff2,
-            'Q4': context.scene.IEAS_properties.Quarterstaff3,       'GS': context.scene.IEAS_properties.Glowing_Staff,          
-        }
-        animationWeaponToggles = {
-            'AX': context.scene.IEAS_properties.Use_AX,         'SR': context.scene.IEAS_properties.Use_SR,
-            'BS': context.scene.IEAS_properties.Use_BS,         'MC': context.scene.IEAS_properties.Use_MC,
-            'BW': context.scene.IEAS_properties.Use_BW,         'M2': context.scene.IEAS_properties.Use_M2,
-            'CB': context.scene.IEAS_properties.Use_CB,         'F2': context.scene.IEAS_properties.Use_F2,
-            'SI': context.scene.IEAS_properties.Use_SI,         'FS': context.scene.IEAS_properties.Use_FS,
-            'CL': context.scene.IEAS_properties.Use_CL,         'S0': context.scene.IEAS_properties.Use_S0,
-            'DD': context.scene.IEAS_properties.Use_DD,         'S1': context.scene.IEAS_properties.Use_S1,
-            'SS': context.scene.IEAS_properties.Use_SS,         'S2': context.scene.IEAS_properties.Use_S2,
-            'FL': context.scene.IEAS_properties.Use_FL,         'S3': context.scene.IEAS_properties.Use_S3,
-            'F0': context.scene.IEAS_properties.Use_F0,         'ST': context.scene.IEAS_properties.Use_ST,
-            'F1': context.scene.IEAS_properties.Use_F1,         'MS': context.scene.IEAS_properties.Use_MS,
-            'F3': context.scene.IEAS_properties.Use_F3,         'WH': context.scene.IEAS_properties.Use_WH,
-            'HB': context.scene.IEAS_properties.Use_HB,         'QS': context.scene.IEAS_properties.Use_QS,
-            'Q2': context.scene.IEAS_properties.Use_Q2,         'Q3': context.scene.IEAS_properties.Use_Q3,
-            'Q4': context.scene.IEAS_properties.Use_Q4,         'GS': context.scene.IEAS_properties.Use_GS,
-        }
+        animationWeaponFolderNames  = IEAS_Data.retrieveAnimationWeaponFolderNames(context)
+        animationWeaponToggles      = IEAS_Data.retrieveAnimationWeaponToggles(context)
         animationArmorToggles = {
             'ARMOR1': context.scene.IEAS_properties.Use_ARMOR1,   'ARMOR2': context.scene.IEAS_properties.Use_ARMOR2,
             'ARMOR3': context.scene.IEAS_properties.Use_ARMOR3,   'ARMOR4': context.scene.IEAS_properties.Use_ARMOR4,        
@@ -4311,7 +4448,6 @@ class IEAS_PT_Animation(Panel):
             'D000':                                 False,
             'E000':                                 False,
             'F000':                                 False,
-            'unique identifier':                    False,# TODO: Delete unique identifier!
         }
         Toggles0000 = {
             'Effect':   context.scene.IEAS_properties.Use_Effect           
@@ -4364,8 +4500,7 @@ class IEAS_PT_Animation(Panel):
             'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
             'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
             'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
-            'Walk':     context.scene.IEAS_properties.Use_WK, 'Conjure':  context.scene.IEAS_properties.Use_SP,
-            'Cast':     context.scene.IEAS_properties.Use_CA,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles3000_mirror0 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1,       'Death':    context.scene.IEAS_properties.Use_DE,
@@ -4924,7 +5059,6 @@ class IEAS_PT_Collections(Panel):
             'D000':                                 False,
             'E000':                                 False,
             'F000':                                 False,
-            'unique identifier':                    False,# TODO: Delete unique identifier!
         }        
         ToggleWeapons = {
             'Axe':                 context.scene.IEAS_properties.Use_AX, 'Shortbow':     context.scene.IEAS_properties.Use_BS,
@@ -4943,10 +5077,12 @@ class IEAS_PT_Collections(Panel):
             'Quarterstaff1':       context.scene.IEAS_properties.Use_Q2, 'Quarterstaff2':context.scene.IEAS_properties.Use_Q3,
             'Quarterstaff3':       context.scene.IEAS_properties.Use_Q4, 'Glowing_Staff':context.scene.IEAS_properties.Use_GS,
         }
+        ToggleWeapons1H2H = {'One_Handed': context.scene.IEAS_properties.Use_1H, 'Two_Handed': context.scene.IEAS_properties.Use_2H}
         ToggleArmor = {
             'Armor1':   context.scene.IEAS_properties.Use_ARMOR1,  'Armor2':   context.scene.IEAS_properties.Use_ARMOR2,
             'Armor3':   context.scene.IEAS_properties.Use_ARMOR3,  'Armor4':   context.scene.IEAS_properties.Use_ARMOR4,
         }
+        # '<string property name>':'<toggle property name>'
         ToggleNames = {
             'Axe':                 'Use_AX',        'Shortbow':         'Use_BS',
             'Longbow':             'Use_BW',        'Crossbow':         'Use_CB',
@@ -4965,7 +5101,8 @@ class IEAS_PT_Collections(Panel):
             'Quarterstaff3':       'Use_Q4',        'Glowing_Staff':    'Use_GS',
             'Armor1':              'Use_ARMOR1',    'Armor2':           'Use_ARMOR2',
             'Armor3':              'Use_ARMOR3',    'Armor4':           'Use_ARMOR4',
-            'Effect':              'Use_Effect',
+            'Effect':              'Use_Effect',    'One_Handed':       'Use_1H',
+            'Two_Handed':          'Use_2H',
         }
         
         # --- Reset and activate
@@ -4977,9 +5114,21 @@ class IEAS_PT_Collections(Panel):
         animationTypesActive[activeType] = True
             
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
-        if (animationTypesActive['2000']                        or  animationTypesActive['7000 monster split bams 0']   or 
-            animationTypesActive['7000 monster split bams 1']   or  animationTypesActive['8000']                        or
-            animationTypesActive['E000']):
+        if(animationTypesActive['2000']):
+            row = self.layout.row()
+            row.prop(context.scene.IEAS_properties, "Creature")            
+            for weaponKey, toggle in ToggleWeapons1H2H.items():
+                # Splits row into two columns
+                split       = self.layout.split(factor=0.7)
+                row_input   = split.row() # Left/first column  
+                row_toggle  = split.row() # Right/second column 
+                # The text input is on the disabled row
+                row_input.enabled = toggle
+                row_input.prop(context.scene.IEAS_properties, weaponKey)
+                # The toggle is on the enabled row
+                row_toggle.prop(context.scene.IEAS_properties, ToggleNames[weaponKey])
+        elif (  animationTypesActive['7000 monster split bams 0']   or animationTypesActive['7000 monster split bams 1']   or  
+                animationTypesActive['8000']                        or animationTypesActive['E000']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")            
             for weaponKey, toggle in ToggleWeapons.items():
