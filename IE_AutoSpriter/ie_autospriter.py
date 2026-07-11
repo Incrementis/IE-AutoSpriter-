@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 58),
+    "version": (0, 37, 63),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -324,6 +324,15 @@ class IEAS_Data:
             'A1':'G2', 'A2':'G21', 'A3':'G22', 'A4':'G23', 'A5':'G24', 'SP':'G25', 'CA':'G26',
         } 
         return sequencesType7000_monster_sp1
+        
+    @staticmethod
+    def retrieveSequencesType8000():
+        """Dictionary wrapper animation type 8000 - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesType8000 = {
+            'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
+            'A1':'G2', 'A2':'G2', 'A3':'G2',
+        }
+        return sequencesType8000
         
     @staticmethod
     def retrieveSequencesTypeB000():
@@ -1850,7 +1859,8 @@ class IEAS_AnimationTypes():
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                          
+            
+            
             # Sets the scene's render output file path. This tells Blender where to save the next rendered image.                       
             bpy.context.scene.render.filepath = os.path.join(typeParameters.position_folder, fileName)            
             # This is the actual rendering process.
@@ -1904,10 +1914,10 @@ class IEAS_AnimationTypes():
                     # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
                     # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
                     if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                     else:
-                        fileName = f"{typeParameters.prefixResref}{wovl}{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                        
+                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                    
                     # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
                     bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
                     # This is the actual rendering process.
@@ -3279,19 +3289,23 @@ class IEAS_OT_IniFiles(Operator):
             allFilenames[animationParts['MAIN']] = [fullPath]
             # ----- [CYCLES]
             animationOrder  = { f'{animationFolderNames["Effect"]}': ["MAIN", "LOWER"]}
-            self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)          
+            self.writeCyclesType0000(allFilenames, cycles, orientations, animationOrder)
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
-        # --------------------------
-        # 2000 monster layered spell
-        # --------------------------
-        if (selectedType == '2000'):
+        # ------------------------------------------------
+        # 2000 monster layered spell, 8000 monster layered
+        # ------------------------------------------------
+        if (selectedType == '2000' or selectedType == '8000'):
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
             
             if(selectedType == '2000'):
-               sequences        = IEAS_Data.retrieveSequencesType2000()
+               sequences       = IEAS_Data.retrieveSequencesType2000()
                animationOrder  = { 'G1':["WK","SD","SC","GH","DE","TW",],
+                                   'G2':["A1","A2","A3"]}
+            elif(selectedType == '8000'):
+               sequences       = IEAS_Data.retrieveSequencesType8000()
+               animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
                                    'G2':["A1","A2","A3"]}
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
@@ -3390,7 +3404,7 @@ class IEAS_OT_IniFiles(Operator):
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
         # ----------------------------------
-        # 7000 monster old B000, C000  
+        # 7000 monster old, B000, C000  
         # ----------------------------------
         if (selectedType == '7000 monster old'  or
             selectedType == 'B000'              or selectedType == 'C000'):
@@ -4600,11 +4614,10 @@ class IEAS_PT_Animation(Panel):
         }
         Toggles8000 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
-            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Conjure':  context.scene.IEAS_properties.Use_SP,
-            'Cast':     context.scene.IEAS_properties.Use_CA, 'Death':    context.scene.IEAS_properties.Use_DE,
+            'Attack3':  context.scene.IEAS_properties.Use_A3, 'Death':    context.scene.IEAS_properties.Use_DE,
             'Get_Hit':  context.scene.IEAS_properties.Use_GH, 'Ready':    context.scene.IEAS_properties.Use_SC,
             'Idle':     context.scene.IEAS_properties.Use_SD, 'Dead':     context.scene.IEAS_properties.Use_TW,
-            'Walk':     context.scene.IEAS_properties.Use_WK, 
+            'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles9000 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1, 'Attack2':  context.scene.IEAS_properties.Use_A2,
@@ -5114,7 +5127,7 @@ class IEAS_PT_Collections(Panel):
         animationTypesActive[activeType] = True
             
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
-        if(animationTypesActive['2000']):
+        if(animationTypesActive['2000'] or animationTypesActive['8000'] ):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")            
             for weaponKey, toggle in ToggleWeapons1H2H.items():
@@ -5128,7 +5141,7 @@ class IEAS_PT_Collections(Panel):
                 # The toggle is on the enabled row
                 row_toggle.prop(context.scene.IEAS_properties, ToggleNames[weaponKey])
         elif (  animationTypesActive['7000 monster split bams 0']   or animationTypesActive['7000 monster split bams 1']   or  
-                animationTypesActive['8000']                        or animationTypesActive['E000']):
+                animationTypesActive['E000']):
             row = self.layout.row()
             row.prop(context.scene.IEAS_properties, "Creature")            
             for weaponKey, toggle in ToggleWeapons.items():
