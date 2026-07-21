@@ -39,7 +39,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 64),
+    "version": (0, 37, 68),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -333,6 +333,16 @@ class IEAS_Data:
             'A1':'G2', 'A2':'G2', 'A3':'G2',
         }
         return sequencesType8000
+        
+    @staticmethod
+    def retrieveSequencesType9000():
+        """Dictionary wrapper animation type 9000 - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesType9000 = {
+            'SD':'G1', 'SC':'G1', 'WK':'G1',
+            'A1':'G2', 'A2':'G2',
+            'A3':'G3', 'GH':'G3', 'DE':'G3', 'TW':'G3'
+        }
+        return sequencesType9000     
         
     @staticmethod
     def retrieveSequencesTypeB000():
@@ -1959,11 +1969,7 @@ class IEAS_AnimationTypes():
         """Method for handling 9000 type logic."""
         if (typeParameters.exclude == False):
             # Used to identify which sprite file is defined for which sequence
-            sequences = {
-                'SD':'G1', 'SC':'G1', 'WK':'G1',
-                'A1':'G2', 'A2':'G2',
-                'A3':'G3', 'GH':'G3', 'DE':'G3', 'TW':'G3'
-            }
+            sequences = IEAS_Data.retrieveSequencesType9000()
             animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
@@ -2424,7 +2430,17 @@ class IEAS_PGT_Inputs(PropertyGroup):
                                                     name        = "Material List",      # Label for the UI element
                                                     description = "Select the material to be used to apply shading nodes" # Tooltip
                                                  )
-                                                    
+    # Checkbox for the palette remapping
+    Use_Overwrite:     bpy.props.BoolProperty(name="Overwrite",   default=False, description="This determines whether sprites are overwritten with the new color palette.") 
+    # (unique identifier, property name, property description, icon identifier, number)
+    Remapping_Metrics: bpy.props.EnumProperty(
+        items=[
+            ('redmean', 'redmean', 'One of the better low-cost approximations, sometimes called "redmean".', '', 0),
+            ('placeholder', 'none', 'placeholder', '', 1),
+        ],
+        default     = 'redmean',
+        description = "Only one palette remapping process is allowed."
+    )
     # --- Step 3: Camera (Subfolder Names and Toggles for each direction)
     # (unique identifier, property name, property description, icon identifier, number)
     Angles:   bpy.props.EnumProperty(
@@ -2818,7 +2834,7 @@ class IEAS_OT_ShadingNodes(Operator):
 
 
 # --------
-# Purpose: TODO
+# Purpose:
 # --------
 # Operator to handle INI files.
 # -----------------------------
@@ -3404,9 +3420,9 @@ class IEAS_OT_IniFiles(Operator):
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
         # ----------------------------------
-        # 7000 monster old, B000, C000  
+        # 7000 monster old, 9000, B000, C000  
         # ----------------------------------
-        if (selectedType == '7000 monster old'  or
+        if (selectedType == '7000 monster old'  or selectedType == '9000' or
             selectedType == 'B000'              or selectedType == 'C000'):
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
@@ -3415,6 +3431,11 @@ class IEAS_OT_IniFiles(Operator):
                 sequences       = IEAS_Data.retrieveSequencesType7000_monster_old()
                 animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
                                     'G2':["A1","A3","CA"]}
+            elif(selectedType == '9000'):
+                sequences       = IEAS_Data.retrieveSequencesType9000()
+                animationOrder  = { 'G1':["SD","SC","WK"],
+                                    'G2':["A1","A2"],
+                                    'G3':["A3","GH","DE","TW"]}
             elif(selectedType == 'B000'):
                 sequences       = IEAS_Data.retrieveSequencesTypeB000()
                 animationOrder  = { 'G1':["SC","SD","GH","DE","TW"]}
@@ -3654,6 +3675,21 @@ class IEAS_OT_IniFiles(Operator):
             self.writeFilters(weaponFilenames, NIfilters)
             
         return {'FINISHED'}
+
+# --------
+# Purpose:TODO
+# --------
+# Operator to handle palette remapping.
+# -------------------------------------
+class IEAS_OT_PaletteRemapping(Operator):
+    """This class provides a function for remapping the palette in images, which is required for the color swapping offered by certain animation types."""
+    bl_idname   = "ieas.palette_remapping" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    bl_label    = "REMAP" # Text displayed on the button in the UI.
+    
+    # Blender specific function which is executed in this case when REMAP button is pressed 
+    def execute(self, context):
+        pass
+
 
 # --------
 # Purpose:
@@ -4232,7 +4268,7 @@ class IEAS_PT_ShadingNodes(Panel):
 
         
 # --------
-# Purpose: TODO
+# Purpose:
 # --------
 # This panel allows for managing INI files.
 # This is crucial for e.g. pre creating BAM files in Near Infinity, 
@@ -4257,6 +4293,41 @@ class IEAS_PT_IniFiles(Panel):
         col = layout.column()
         # Creates a button that executes the IEAS_OT_IniFiles operator.
         col.operator("ieas.ini_files")
+
+
+
+# --------
+# Purpose:TODO
+# --------
+# This panel allows for managing palette remapping.
+# This is crucial, for instance when pre-creating BAM files in Near Infinity, 
+# since the Infinity Engine supports specific colors for color swapping.
+# -----------------------------------------------------------------
+class IEAS_PT_PaletteManipulations(Panel):
+    """This step defines general settings in regards to INI files."""
+    
+    # --- Blender specific class variables
+    bl_label        = "Palette Manipulations" 
+    bl_idname       = 'IEAS_PT_PaletteManipulations'
+    bl_space_type   = 'VIEW_3D'
+    bl_region_type  = 'UI'
+    bl_category     = "IE AutoSpriter"
+    bl_parent_id    = 'IEAS_PT_QoLOptions'
+    bl_options      = {'DEFAULT_CLOSED'}
+    
+    # --- Blender specific function which places elements into GUI
+    # This method draws the UI elements for Palette Manipulations settings.
+    def draw(self, context):
+        layout = self.layout
+        # Radiobuttons for selecting the color metric
+        row = layout.row(align=True)
+        row.prop(context.scene.IEAS_properties, 'Remapping_Metrics', expand=True)       
+        # Checkbox for overwriting sprites with the new color palette(destructive).
+        row = layout.row()
+        row.prop(context.scene.IEAS_properties,'Use_Overwrite')
+        # Creates a button that executes the IEAS_OT_PaletteRemapping operator.
+        col = layout.column()
+        col.operator("ieas.palette_remapping")
 
         
 # --------
@@ -5218,6 +5289,7 @@ def register():
     bpy.utils.register_class(IEAS_OT_Rotation)
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
     bpy.utils.register_class(IEAS_OT_IniFiles)
+    bpy.utils.register_class(IEAS_OT_PaletteRemapping)
     bpy.utils.register_class(IEAS_OT_Final)
     bpy.utils.register_class(IEAS_PGT_Inputs)
     bpy.utils.register_class(IEAS_PT_Core)
@@ -5225,6 +5297,7 @@ def register():
     bpy.utils.register_class(IEAS_PT_QoLOptions)
     bpy.utils.register_class(IEAS_PT_ShadingNodes)
     bpy.utils.register_class(IEAS_PT_IniFiles)
+    bpy.utils.register_class(IEAS_PT_PaletteManipulations)
     bpy.utils.register_class(IEAS_PT_Camera)
     bpy.utils.register_class(IEAS_PT_Animation)
     bpy.utils.register_class(IEAS_PT_Collections)
@@ -5246,6 +5319,7 @@ def unregister():
     bpy.utils.unregister_class(IEAS_OT_Rotation)
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_OT_IniFiles)
+    bpy.utils.unregister_class(IEAS_OT_PaletteRemapping)
     bpy.utils.unregister_class(IEAS_OT_Final)
     bpy.utils.unregister_class(IEAS_PGT_Inputs)
     bpy.utils.unregister_class(IEAS_PT_Core)
@@ -5253,6 +5327,7 @@ def unregister():
     bpy.utils.unregister_class(IEAS_PT_QoLOptions)
     bpy.utils.unregister_class(IEAS_PT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_PT_IniFiles)
+    bpy.utils.unregister_class(IEAS_PT_PaletteManipulations)
     bpy.utils.unregister_class(IEAS_PT_Camera)
     bpy.utils.unregister_class(IEAS_PT_Animation)
     bpy.utils.unregister_class(IEAS_PT_Collections)
