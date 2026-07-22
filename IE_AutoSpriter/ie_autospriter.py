@@ -30,7 +30,6 @@ import time
 import webbrowser
 import numpy as np
 
-
 # --------
 # Purpose:
 # --------
@@ -39,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 68),
+    "version": (0, 37, 69),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -82,30 +81,30 @@ class IEAS_Data:
     def retrieveAnimationTypeHandlers():
         """List wrapper function - returns method references of IEAS_AnimationTypes."""
         animationTypeHandlers = {
-                '0000':                                 IEAS_AnimationTypes().type0000,
-                '1000 monster quadrant':                IEAS_AnimationTypes().type1000_monster_quadrant,
-                '1000 monster multi split bams 0':      IEAS_AnimationTypes().type1000_monster_multi_sp0,
-                '1000 monster multi split bams 1':      IEAS_AnimationTypes().type1000_monster_multi_sp1,
-                '1000 multi new split bams 0':          IEAS_AnimationTypes().type1000_multi_new_sp0,
-                '1000 multi new split bams 1':          IEAS_AnimationTypes().type1000_multi_new_sp1,
-                '2000':                                 IEAS_AnimationTypes().type2000,
-                '3000 mirror 0':                        IEAS_AnimationTypes().type3000_mirror0,
-                '3000 mirror 1':                        IEAS_AnimationTypes().type3000_mirror1,
-                '4000':                                 IEAS_AnimationTypes().type4000,
-                '5000/6000 character split bams 0':     IEAS_AnimationTypes().type5000and6000_character_sp0,
-                '5000/6000 character split bams 1':     IEAS_AnimationTypes().type5000and6000_character_sp1,
-                '5000/6000 character old':              IEAS_AnimationTypes().type5000and6000_character_old,
-                '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
-                '7000 monster split bams 1':            IEAS_AnimationTypes().type7000_monster_sp1,
-                '7000 monster old':                     IEAS_AnimationTypes().type7000_monster_old,
-                '8000':                                 IEAS_AnimationTypes().type8000,
-                '9000':                                 IEAS_AnimationTypes().type9000,
-                'A000':                                 IEAS_AnimationTypes().typeA000,
-                'B000':                                 IEAS_AnimationTypes().typeB000,
-                'C000':                                 IEAS_AnimationTypes().typeC000,
-                'D000':                                 IEAS_AnimationTypes().typeD000,
-                'E000':                                 IEAS_AnimationTypes().typeE000,
-                'F000':                                 IEAS_AnimationTypes().typeF000,
+            '0000':                                 IEAS_AnimationTypes().type0000,
+            '1000 monster quadrant':                IEAS_AnimationTypes().type1000_monster_quadrant,
+            '1000 monster multi split bams 0':      IEAS_AnimationTypes().type1000_monster_multi_sp0,
+            '1000 monster multi split bams 1':      IEAS_AnimationTypes().type1000_monster_multi_sp1,
+            '1000 multi new split bams 0':          IEAS_AnimationTypes().type1000_multi_new_sp0,
+            '1000 multi new split bams 1':          IEAS_AnimationTypes().type1000_multi_new_sp1,
+            '2000':                                 IEAS_AnimationTypes().type2000,
+            '3000 mirror 0':                        IEAS_AnimationTypes().type3000_mirror0,
+            '3000 mirror 1':                        IEAS_AnimationTypes().type3000_mirror1,
+            '4000':                                 IEAS_AnimationTypes().type4000,
+            '5000/6000 character split bams 0':     IEAS_AnimationTypes().type5000and6000_character_sp0,
+            '5000/6000 character split bams 1':     IEAS_AnimationTypes().type5000and6000_character_sp1,
+            '5000/6000 character old':              IEAS_AnimationTypes().type5000and6000_character_old,
+            '7000 monster split bams 0':            IEAS_AnimationTypes().type7000_monster_sp0,
+            '7000 monster split bams 1':            IEAS_AnimationTypes().type7000_monster_sp1,
+            '7000 monster old':                     IEAS_AnimationTypes().type7000_monster_old,
+            '8000':                                 IEAS_AnimationTypes().type8000,
+            '9000':                                 IEAS_AnimationTypes().type9000,
+            'A000':                                 IEAS_AnimationTypes().typeA000,
+            'B000':                                 IEAS_AnimationTypes().typeB000,
+            'C000':                                 IEAS_AnimationTypes().typeC000,
+            'D000':                                 IEAS_AnimationTypes().typeD000,
+            'E000':                                 IEAS_AnimationTypes().typeE000,
+            'F000':                                 IEAS_AnimationTypes().typeF000,
         }           
         return animationTypeHandlers
  
@@ -188,14 +187,14 @@ class IEAS_Data:
     def retrieveCameraPosFolderNames(context):
         """Dictionary wrapper function - mapping internal keys to user-defined orientation names."""
         cameraPosFolderNames = {
-                'south':        context.scene.IEAS_properties.South,        'south_south_west': context.scene.IEAS_properties.South_South_West,
-                'south_west':   context.scene.IEAS_properties.South_West,   'west_south_west':  context.scene.IEAS_properties.West_South_West,
-                'west':         context.scene.IEAS_properties.West,         'west_north_west':  context.scene.IEAS_properties.West_North_West,
-                'north_west':   context.scene.IEAS_properties.North_West,   'north_north_west': context.scene.IEAS_properties.North_North_West,
-                'north':        context.scene.IEAS_properties.North,        'north_north_east': context.scene.IEAS_properties.North_North_East,
-                'north_east':   context.scene.IEAS_properties.North_East,   'east_north_east':  context.scene.IEAS_properties.East_North_East,
-                'east':         context.scene.IEAS_properties.East,         'east_south_east':  context.scene.IEAS_properties.East_South_East,
-                'south_east':   context.scene.IEAS_properties.South_East,   'south_south_east': context.scene.IEAS_properties.South_South_East
+            'south':        context.scene.IEAS_properties.South,        'south_south_west': context.scene.IEAS_properties.South_South_West,
+            'south_west':   context.scene.IEAS_properties.South_West,   'west_south_west':  context.scene.IEAS_properties.West_South_West,
+            'west':         context.scene.IEAS_properties.West,         'west_north_west':  context.scene.IEAS_properties.West_North_West,
+            'north_west':   context.scene.IEAS_properties.North_West,   'north_north_west': context.scene.IEAS_properties.North_North_West,
+            'north':        context.scene.IEAS_properties.North,        'north_north_east': context.scene.IEAS_properties.North_North_East,
+            'north_east':   context.scene.IEAS_properties.North_East,   'east_north_east':  context.scene.IEAS_properties.East_North_East,
+            'east':         context.scene.IEAS_properties.East,         'east_south_east':  context.scene.IEAS_properties.East_South_East,
+            'south_east':   context.scene.IEAS_properties.South_East,   'south_south_east': context.scene.IEAS_properties.South_South_East
         }
         return cameraPosFolderNames
 
@@ -255,14 +254,14 @@ class IEAS_Data:
     def retrieveCameraPosToggles(context):
         """Dictionary wrapper function - returns the current values of the orientation toggle check boxes when called."""
         cameraPosToggles = {
-                'south':        context.scene.IEAS_properties.Use_SO, 'south_south_west':   context.scene.IEAS_properties.Use_SSW,
-                'south_west':   context.scene.IEAS_properties.Use_SW, 'west_south_west':    context.scene.IEAS_properties.Use_WSW,
-                'west':         context.scene.IEAS_properties.Use_WE, 'west_north_west':    context.scene.IEAS_properties.Use_WNW,
-                'north_west':   context.scene.IEAS_properties.Use_NW, 'north_north_west':   context.scene.IEAS_properties.Use_NNW,
-                'north':        context.scene.IEAS_properties.Use_NO, 'north_north_east':   context.scene.IEAS_properties.Use_NNE,
-                'north_east':   context.scene.IEAS_properties.Use_NE, 'east_north_east':    context.scene.IEAS_properties.Use_ENE,
-                'east':         context.scene.IEAS_properties.Use_ES, 'east_south_east':    context.scene.IEAS_properties.Use_ESE,
-                'south_east':   context.scene.IEAS_properties.Use_SE, 'south_south_east':   context.scene.IEAS_properties.Use_SSE
+            'south':        context.scene.IEAS_properties.Use_SO, 'south_south_west':   context.scene.IEAS_properties.Use_SSW,
+            'south_west':   context.scene.IEAS_properties.Use_SW, 'west_south_west':    context.scene.IEAS_properties.Use_WSW,
+            'west':         context.scene.IEAS_properties.Use_WE, 'west_north_west':    context.scene.IEAS_properties.Use_WNW,
+            'north_west':   context.scene.IEAS_properties.Use_NW, 'north_north_west':   context.scene.IEAS_properties.Use_NNW,
+            'north':        context.scene.IEAS_properties.Use_NO, 'north_north_east':   context.scene.IEAS_properties.Use_NNE,
+            'north_east':   context.scene.IEAS_properties.Use_NE, 'east_north_east':    context.scene.IEAS_properties.Use_ENE,
+            'east':         context.scene.IEAS_properties.Use_ES, 'east_south_east':    context.scene.IEAS_properties.Use_ESE,
+            'south_east':   context.scene.IEAS_properties.Use_SE, 'south_south_east':   context.scene.IEAS_properties.Use_SSE
         }
         return cameraPosToggles
     
@@ -480,7 +479,7 @@ class IEAS_AnimationTypes():
             channels            = 4
             # Reshapes the 1D pixel array into a 3D array (height, width, channels).
             arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
-            arrPixelsFlipped    = arrPixelsReshaped
+            arrPixelsFlipped    = arrPixelsReshaped # TODO:This variable makes no sense! It is never used. Check and delete why I made it!
             
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
@@ -571,7 +570,7 @@ class IEAS_AnimationTypes():
             channels            = 4
             # Reshapes the 1D pixel array into a 3D array (height, width, channels).
             arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
-            arrPixelsFlipped    = arrPixelsReshaped
+            arrPixelsFlipped    = arrPixelsReshaped # TODO:This variable makes no sense! It is never used. Check and delete why I made it!
                         
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
@@ -783,7 +782,7 @@ class IEAS_AnimationTypes():
             channels            = 4
             # Reshapes the 1D pixel array into a 3D array (height, width, channels).
             arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
-            arrPixelsFlipped    = arrPixelsReshaped
+            arrPixelsFlipped    = arrPixelsReshaped # TODO:This variable makes no sense! It is never used. Check and delete why I made it!
             
             # Processes the pixels for each quadrant and writes them as an image to a specific location.
             for quadrant, coordinate in quadrants.items():                                                          
@@ -3686,9 +3685,67 @@ class IEAS_OT_PaletteRemapping(Operator):
     bl_idname   = "ieas.palette_remapping" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label    = "REMAP" # Text displayed on the button in the UI.
     
+    @classmethod
+    def calculateRedmean(cls, image, newPalette):
+        """TODO"""
+        imageRed        = 0
+        imageGreen      = 0
+        imageBlue       = 0
+        paletteRed      = 0
+        paletteGreen    = 0
+        paletteBlue     = 0
+        deltaRed        = imageRed  - paletteRed#max=255
+        deltaGreen      = imageGreen - paletteGreen#max=255
+        deltaBlue       = imageBlue - paletteBlue#max=255
+        redMean         = 0.5 * (imageRed + paletteRed) #max=127.5
+        weightRed       = (2.0 + redMean/256.0) #~max=2.5
+        weightGreen     = 4.0
+        weightBlue      = (2.0 + (255.0 - redMean)/256.0) #~max=2.5
+        # math.sqrt is not needed, as the computational overhead is unnecessarily high.
+        #deltaColor      =  math.sqrt( (weightRed * deltaRed**2.0) + (weightGreen * deltaGreen**2.0) + (weightBlue * deltaBlue**2.0) )#~max=765
+        deltaColor      =  (weightRed * deltaRed**2.0) + (weightGreen * deltaGreen**2.0) + (weightBlue * deltaBlue**2.0)#~max=765
+        
+        return deltaColor
+        
+    @classmethod    
+    def remapPalette(cls, image, newPalette):
+        """TODO"""
+        # Loads the rendered image from disk and retrieves its pixel data.      
+        #renderedImage       = bpy.data.images.load(bpy.context.scene.render.filepath)                       
+        renderedImage       = bpy.data.images.load(image)                       
+        pixels              = renderedImage.pixels
+        arrPixels           = np.array(pixels)# (flat array, meaning all 4 channels in one list)  
+        channels            = 4
+        width               = renderedImage.size[0]
+        height              = renderedImage.size[1]
+        # Reshapes the 1D pixel array into a 3D array (number of rows * number of columns per row * channels); RGBA.
+        arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
+        
+        # TODO:Delete prints
+        print(f"renderedImage:{renderedImage}")
+        print(f"renderedImage.size-X-Width:{renderedImage.size[0]}")
+        print(f"renderedImage.size-Y-Height:{renderedImage.size[1]}")
+        print(f"pixels:{pixels}")
+        print(f"arrPixels:{arrPixels.shape}")
+        print(f"arrPixelsReshaped:{arrPixelsReshaped.shape}")
+        
+    
     # Blender specific function which is executed in this case when REMAP button is pressed 
     def execute(self, context):
-        pass
+        overwrite   = context.scene.IEAS_properties.Use_Overwrite
+        metrictype  = context.scene.IEAS_properties.Remapping_Metrics
+        # "r" means pure text and no interpretation of special characters. Shouldn't be needed in the final version!
+        imagePath   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south"
+        imageName   = "!_OgreSDG1_south_00001.png"
+        image       = os.path.join(imagePath, imageName)
+        
+        self.remapPalette(image,0)
+        
+        #TODO: Delte prints
+        print(f"overwrite:{overwrite}")
+        print(f"metrictype:{metrictype}")
+                
+        return{'FINISHED'}
 
 
 # --------
