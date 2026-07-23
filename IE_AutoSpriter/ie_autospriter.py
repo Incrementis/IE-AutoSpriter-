@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 69),
+    "version": (0, 37, 70),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -358,7 +358,42 @@ class IEAS_Data:
             'WK':'G1', 'SC':'G1', 'SD':'G1', 'GH':'G1', 'DE':'G1', 'TW':'G1',
         }
         return sequencesTypeC000
-
+        
+    @staticmethod
+    def retrieveColorSwapPalette():
+        """NumPy array with shape (n, 3), where 3 represents the RGB color channels and n is the number of colors."""
+        colorSwapPalette = np.array([[
+            # GREY_RAMP
+            [255, 255, 255], [225, 225, 225], [208, 208, 208], [191, 191, 191],
+            [157, 157, 157], [140, 140, 140], [124, 124, 124], [107, 107, 107],
+            [ 90,  90,  90], [ 73,  73,  73], [ 56,  56,  56], [ 30,  30,  30],
+            # CYAN_RAMP
+            [246, 255, 255], [209, 255, 255], [177, 255, 255], [113, 255, 255],
+            [ 17, 255, 255], [  0, 240, 240], [  0, 209, 209], [  0, 176, 176],
+            [  0, 144, 144], [  0, 112, 112], [  0,  80,  80], [  0,  64,  64],
+            # PINK_RAMP
+            [255, 246, 255], [255, 209, 255], [255, 177, 255], [255, 113, 255],
+            [255,  17, 255], [240,   0, 240], [209,   0, 209], [176,   0, 176],
+            [144,   0, 144], [112,   0, 112], [ 80,   0,  80], [ 64,   0,  64],
+            # YELLOW_RAMP
+            [255, 255, 246], [255, 255, 209], [255, 255, 177], [255, 255, 145],
+            [255, 255,  17], [240, 240,   0], [209, 209,   0], [176, 176,   0],
+            [144, 144,   0], [112, 112,   0], [ 80,  80,   0], [ 64,  64,   0],
+            # RED_RAMP
+            [255, 246, 246], [255, 209, 209], [255, 145, 145], [255, 113, 113],
+            [255,  49,  49], [240,   0,   0], [209,   0,   0], [176,   0,   0],
+            [144,   0,   0], [112,   0,   0], [ 80,   0,   0], [ 64,   0,   0],
+            # BLUE_RAMP
+            [246, 246, 255], [209, 209, 255], [177, 177, 255], [113, 113, 255],
+            [ 17,  17, 255], [  0,   0, 240], [  0,   0, 209], [  0,   0, 176],
+            [  0,   0, 144], [  0,   0, 112], [  0,   0,  80], [  0,   0,  64],
+            # GREEN_RAMP
+            [246, 255, 246], [209, 255, 209], [177, 255, 177], [113, 255, 113],
+            [ 17, 241,  17], [  0, 240,   0], [  0, 209,   0], [  0, 176,   0],
+            [  0, 144,   0], [  0, 112,   0], [  0,  80,   0], [  0,  64,   0],
+            # BLACK_RAMP
+            [  0,   0,   0] ]], dtype=np.uint8)
+        return colorSwapPalette
 
 # --------
 # Purpose:
@@ -3688,12 +3723,13 @@ class IEAS_OT_PaletteRemapping(Operator):
     @classmethod
     def calculateRedmean(cls, image, newPalette):
         """TODO"""
-        imageRed        = 0
-        imageGreen      = 0
-        imageBlue       = 0
-        paletteRed      = 0
-        paletteGreen    = 0
-        paletteBlue     = 0
+        # Alpha channel is not needed.
+        imageRed        = image[:,:,0]
+        imageGreen      = image[:,:,1]
+        imageBlue       = image[:,:,2]
+        paletteRed      = newPalette[:,:,0]
+        paletteGreen    = newPalette[:,:,1]
+        paletteBlue     = newPalette[:,:,2]
         deltaRed        = imageRed  - paletteRed#max=255
         deltaGreen      = imageGreen - paletteGreen#max=255
         deltaBlue       = imageBlue - paletteBlue#max=255
@@ -3719,15 +3755,25 @@ class IEAS_OT_PaletteRemapping(Operator):
         width               = renderedImage.size[0]
         height              = renderedImage.size[1]
         # Reshapes the 1D pixel array into a 3D array (number of rows * number of columns per row * channels); RGBA.
-        arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
+        #arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
+        # This will prodcuce the shape (k,1,4). k is the number of pixels and 1 is placholder axis to make broadcasting possible.
+        # Broadcasting improves computational performance.
+        arrPixelsReshaped   = np.reshape(arrPixels, (height*width,1, channels)).astype(np.float32)
+        palette             = newPalette.astype(np.float32)
+        
+        colorDistances = cls.calculateRedmean(arrPixelsReshaped, palette)
         
         # TODO:Delete prints
         print(f"renderedImage:{renderedImage}")
         print(f"renderedImage.size-X-Width:{renderedImage.size[0]}")
         print(f"renderedImage.size-Y-Height:{renderedImage.size[1]}")
         print(f"pixels:{pixels}")
-        print(f"arrPixels:{arrPixels.shape}")
+        print(f"arrPixel.shapes:{arrPixels.shape}")
         print(f"arrPixelsReshaped:{arrPixelsReshaped.shape}")
+        print(f"palette:{palette}")
+        print(f"palette.shape:{palette.shape}")
+        print(f"palette[:,:,2].shape:{palette[:,:,2].shape}")
+        print(f"colorDistances.shape:{colorDistances.shape}")
         
     
     # Blender specific function which is executed in this case when REMAP button is pressed 
@@ -3738,8 +3784,9 @@ class IEAS_OT_PaletteRemapping(Operator):
         imagePath   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south"
         imageName   = "!_OgreSDG1_south_00001.png"
         image       = os.path.join(imagePath, imageName)
+        newPalette  = IEAS_Data.retrieveColorSwapPalette()
         
-        self.remapPalette(image,0)
+        self.remapPalette(image,newPalette)
         
         #TODO: Delte prints
         print(f"overwrite:{overwrite}")
