@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 70),
+    "version": (0, 37, 71),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -361,7 +361,7 @@ class IEAS_Data:
         
     @staticmethod
     def retrieveColorSwapPalette():
-        """NumPy array with shape (n, 3), where 3 represents the RGB color channels and n is the number of colors."""
+        """NumPy array with shape (1, n, 3), where 3 represents the RGB color channels and n is the number of colors."""
         colorSwapPalette = np.array([[
             # GREY_RAMP
             [255, 255, 255], [225, 225, 225], [208, 208, 208], [191, 191, 191],
@@ -681,11 +681,11 @@ class IEAS_AnimationTypes():
                 'Q7': "7", 'Q8': "8",'Q9': "9",
             }
             directions = {
-            'south':        "00", 'south_south_west': "01",
-            'south_west':   "02", 'west_south_west':  "03",
-            'west':         "04", 'west_north_west':  "05",
-            'north_west':   "06", 'north_north_west': "07",
-            'north':        "08",
+                'south':        "00", 'south_south_west': "01",
+                'south_west':   "02", 'west_south_west':  "03",
+                'west':         "04", 'west_north_west':  "05",
+                'north_west':   "06", 'north_north_west': "07",
+                'north':        "08",
             }
             
             # --- Debugging: TODO - Delete all following prints
@@ -3722,7 +3722,9 @@ class IEAS_OT_PaletteRemapping(Operator):
     
     @classmethod
     def calculateRedmean(cls, image, newPalette):
-        """TODO"""
+        """TODO
+            Args:
+                TODO:explain Parameters"""
         # Alpha channel is not needed.
         imageRed        = image[:,:,0]
         imageGreen      = image[:,:,1]
@@ -3744,13 +3746,15 @@ class IEAS_OT_PaletteRemapping(Operator):
         return deltaColor
         
     @classmethod    
-    def remapPalette(cls, image, newPalette):
-        """TODO"""
+    def remapPalette(cls, fullPath, imageName, saveImageAt, newPalette, metric):
+        """TODO
+            Args:
+                TODO:explain Parameters"""
         # Loads the rendered image from disk and retrieves its pixel data.      
         #renderedImage       = bpy.data.images.load(bpy.context.scene.render.filepath)                       
-        renderedImage       = bpy.data.images.load(image)                       
-        pixels              = renderedImage.pixels
-        arrPixels           = np.array(pixels)# (flat array, meaning all 4 channels in one list)  
+        renderedImage       = bpy.data.images.load(fullPath)                       
+        pixels              = renderedImage.pixels # RGBA values are stored in range 0 - 1
+        arrPixels           = np.array(pixels)*255# (flat array, meaning all 4 channels in one list);  
         channels            = 4
         width               = renderedImage.size[0]
         height              = renderedImage.size[1]
@@ -3761,7 +3765,42 @@ class IEAS_OT_PaletteRemapping(Operator):
         arrPixelsReshaped   = np.reshape(arrPixels, (height*width,1, channels)).astype(np.float32)
         palette             = newPalette.astype(np.float32)
         
-        colorDistances = cls.calculateRedmean(arrPixelsReshaped, palette)
+        if(metric == 'redmean'):
+            colorDistances = cls.calculateRedmean(arrPixelsReshaped, palette)
+        else:
+            self.report({'ERROR'}, f"ERROR: No distance metric selected. This shouldn't happen!")
+            return {'CANCELLED'}
+        
+        # Stores the indices of the smallest distance values found in the distance numpy array.
+        calculatedRGBIndices= np.argmin(colorDistances,axis=1)
+        # Removes first dimension of numpy palette array which was needed for broadcasting. Shape(m,3)
+        flattenPalette      = newPalette[0]
+        # Also with no placeholder axis with shape value 1 which was needed for broadcasting.Shape(k,4) 
+        flattenPixelArray   = np.reshape(arrPixels, (height*width, channels))
+        # Alpha channel needs to be as is.
+        alphaChannel        = flattenPixelArray[:,3:4]
+        # Assigns the new pixelcolors to the image.
+        convertedImage      = flattenPalette[calculatedRGBIndices]
+        remappedImage       = np.hstack((convertedImage, alphaChannel))/255.0
+        
+        # Flattens the array so it can be stored into a blender image data block.
+        arrPixelsFlatten = np.reshape(remappedImage,arrPixels.shape)
+            
+        # Creates a new Blender image data block.
+        newImage = bpy.data.images.new(
+            name    = imageName, # Not used as filename
+            width   = width,
+            height  = height,
+            alpha   = True,
+        )
+        
+        # Assign the manipulated NumPy array's pixel data to the new Blender image.
+        newImage.pixels         = arrPixelsFlatten        
+        newImage.filepath_raw   = saveImageAt 
+        newImage.file_format    = 'PNG'  # Not used as extension
+        # Save the new image data block to a file.
+        newImage.save()
+        
         
         # TODO:Delete prints
         print(f"renderedImage:{renderedImage}")
@@ -3774,6 +3813,13 @@ class IEAS_OT_PaletteRemapping(Operator):
         print(f"palette.shape:{palette.shape}")
         print(f"palette[:,:,2].shape:{palette[:,:,2].shape}")
         print(f"colorDistances.shape:{colorDistances.shape}")
+        print(f"calculatedRGBIndices[:5]:{calculatedRGBIndices[:5]}")
+        print(f"calculatedRGBIndices.shape:{calculatedRGBIndices.shape}")
+        print(f"convertedImage.shape:{convertedImage.shape}")
+        print(f"alphaChannel.shape:{alphaChannel.shape}")
+        print(f"remappedImage.shape:{remappedImage.shape}")
+        print(f"arrPixelsFlatten.shape:{arrPixelsFlatten.shape}")
+        print(f"imageName:{imageName}")
         
     
     # Blender specific function which is executed in this case when REMAP button is pressed 
@@ -3781,12 +3827,18 @@ class IEAS_OT_PaletteRemapping(Operator):
         overwrite   = context.scene.IEAS_properties.Use_Overwrite
         metrictype  = context.scene.IEAS_properties.Remapping_Metrics
         # "r" means pure text and no interpretation of special characters. Shouldn't be needed in the final version!
-        imagePath   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south"
-        imageName   = "!_OgreSDG1_south_00001.png"
-        image       = os.path.join(imagePath, imageName)
-        newPalette  = IEAS_Data.retrieveColorSwapPalette()
+        imageLocation   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south"
+        imageName       = "!_OgreSDG1_south_00001.png"
+        fullPath        = os.path.join(imageLocation, imageName)
+        newPalette = IEAS_Data.retrieveColorSwapPalette()
         
-        self.remapPalette(image,newPalette)
+        if(overwrite==False):
+            imageLocation   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south_"+metrictype
+            saveImageAt     = os.path.join(imageLocation, imageName)
+        else:
+            saveImageAt     = fullPath
+                   
+        self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
         
         #TODO: Delte prints
         print(f"overwrite:{overwrite}")
