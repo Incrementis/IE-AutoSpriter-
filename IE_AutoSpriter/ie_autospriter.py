@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 71),
+    "version": (0, 37, 72),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -3711,10 +3711,10 @@ class IEAS_OT_IniFiles(Operator):
         return {'FINISHED'}
 
 # --------
-# Purpose:TODO
+# Purpose:
 # --------
-# Operator to handle palette remapping.
-# -------------------------------------
+# Operator to handle palette remapping regarding ingame color replacemnt.
+# -----------------------------------------------------------------------
 class IEAS_OT_PaletteRemapping(Operator):
     """This class provides a function for remapping the palette in images, which is required for the color swapping offered by certain animation types."""
     bl_idname   = "ieas.palette_remapping" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
@@ -3768,7 +3768,7 @@ class IEAS_OT_PaletteRemapping(Operator):
         if(metric == 'redmean'):
             colorDistances = cls.calculateRedmean(arrPixelsReshaped, palette)
         else:
-            self.report({'ERROR'}, f"ERROR: No distance metric selected. This shouldn't happen!")
+            self.report({'ERROR'}, f"ERROR: No distance metric selected.")
             return {'CANCELLED'}
         
         # Stores the indices of the smallest distance values found in the distance numpy array.
@@ -3803,47 +3803,95 @@ class IEAS_OT_PaletteRemapping(Operator):
         
         
         # TODO:Delete prints
-        print(f"renderedImage:{renderedImage}")
-        print(f"renderedImage.size-X-Width:{renderedImage.size[0]}")
-        print(f"renderedImage.size-Y-Height:{renderedImage.size[1]}")
-        print(f"pixels:{pixels}")
-        print(f"arrPixel.shapes:{arrPixels.shape}")
-        print(f"arrPixelsReshaped:{arrPixelsReshaped.shape}")
-        print(f"palette:{palette}")
-        print(f"palette.shape:{palette.shape}")
-        print(f"palette[:,:,2].shape:{palette[:,:,2].shape}")
-        print(f"colorDistances.shape:{colorDistances.shape}")
-        print(f"calculatedRGBIndices[:5]:{calculatedRGBIndices[:5]}")
-        print(f"calculatedRGBIndices.shape:{calculatedRGBIndices.shape}")
-        print(f"convertedImage.shape:{convertedImage.shape}")
-        print(f"alphaChannel.shape:{alphaChannel.shape}")
-        print(f"remappedImage.shape:{remappedImage.shape}")
-        print(f"arrPixelsFlatten.shape:{arrPixelsFlatten.shape}")
-        print(f"imageName:{imageName}")
-        
+        # print(f"renderedImage:{renderedImage}")
+        # print(f"renderedImage.size-X-Width:{renderedImage.size[0]}")
+        # print(f"renderedImage.size-Y-Height:{renderedImage.size[1]}")
+        # print(f"pixels:{pixels}")
+        # print(f"arrPixel.shapes:{arrPixels.shape}")
+        # print(f"arrPixelsReshaped:{arrPixelsReshaped.shape}")
+        # print(f"palette:{palette}")
+        # print(f"palette.shape:{palette.shape}")
+        # print(f"palette[:,:,2].shape:{palette[:,:,2].shape}")
+        # print(f"colorDistances.shape:{colorDistances.shape}")
+        # print(f"calculatedRGBIndices[:5]:{calculatedRGBIndices[:5]}")
+        # print(f"calculatedRGBIndices.shape:{calculatedRGBIndices.shape}")
+        # print(f"convertedImage.shape:{convertedImage.shape}")
+        # print(f"alphaChannel.shape:{alphaChannel.shape}")
+        # print(f"remappedImage.shape:{remappedImage.shape}")
+        # print(f"arrPixelsFlatten.shape:{arrPixelsFlatten.shape}")
+        # print(f"imageName:{imageName}")
+        print(f"remapping '{imageName}' to {saveImageAt}")
     
     # Blender specific function which is executed in this case when REMAP button is pressed 
     def execute(self, context):
-        overwrite   = context.scene.IEAS_properties.Use_Overwrite
-        metrictype  = context.scene.IEAS_properties.Remapping_Metrics
+        #---- Variables
+        overwrite               = context.scene.IEAS_properties.Use_Overwrite
+        metrictype              = context.scene.IEAS_properties.Remapping_Metrics
+        saveAt                  = context.scene.IEAS_properties.Save_at
+        selectedType            = context.scene.IEAS_properties.Type
+        animationFolders        = IEAS_Data.retrieveAnimationFolderNames(context)
+        animationToggles        = IEAS_Data.retrieveAnimationToggles(context)
+        animationWeaponFolders  = IEAS_Data.retrieveAnimationWeaponFolderNames(context)
+        animationWeaponToggles  = IEAS_Data.retrieveAnimationWeaponToggles(context)
+        cameraPosFolders        = IEAS_Data.retrieveCameraPosFolderNames(context)
+        cameraToggles           = IEAS_Data.retrieveCameraPosToggles(context)
+        newPalette              = IEAS_Data.retrieveColorSwapPalette()   
         # "r" means pure text and no interpretation of special characters. Shouldn't be needed in the final version!
-        imageLocation   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south"
-        imageName       = "!_OgreSDG1_south_00001.png"
-        fullPath        = os.path.join(imageLocation, imageName)
-        newPalette = IEAS_Data.retrieveColorSwapPalette()
-        
-        if(overwrite==False):
-            imageLocation   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south_"+metrictype
-            saveImageAt     = os.path.join(imageLocation, imageName)
-        else:
-            saveImageAt     = fullPath
+        # imageLocation   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south"
+        # imageName       = "!_OgreSDG1_south_00001.png"
+        # fullPath        = os.path.join(imageLocation, imageName)
                    
-        self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
+        
+        #---- Dyanmic filepaths       
+        # TODO add all types which have no weapon overlay as animation.
+        if(selectedType == '9000'):
+            for animationKey, animationFolder in animationFolders.items():
+                if(animationToggles[animationKey]==True):
+                    if(overwrite==False):
+                        saveImageAt = "00-"+animationFolder+"_"+metrictype
+                        saveImageAtAnimation = os.path.join(saveAt, saveImageAt)
+                    else:
+                        saveImageAtAnimation = os.path.join(saveAt, animationFolder)
+                        
+                    fullPathAnimation    = os.path.join(saveAt, "00-"+animationFolder)           
+                    for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
+                        if(cameraToggles[cameraPosKey]==True):
+                            fullPathCameraPos    = os.path.join(fullPathAnimation, cameraPosFolder)
+                            saveImageAtCameraPos = os.path.join(saveImageAtAnimation, cameraPosFolder)
+                            # Goes through all files within that path.
+                            for imageName in os.listdir(fullPathCameraPos):
+                                # Only png files are needed.
+                                if imageName.lower().endswith(".png"):
+                                    fullPath    = os.path.join(fullPathCameraPos, imageName)
+                                    saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
+                                    self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
+                                    
+        # For animations with weapon overlay                          
+        # for animationKey, animationFolder in animationFolders.items():
+            # if(animationToggles[animationKey]==True):
+                # fullPathAnimation    = os.path.join(saveAt, animationFolder)
+                # saveImageAtAnimation = os.path.join(saveImageAt, animationFolder)
+                # for animationWeaponKey, animationWeaponFolder in animationWeaponFolders.items():
+                    # if(animationWeaponToggles[animationWeaponKey]==True):
+                        # fullPathWeapon    = os.path.join(fullPathAnimation, animationWeaponFolder)
+                        # saveImageAtWeapon = os.path.join(saveImageAtAnimation, animationWeaponFolder)
+                    # for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
+                        # if(animationWeaponToggles[animationWeaponKey]==True):
+                            # if(cameraToggles[cameraPosKey]==True):
+                                # fullPathCameraPos    = os.path.join(fullPathWeapon, cameraPosFolder)
+                                # saveImageAtCameraPos = os.path.join(saveImageAtWeapon, cameraPosFolder)
+                                # # Goes through all files within that path.
+                                # for imageName in os.listdir(fullPathCameraPos):
+                                    # # Only png files are needed.
+                                    # if imageName.lower().endswith(".png"):
+                                        # fullPath    = os.path.join(fullPathCameraPos, imageName)
+                                        # saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
+                                        # self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
         
         #TODO: Delte prints
-        print(f"overwrite:{overwrite}")
-        print(f"metrictype:{metrictype}")
-                
+        # print(f"overwrite:{overwrite}")
+        # print(f"metrictype:{metrictype}")
+        #print(f"saveImageAt{saveImageAt}")        
         return{'FINISHED'}
 
 
