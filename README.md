@@ -80,7 +80,9 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * [Creating radio buttons in the Blender add-ons interface](https://b3d.interplanety.org/en/creating-radio-buttons-in-the-blender-add-ons-interface/) by Nikita
 * [Add a Predefined Meta-Rig](https://docs.blender.org/manual/en/2.81/addons/rigging/rigify.html?highlight=horse) by blender
 * [Make Animals In Blender 3 - The Easy Way](https://www.youtube.com/watch?v=tEZOXuDhTJ0) by Grant Abbitt (Gabbitt)
+* [Make a Detailed Sword in Blender :Topology Tips & Hard Surface Techniques](https://www.youtube.com/watch?v=f320TtEpGYQ) by Grant Abbitt(Gabbitt)
 * [Create Low Poly Characters in Blender (Beginner Tutorial)](https://www.youtube.com/watch?v=BL6fyBeldHA&t=4341s) by Ryan King Art
 * [How to Grow Tendrils Over Any Object (Blender Tutorial)](https://www.youtube.com/watch?v=ufRygCrYsx4) by Pixel Me That
 * [A Different approach to making FIRE in Blender!](https://www.youtube.com/watch?v=cUfc4iWG9qI) by Kenan Proffitt
 * [Blender 4.0 RIGIFY ＃6-1: Custom Rigs (theory)](https://youtu.be/Cq2Vw6EFXy0?list=PLdcL5aF8ZcJuG3kKcVgQQz36E3JXzijEH) by CGDive (Blender Rigging Tuts)
+* [Color difference](https://en.wikipedia.org/wiki/Color_difference#CIEDE2000) by Wikipedia

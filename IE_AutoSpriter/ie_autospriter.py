@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 37, 72),
+    "version": (0, 38, 00),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2283,9 +2283,9 @@ class IEAS_OT_Iesdp(Operator):
 # Purpose:
 # --------
 # Operator to rotate an object.
-# ----------------------------------------------------------
+# -----------------------------
 class IEAS_OT_Rotation(Operator):
-    """This rotates an object"""
+    """This rotates an object. See manual for more detailed information."""
     bl_idname = "ieas.rotation" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label = "ROTATE(Preview)"
     
@@ -2307,10 +2307,10 @@ class IEAS_OT_Rotation(Operator):
 # These properties are accessible via `context.scene.IEAS_properties`.
 # ------------------------------------------------------------------------------------------------
 class IEAS_PGT_Inputs(PropertyGroup):
-    """Group of input types which will be added into the other panels"""
+    """Group of input types which will be added into the other panels."""
     
-    # --- Resets all camera and animation toggles to false.
     def resetToggles(self, context):
+        """Resets all camera and animation toggles to false."""
         # Lists with property names.
         cameraToggles = [
             'Use_SO', 'Use_SSW', 'Use_SW', 'Use_WSW', 'Use_WE', 'Use_WNW',
@@ -2370,15 +2370,17 @@ class IEAS_PGT_Inputs(PropertyGroup):
         for propertyName in armorToggles:
             setattr(context.scene.IEAS_properties, propertyName, False)
 
-    # --- Updates the user-specified resolution X input from IE Autospriter to Output Properties and vice versa
+
     def updateResolutionX(self, context):
+        """Updates the user-specified resolution X input from IE Autospriter to Output Properties and vice versa."""
         bpy.context.scene.render.resolution_x = context.scene.IEAS_properties.Resolution_X
         #TODO: delete prints
         print("bpy resX:",bpy.context.scene.render.resolution_x)
         print("resX:",context.scene.IEAS_properties.Resolution_X)
-    
-    # --- Updates the user-specified resolution Y input from IE Autospriter to Output Properties and vice versa
+  
+  
     def updateResolutionY(self, context):
+        """Updates the user-specified resolution Y input from IE Autospriter to Output Properties and vice versa."""
         bpy.context.scene.render.resolution_y = context.scene.IEAS_properties.Resolution_Y
                     
     # --- Step 1: Global Parameters    
@@ -2802,7 +2804,7 @@ class IEAS_PGT_Inputs(PropertyGroup):
 # This prepares the material for indexed color palettes required by Infinity Engine games.
 # ----------------------------------------------------------------------------------------
 class IEAS_OT_ShadingNodes(Operator):
-    """This class offers a function which adds shading nodes which then is used in "IEAS_PT_ShadingNodes" class"""
+    """This offers a function which adds shading nodes which then is used in "IEAS_PT_ShadingNodes" class. """
     bl_idname = "ieas.shading_nodes" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label = "ADD" # Text displayed on the button in the UI.
     
@@ -2873,7 +2875,7 @@ class IEAS_OT_ShadingNodes(Operator):
 # Operator to handle INI files.
 # -----------------------------
 class IEAS_OT_IniFiles(Operator):
-    """This class provides a function that creates INI files which can be used to automate the BAM pre-creation process, e.g., in Near Infinity."""
+    """This provides a function that creates INI files which can be used to automate the BAM pre-creation process, e.g., in Near Infinity. See manual for more detailed information."""
     bl_idname   = "ieas.ini_files" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label    = "CREATE" # Text displayed on the button in the UI.
     
@@ -3716,52 +3718,60 @@ class IEAS_OT_IniFiles(Operator):
 # Operator to handle palette remapping regarding ingame color replacemnt.
 # -----------------------------------------------------------------------
 class IEAS_OT_PaletteRemapping(Operator):
-    """This class provides a function for remapping the palette in images, which is required for the color swapping offered by certain animation types."""
+    """This provides a function for remapping the palette in images, which is required for the color swapping offered by certain animation types. See manual for more detailed information."""
     bl_idname   = "ieas.palette_remapping" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label    = "REMAP" # Text displayed on the button in the UI.
     
     @classmethod
     def calculateRedmean(cls, image, newPalette):
-        """TODO
+        """Calculates the redmean distance for all color channels.
+        
             Args:
-                TODO:explain Parameters"""
-        # Alpha channel is not needed.
+                image(numpy.ndarray): The image pixels with all its color channels.
+                newPalette(numpy.ndarray): The target color palette entries.
+                
+            Returns:
+                numpy.ndarray: All color distances between the image and color palette.
+        """
+        # Alpha channel is not required.
         imageRed        = image[:,:,0]
         imageGreen      = image[:,:,1]
         imageBlue       = image[:,:,2]
         paletteRed      = newPalette[:,:,0]
         paletteGreen    = newPalette[:,:,1]
         paletteBlue     = newPalette[:,:,2]
-        deltaRed        = imageRed  - paletteRed#max=255
-        deltaGreen      = imageGreen - paletteGreen#max=255
-        deltaBlue       = imageBlue - paletteBlue#max=255
+        deltaRed        = imageRed  - paletteRed        #max=255
+        deltaGreen      = imageGreen - paletteGreen     #max=255
+        deltaBlue       = imageBlue - paletteBlue       #max=255
         redMean         = 0.5 * (imageRed + paletteRed) #max=127.5
-        weightRed       = (2.0 + redMean/256.0) #~max=2.5
+        weightRed       = (2.0 + redMean/256.0)         #~max=2.5
         weightGreen     = 4.0
-        weightBlue      = (2.0 + (255.0 - redMean)/256.0) #~max=2.5
-        # math.sqrt is not needed, as the computational overhead is unnecessarily high.
-        #deltaColor      =  math.sqrt( (weightRed * deltaRed**2.0) + (weightGreen * deltaGreen**2.0) + (weightBlue * deltaBlue**2.0) )#~max=765
-        deltaColor      =  (weightRed * deltaRed**2.0) + (weightGreen * deltaGreen**2.0) + (weightBlue * deltaBlue**2.0)#~max=765
+        weightBlue      = (2.0 + (255.0 - redMean)/256.0)#~max=2.5
+        # math.sqrt is not required, as the computational overhead is unnecessarily high.
+        deltaColor      =  (weightRed * deltaRed**2) + (weightGreen * deltaGreen**2) + (weightBlue * deltaBlue**2)#~max=765
         
         return deltaColor
         
     @classmethod    
     def remapPalette(cls, fullPath, imageName, saveImageAt, newPalette, metric):
-        """TODO
+        """Replaces the image pixels based on the target color palette by calculating the distances between them.
+        
             Args:
-                TODO:explain Parameters"""
-        # Loads the rendered image from disk and retrieves its pixel data.      
-        #renderedImage       = bpy.data.images.load(bpy.context.scene.render.filepath)                       
+                fullPath(str): File path and filename at the end of the file path which is required to retrieve the image.
+                imageName(str): file name.
+                saveImageAt(str): Path which the new image is stored to.
+                newPalette(numpy.ndarray): The target color palette entries.
+                metric(str): The metric formular which is used to calculate the distances.
+        """
+        # Loads the rendered image from disk and retrieves its pixel data.                           
         renderedImage       = bpy.data.images.load(fullPath)                       
-        pixels              = renderedImage.pixels # RGBA values are stored in range 0 - 1
-        arrPixels           = np.array(pixels)*255# (flat array, meaning all 4 channels in one list);  
+        pixels              = renderedImage.pixels  # RGBA values are stored in range 0.0 - 1.0
+        arrPixels           = np.array(pixels)*255  # All 4 channels in one list.  
         channels            = 4
         width               = renderedImage.size[0]
         height              = renderedImage.size[1]
-        # Reshapes the 1D pixel array into a 3D array (number of rows * number of columns per row * channels); RGBA.
-        #arrPixelsReshaped   = np.reshape(arrPixels, (height, width, channels))
-        # This will prodcuce the shape (k,1,4). k is the number of pixels and 1 is placholder axis to make broadcasting possible.
-        # Broadcasting improves computational performance.
+        # This produces the shape (k,1,4). k is the number of pixels, and 1 is a dummy axis to enable broadcasting.
+        # Broadcasting significantly improves performance.
         arrPixelsReshaped   = np.reshape(arrPixels, (height*width,1, channels)).astype(np.float32)
         palette             = newPalette.astype(np.float32)
         
@@ -3794,36 +3804,21 @@ class IEAS_OT_PaletteRemapping(Operator):
             alpha   = True,
         )
         
-        # Assign the manipulated NumPy array's pixel data to the new Blender image.
+        # Assigns the manipulated NumPy array's pixel data to the new Blender image.
         newImage.pixels         = arrPixelsFlatten        
         newImage.filepath_raw   = saveImageAt 
-        newImage.file_format    = 'PNG'  # Not used as extension
-        # Save the new image data block to a file.
+        newImage.file_format    = 'PNG'# Not used as extension
+        # Saves the new image data block to a file.
         newImage.save()
         
-        
-        # TODO:Delete prints
-        # print(f"renderedImage:{renderedImage}")
-        # print(f"renderedImage.size-X-Width:{renderedImage.size[0]}")
-        # print(f"renderedImage.size-Y-Height:{renderedImage.size[1]}")
-        # print(f"pixels:{pixels}")
-        # print(f"arrPixel.shapes:{arrPixels.shape}")
-        # print(f"arrPixelsReshaped:{arrPixelsReshaped.shape}")
-        # print(f"palette:{palette}")
-        # print(f"palette.shape:{palette.shape}")
-        # print(f"palette[:,:,2].shape:{palette[:,:,2].shape}")
-        # print(f"colorDistances.shape:{colorDistances.shape}")
-        # print(f"calculatedRGBIndices[:5]:{calculatedRGBIndices[:5]}")
-        # print(f"calculatedRGBIndices.shape:{calculatedRGBIndices.shape}")
-        # print(f"convertedImage.shape:{convertedImage.shape}")
-        # print(f"alphaChannel.shape:{alphaChannel.shape}")
-        # print(f"remappedImage.shape:{remappedImage.shape}")
-        # print(f"arrPixelsFlatten.shape:{arrPixelsFlatten.shape}")
-        # print(f"imageName:{imageName}")
+        # ---- Monitoring
         print(f"remapping '{imageName}' to {saveImageAt}")
     
-    # Blender specific function which is executed in this case when REMAP button is pressed 
+    # Blender specific function which is executed in this case when REMAP button is pressed.
     def execute(self, context):
+        # ---- Start timer
+        startTimer = time.time()
+        
         #---- Variables
         overwrite               = context.scene.IEAS_properties.Use_Overwrite
         metrictype              = context.scene.IEAS_properties.Remapping_Metrics
@@ -3835,63 +3830,99 @@ class IEAS_OT_PaletteRemapping(Operator):
         animationWeaponToggles  = IEAS_Data.retrieveAnimationWeaponToggles(context)
         cameraPosFolders        = IEAS_Data.retrieveCameraPosFolderNames(context)
         cameraToggles           = IEAS_Data.retrieveCameraPosToggles(context)
-        newPalette              = IEAS_Data.retrieveColorSwapPalette()   
-        # "r" means pure text and no interpretation of special characters. Shouldn't be needed in the final version!
-        # imageLocation   = r"D:\Mods\IEGames\MyMods\Tools\IE-AutoSpriter-\demos\blender4.5.5 LTS\9000 Ogre\00-idle\south"
-        # imageName       = "!_OgreSDG1_south_00001.png"
-        # fullPath        = os.path.join(imageLocation, imageName)
-                   
-        
-        #---- Dyanmic filepaths       
-        # TODO add all types which have no weapon overlay as animation.
-        if(selectedType == '9000'):
-            for animationKey, animationFolder in animationFolders.items():
-                if(animationToggles[animationKey]==True):
+        newPalette              = IEAS_Data.retrieveColorSwapPalette()
+        colorReplacementTypes   = ['9000', '7000 monster old', 'F000', '2000', '5000/6000 character split bams 0',
+                                   '5000/6000 character split bams 1', '5000/6000 character old', '7000 monster split bams 0',
+                                   '7000 monster split bams 1', '8000']
+        weaponOverlayTypes      = ['2000', '5000/6000 character split bams 0', '5000/6000 character split bams 1',
+                                   '5000/6000 character old', '7000 monster split bams 0', 
+                                   '7000 monster split bams 1', '8000']
+                                   
+        #--- Sanity Checks and Pre-testing
+        # Wrong selected type.
+        if(selectedType not in colorReplacementTypes):
+            self.report({'ERROR'}, f"ERROR: Wrong selected animation type. Animation type '{selectedType}' does not support color replacement.")
+            return {'CANCELLED'}
+            
+        # Path does not exist for animations with or without weapon overlays.
+        for animationKey, animationFolder in animationFolders.items():
+            if (animationToggles[animationKey]):
+                fullPathAnimation = os.path.join(saveAt, "00-" + animationFolder)      
+                for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
+                    if (cameraToggles[cameraPosKey]):
+                        directory = os.path.join(fullPathAnimation, cameraPosFolder)
+                        if (not os.path.exists(directory)):
+                            self.report({'ERROR'}, f"ERROR: Path '{directory}' doesn't exist.")
+                            return {'CANCELLED'}
+                            
+        # Path does not exist for animations with weapon overlays.
+        if (selectedType in weaponOverlayTypes):
+            for animationWeaponKey, animationWeaponFolder in animationWeaponFolders.items():
+                if (animationWeaponToggles[animationWeaponKey]):
+                    fullPathWeapon = os.path.join(saveAt, animationWeaponFolder)
+                    for animationKey, animationFolder in animationFolders.items():
+                        if (animationToggles[animationKey]):
+                            fullPathAnimation = os.path.join(fullPathWeapon, animationFolder)
+                            for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
+                                if (cameraToggles[cameraPosKey]):
+                                    directory = os.path.join(fullPathAnimation, cameraPosFolder)
+                                    if (not os.path.exists(directory)):
+                                        self.report({'ERROR'}, f"ERROR: Path '{directory}' doesn't exist.")
+                                        return {'CANCELLED'}
+
+        #---- Dyanmic filepaths
+        # For animations with and without weapon overlays
+        # -----------------------------------------------
+        for animationKey, animationFolder in animationFolders.items():
+            if(animationToggles[animationKey]==True):
+                if(overwrite==False):
+                    saveImageAt = "00-"+animationFolder+"_"+metrictype
+                    saveImageAtAnimation = os.path.join(saveAt, saveImageAt)
+                else:
+                    saveImageAtAnimation = os.path.join(saveAt, "00-"+animationFolder)
+                    
+                fullPathAnimation    = os.path.join(saveAt, "00-"+animationFolder)
+                for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
+                    if(cameraToggles[cameraPosKey]==True):
+                        fullPathCameraPos    = os.path.join(fullPathAnimation, cameraPosFolder)
+                        saveImageAtCameraPos = os.path.join(saveImageAtAnimation, cameraPosFolder)
+                        # Iterates through all files in that directory.
+                        for imageName in os.listdir(fullPathCameraPos):
+                            # Only PNG files are required.
+                            if (imageName.lower().endswith(".png")):
+                                fullPath    = os.path.join(fullPathCameraPos, imageName)
+                                saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
+                                self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)                                  
+        # For animations with weapon overlays(TODO:Tests needed!)
+        # -----------------------------------
+        if(selectedType in weaponOverlayTypes):
+           for animationWeaponKey, animationWeaponFolder in animationWeaponFolders.items():
+                if(animationWeaponToggles[animationWeaponKey]==True):
                     if(overwrite==False):
-                        saveImageAt = "00-"+animationFolder+"_"+metrictype
-                        saveImageAtAnimation = os.path.join(saveAt, saveImageAt)
+                        saveImageAt = animationWeaponFolder+"_"+metrictype
+                        saveImageAtWeapon = os.path.join(saveAt, saveImageAt)
                     else:
-                        saveImageAtAnimation = os.path.join(saveAt, animationFolder)
+                        saveImageAtWeapon = os.path.join(saveAt, animationWeaponFolder)
                         
-                    fullPathAnimation    = os.path.join(saveAt, "00-"+animationFolder)           
-                    for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
-                        if(cameraToggles[cameraPosKey]==True):
-                            fullPathCameraPos    = os.path.join(fullPathAnimation, cameraPosFolder)
-                            saveImageAtCameraPos = os.path.join(saveImageAtAnimation, cameraPosFolder)
-                            # Goes through all files within that path.
-                            for imageName in os.listdir(fullPathCameraPos):
-                                # Only png files are needed.
-                                if imageName.lower().endswith(".png"):
-                                    fullPath    = os.path.join(fullPathCameraPos, imageName)
-                                    saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
-                                    self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
-                                    
-        # For animations with weapon overlay                          
-        # for animationKey, animationFolder in animationFolders.items():
-            # if(animationToggles[animationKey]==True):
-                # fullPathAnimation    = os.path.join(saveAt, animationFolder)
-                # saveImageAtAnimation = os.path.join(saveImageAt, animationFolder)
-                # for animationWeaponKey, animationWeaponFolder in animationWeaponFolders.items():
-                    # if(animationWeaponToggles[animationWeaponKey]==True):
-                        # fullPathWeapon    = os.path.join(fullPathAnimation, animationWeaponFolder)
-                        # saveImageAtWeapon = os.path.join(saveImageAtAnimation, animationWeaponFolder)
-                    # for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
-                        # if(animationWeaponToggles[animationWeaponKey]==True):
-                            # if(cameraToggles[cameraPosKey]==True):
-                                # fullPathCameraPos    = os.path.join(fullPathWeapon, cameraPosFolder)
-                                # saveImageAtCameraPos = os.path.join(saveImageAtWeapon, cameraPosFolder)
-                                # # Goes through all files within that path.
-                                # for imageName in os.listdir(fullPathCameraPos):
-                                    # # Only png files are needed.
-                                    # if imageName.lower().endswith(".png"):
-                                        # fullPath    = os.path.join(fullPathCameraPos, imageName)
-                                        # saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
-                                        # self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
+                    fullPathWeapon    = os.path.join(saveAt, animationWeaponFolder)
+                    for animationKey, animationFolder in animationFolders.items():
+                        if(animationToggles[animationKey]==True):
+                            fullPathAnimation       = os.path.join(fullPathWeapon, animationFolder)
+                            saveImageAtAnimation    = os.path.join(saveImageAtWeapon, animationFolder)
+                            for cameraPosKey, cameraPosFolder in cameraPosFolders.items():
+                                if(cameraToggles[cameraPosKey]==True):
+                                    fullPathCameraPos    = os.path.join(fullPathAnimation, cameraPosFolder)
+                                    saveImageAtCameraPos = os.path.join(saveImageAtAnimation, cameraPosFolder)
+                                    # Iterates through all files in that directory.
+                                    for imageName in os.listdir(fullPathCameraPos):
+                                        # Only PNG files are required.
+                                        if (imageName.lower().endswith(".png")):
+                                            fullPath    = os.path.join(fullPathCameraPos, imageName)
+                                            saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
+                                            self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
         
-        #TODO: Delte prints
-        # print(f"overwrite:{overwrite}")
-        # print(f"metrictype:{metrictype}")
-        #print(f"saveImageAt{saveImageAt}")        
+        # ---- Calculates and prints the total time taken for the palette remapping process.
+        print("Elapsed:",time.time() - startTimer)
         return{'FINISHED'}
 
 
@@ -3901,7 +3932,7 @@ class IEAS_OT_PaletteRemapping(Operator):
 # Operator to initiate the full sprite rendering process for selected objects, animations, and directions.
 # --------------------------------------------------------------------------------------------------------
 class IEAS_OT_Final(Operator):
-    """This class offers a function which starts the rendering which is used in "IEAS_PT_Final" class"""
+    """This offers a function which starts the rendering which is used in "IEAS_PT_Final" class. See manual for more detailed information."""
     bl_idname = "ieas.final" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
     bl_label = "RENDER" # Text displayed on the button in the UI.
     
