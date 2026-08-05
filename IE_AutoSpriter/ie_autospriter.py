@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 00),
+    "version": (0, 38, 2),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2296,8 +2296,9 @@ class IEAS_OT_Rotation(Operator):
         # Checks if the rotation is clockwise or counter-clockwise.
         if context.scene.IEAS_properties.Direction == 'CCW':
             rotationDegree = -rotationDegree
-        # Rotation on the z-axis in degrees.
-        bpy.ops.transform.rotate(value=rotationDegree*math.pi/180, orient_axis='Z')
+        # Gets the Object List value from step 1 and rotates on the z-axis in degrees.
+        context.scene.IEAS_properties.Object_List.rotation_euler.z += rotationDegree*math.pi/180   
+            
         return {'FINISHED'}
 
 # --------
@@ -3295,6 +3296,17 @@ class IEAS_OT_IniFiles(Operator):
         cycles                      = {}
         allFilenames                = {}
         
+        
+        # ---- Sanity Checks
+        # Checks if no direction/orientation is selected.
+        if(not any(cameraPosToggles.values())):
+            self.report({'ERROR'}, f"ERROR: No direction selected in 'Step 3: Camera'. At least one must be selected.")
+            return {'CANCELLED'}
+        # Checks if no animation is selected.
+        if(not any(animationToggles.values())):
+            self.report({'ERROR'}, f"ERROR: No animation selected in 'Step 4: Animation'. At least one must be selected.")
+            return {'CANCELLED'}
+        
         # -----------
         # 0000 effect
         # -----------
@@ -4144,6 +4156,10 @@ class IEAS_OT_Final(Operator):
         if(not any(cameraPosToggles.values())):
             self.report({'ERROR'}, f"ERROR: No direction selected in 'Step 3: Camera'. At least one must be selected.")
             return {'CANCELLED'}
+        # Checks if no animation is selected.
+        if(not any(animationToggles.values())):
+            self.report({'ERROR'}, f"ERROR: No animation selected in 'Step 4: Animation'. At least one must be selected.")
+            return {'CANCELLED'}
         # Checks if the object exist.
         if (objectCurrent is None):
             self.report({'ERROR'}, f"ERROR: Object '{objectCurrent}' does not exist!")
@@ -4156,7 +4172,7 @@ class IEAS_OT_Final(Operator):
         if (objectCurrent.hide_render):
             self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from renders (Camera icon is OFF)!")
             return {'CANCELLED'}
-        # Checks if 'Object List' is selected with an object(armature/rig)
+        # Checks if 'Object List' is selected with an object(armature/rig).
         if (prefixResref == ''):
             self.report({'WARNING'}, f"WARNING: Prefix AND Resref are empty in step 1!")
         
@@ -4208,7 +4224,7 @@ class IEAS_OT_Final(Operator):
                         
         # ----- Deselecting and selecting
         # Checks if the user is not in "Object Mode"
-        if bpy.context.mode != 'OBJECT':
+        if (bpy.context.mode != 'OBJECT'):
             # Displays a red error message in the UI
             self.report({'ERROR'}, "ERROR: Please switch to 'Object Mode' before starting rendering!")
             return {'CANCELLED'}
@@ -4222,7 +4238,7 @@ class IEAS_OT_Final(Operator):
             self.report({'ERROR'}, f"ERROR: Object '{objectName}' does not exist!")
             return {'CANCELLED'}
         # Checks if the collection is excluded from vie layer(e.g. through unchecked tick).
-        if not objectCurrent.visible_get():
+        if (not objectCurrent.visible_get()):
             self.report({'ERROR'}, f"ERROR: Object '{objectName}' is excluded from View Layer! This error can be caused by an incorrect object in step 1(see `Object List`)")
             return {'CANCELLED'}
         
