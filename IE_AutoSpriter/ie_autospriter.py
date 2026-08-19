@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 2),
+    "version": (0, 38, 12),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -342,6 +342,16 @@ class IEAS_Data:
             'A3':'G3', 'GH':'G3', 'DE':'G3', 'TW':'G3'
         }
         return sequencesType9000     
+    
+    @staticmethod
+    def retrieveSequencesTypeA000():
+        """Dictionary wrapper animation type A000 - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesTypeA000 = {
+            'WK':'G1',
+            'SD':'G2', 'SC':'G2', 'GH':'G2', 'DE':'G2', 'TW':'G2',
+            'A1':'G3', 'A2':'G3', 'A3':'G3', 
+        }
+        return sequencesTypeA000      
         
     @staticmethod
     def retrieveSequencesTypeB000():
@@ -2027,11 +2037,7 @@ class IEAS_AnimationTypes():
         """Method for handling A000 type logic."""
         if (typeParameters.exclude == False):
              # Used to identify which sprite file is defined for which sequence
-            sequences = {
-                'WK':'G1',
-                'SD':'G2', 'SC':'G2', 'GH':'G3', 'DE':'G3', 'TW':'G3',
-                'A1':'G2', 'A2':'G2', 'A3':'G3', 
-            }
+            sequences = IEAS_Data.retrieveSequencesTypeA000()
             animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
@@ -3423,9 +3429,7 @@ class IEAS_OT_IniFiles(Operator):
             # ----- [FILTERS]
             # Restructures for compatibility reasons.
             restructeredFilenames = {seq: [path for paths in sides.values() for path in paths] for seq, sides in allFilenames.items()}
-            self.writeFilters(restructeredFilenames, NIfilters)
-        
-        
+            self.writeFilters(restructeredFilenames, NIfilters)             
         # ------------------------
         # 4000 effect, D000 flying
         # ------------------------
@@ -3467,11 +3471,13 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCycles_withNoSequences(fullPath, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
-        # ----------------------------------
-        # 7000 monster old, 9000, B000, C000  
-        # ----------------------------------
+        # ----------------------------------------
+        # 7000 monster old, 9000, A000, B000, C000  
+        # ----------------------------------------
         if (selectedType == '7000 monster old'  or selectedType == '9000' or
-            selectedType == 'B000'              or selectedType == 'C000'):
+            selectedType == 'B000'              or selectedType == 'A000' or 
+            selectedType == 'C000'):
+                
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
             
@@ -3484,12 +3490,24 @@ class IEAS_OT_IniFiles(Operator):
                 animationOrder  = { 'G1':["SD","SC","WK"],
                                     'G2':["A1","A2"],
                                     'G3':["A3","GH","DE","TW"]}
+            elif(selectedType == 'A000'):
+                sequences       = IEAS_Data.retrieveSequencesTypeA000()
+                animationOrder  = { 'G1':["WK"],
+                                    'G2':["SD","SC","GH","DE","TW"],
+                                    'G3':["A1","A2","A3"]}
+                orientations    = orientations16D
+                orientationsEast= ['north_east', 'east_north_east', 'east', 'east_south_east', 'south_east', 'south_south_east']
             elif(selectedType == 'B000'):
                 sequences       = IEAS_Data.retrieveSequencesTypeB000()
                 animationOrder  = { 'G1':["SC","SD","GH","DE","TW"]}
             elif(selectedType == 'C000'):
                 sequences       = IEAS_Data.retrieveSequencesTypeC000()
                 animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW"]}
+                
+            print(f"sequences:{sequences}")
+            print(f"animationOrder:{animationOrder}")
+            print(f"orientations:{orientations}")
+            print(f"orientationsEast:{orientationsEast}")
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -3845,7 +3863,7 @@ class IEAS_OT_PaletteRemapping(Operator):
         newPalette              = IEAS_Data.retrieveColorSwapPalette()
         colorReplacementTypes   = ['9000', '7000 monster old', 'F000', '2000', '5000/6000 character split bams 0',
                                    '5000/6000 character split bams 1', '5000/6000 character old', '7000 monster split bams 0',
-                                   '7000 monster split bams 1', '8000']
+                                   '7000 monster split bams 1', '8000', 'A000']
         weaponOverlayTypes      = ['2000', '5000/6000 character split bams 0', '5000/6000 character split bams 1',
                                    '5000/6000 character old', '7000 monster split bams 0', 
                                    '7000 monster split bams 1', '8000']
@@ -3905,7 +3923,7 @@ class IEAS_OT_PaletteRemapping(Operator):
                                 fullPath    = os.path.join(fullPathCameraPos, imageName)
                                 saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
                                 self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)                                  
-        # For animations with weapon overlays(TODO:Tests needed!)
+        # For animations with weapon overlays
         # -----------------------------------
         if(selectedType in weaponOverlayTypes):
            for animationWeaponKey, animationWeaponFolder in animationWeaponFolders.items():
@@ -3932,6 +3950,8 @@ class IEAS_OT_PaletteRemapping(Operator):
                                             fullPath    = os.path.join(fullPathCameraPos, imageName)
                                             saveImageAt = os.path.join(saveImageAtCameraPos, imageName)
                                             self.remapPalette(fullPath, imageName, saveImageAt, newPalette, metrictype)
+                                            
+        # TODO: The same for armor may be needed.
         
         # ---- Calculates and prints the total time taken for the palette remapping process.
         print("Elapsed:",time.time() - startTimer)
@@ -4016,7 +4036,7 @@ class IEAS_OT_Final(Operator):
             'east':         90,     'east_south_east':  67.5,
             'south_east':   45,     'south_south_east': 22.5
         }
-        cameraEasternPositions = [  'north_north_east',         'north_east', 'east_north_east', 
+        cameraEasternPositions = [  """'north_north_east'""",   'north_east', 'east_north_east', 
                                     'east', 'east_south_east',  'south_east', 'south_south_east']
         
         # ----- Animation

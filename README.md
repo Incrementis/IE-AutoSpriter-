@@ -66,6 +66,7 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * Bubb
 * lynx
 * skellytz
+* FallDamage312
 
 ## Sources and Learning Materials
 * [INI file format: Creature Animations](https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm)
@@ -86,3 +87,4 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * [A Different approach to making FIRE in Blender!](https://www.youtube.com/watch?v=cUfc4iWG9qI) by Kenan Proffitt
 * [Blender 4.0 RIGIFY ＃6-1: Custom Rigs (theory)](https://youtu.be/Cq2Vw6EFXy0?list=PLdcL5aF8ZcJuG3kKcVgQQz36E3JXzijEH) by CGDive (Blender Rigging Tuts)
 * [Color difference](https://en.wikipedia.org/wiki/Color_difference#CIEDE2000) by Wikipedia
+* [How to Make Animated PIXEL ART Characters Sprites with Blender 2.9 | Quick and Easy TUTORIAL](https://www.youtube.com/watch?v=eSqb6II3WMM) by Soyaa
