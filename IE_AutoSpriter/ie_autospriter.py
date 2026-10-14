@@ -180,19 +180,13 @@ class IEAS_Data:
             'Q2': context.scene.IEAS_properties.Quarterstaff1,       'Q3': context.scene.IEAS_properties.Quarterstaff2,
             'Q4': context.scene.IEAS_properties.Quarterstaff3,       'GS': context.scene.IEAS_properties.Glowing_Staff,          
             '1H': context.scene.IEAS_properties.One_Handed,          '2H': context.scene.IEAS_properties.Two_Handed,
+            'A': context.scene.IEAS_properties.Axe,                  'B': context.scene.IEAS_properties.Longbow,
+            'C': context.scene.IEAS_properties.Club,                 'D': context.scene.IEAS_properties.Dagger,
+            'F': context.scene.IEAS_properties.Flail,                'H': context.scene.IEAS_properties.Halberd,
+            'M': context.scene.IEAS_properties.Mace,                 'Q': context.scene.IEAS_properties.Quarterstaff,
+            'S': context.scene.IEAS_properties.Longsword,            'W': context.scene.IEAS_properties.Warhammer,
         }
         return animationWeaponFolderNames
-    
-    @staticmethod
-    def retrieveE000AnimationWeaponFolderNames(context):
-        animationE000WeaponFolderNames = {            
-            'A': context.scene.IEAS_properties.Axe,         'B': context.scene.IEAS_properties.Longbow,
-            'C': context.scene.IEAS_properties.Club,        'D': context.scene.IEAS_properties.Dagger,
-            'F': context.scene.IEAS_properties.Flail,       'H': context.scene.IEAS_properties.Halberd,
-            'M': context.scene.IEAS_properties.Mace,        'Q': context.scene.IEAS_properties.Quarterstaff,
-            'S': context.scene.IEAS_properties.Longsword,   'W': context.scene.IEAS_properties.Warhammer,
-        }
-        return animationE000WeaponFolderNames
     
     @staticmethod
     def retrieveCameraPosFolderNames(context):
@@ -979,9 +973,11 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.                   
+            # Only weapon collection names(is equal weapon folder names) are needed and deactivated.
+            weaponFoldernames = set(typeParameters.animationWeaponFolderNames.values())                   
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
+                if (collection.name in weaponFoldernames):
+                    collection.exclude = True            
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1012,7 +1008,8 @@ class IEAS_AnimationTypes():
             print("type2000: Executing complex logic for 2000 type.")
             # Stores the initial 'holdout' state of the creature collection before modification.
             # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
-            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            holdout             = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            weaponFoldernames   = set(typeParameters.animationWeaponFolderNames.values())
             
             # ----- Debugging
             # TODO: Delete print
@@ -1027,63 +1024,72 @@ class IEAS_AnimationTypes():
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collectionName  = collection.name
-                # Finds the corresponding weapon key for the collection name.
-                # "next" is used for a single, fast lookup with built-in error handling.
+                # Finds the corresponding weapon key for the collection name.     
                 # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
-                wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
+                wovlCheck   = [key for key, value in typeParameters.animationWeaponFolderNames.items() if value == collectionName]
+                # "next" is used for a single, fast lookup with built-in error handling.
+                wovl        = next((key for key in wovlCheck if typeParameters.animationWeaponToggles.get(key, False) == True), None)
                 
-                # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
-                if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
-                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
-                    # All other weapon collections remain excluded (invisible) by default.
-                    collection.exclude=False
-                    
-                    # Constructs the base output folder path for the current weapon.
-                    weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
-                    weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
-                    
-                    # Creates a subfolder for the specific weapon and camera angle.
-                    weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
-                    if not os.path.exists(weapon_position_folder):
-                        os.makedirs(weapon_position_folder)
-                    
-                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                    # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                    else:
-                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                # Prevents altering collections which are not part of the weapon and creature collection.
+                if ( (collectionName in weaponFoldernames) or (collectionName == typeParameters.CreatureCollectionName) ):
+                    # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                    if(wovl != None):
+                        # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                        # All other weapon collections remain excluded (invisible) by default.
+                        collection.exclude=False
                         
-                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
-                    bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
-                    # This is the actual rendering process.
-                    # `animation=False` renders a single still image.
-                    # `write_still=True` saves the rendered image to the specified `filepath`.
-                    # The first `False` argument disables undo support for the operation.
-                    renderFrame = bpy.ops.render.render
-                    renderFrame(  False,
-                                  animation     =False,
-                                  write_still   =True)
+                        # Constructs the base output folder path for the current weapon.
+                        weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
+                        weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
+                        
+                        # Creates a subfolder for the specific weapon and camera angle.
+                        weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
+                        if not os.path.exists(weapon_position_folder):
+                            os.makedirs(weapon_position_folder)
+                        
+                        # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                        # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                        if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
+                            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        else:
+                            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                            
+                        # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                        bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
+                        # This is the actual rendering process.
+                        # `animation=False` renders a single still image.
+                        # `write_still=True` saves the rendered image to the specified `filepath`.
+                        # The first `False` argument disables undo support for the operation.
+                        renderFrame = bpy.ops.render.render
+                        renderFrame(  False,
+                                      animation     =False,
+                                      write_still   =True)
 
-                    # ----- Debugging
-                    # TODO: Delete print
-                    #print("position_folder:",position_folder)
-                    # TODO: Delete print
-                    print("fileName:",fileName)
-                    # TODO: Delete print
-                    print("weapon_folder:",weapon_folder)
-                    # TODO: Delete print
-                    print("weapon_position_folder:",weapon_position_folder)
-                       
-                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
-                    # This ensures only one weapon collection is active at any given time for subsequent renders.
-                    collection.exclude = True
+                        # ----- Debugging
+                        # TODO: Delete print
+                        #print("position_folder:",position_folder)
+                        # TODO: Delete print
+                        print("fileName:",fileName)
+                        # TODO: Delete print
+                        print("weapon_folder:",weapon_folder)
+                        # TODO: Delete print
+                        print("weapon_position_folder:",weapon_position_folder)                         
+                           
+                        # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                        # This ensures only one weapon collection is active at any given time for subsequent renders.
+                        collection.exclude = True
  
                 # ----- Debugging
                 # TODO: Delete print
                 print("collectionName:",collectionName)
                 # TODO: Delete print
+                print("typeParameters.CreatureCollectionName:",typeParameters.CreatureCollectionName)
+                # TODO: Delete print
                 print("wovl:",wovl)
+                # TODO: Delete print
+                #print("1H folder name:", typeParameters.animationWeaponFolderNames.get('1H'))
+                # TODO: Delete print
+                #print("wovlCheck:",wovlCheck)
             
             # Resets the 'holdout' state of the creature collection to its original value.
             # This ensures the creature is visible again after weapon rendering is complete, if it was originally visible.
@@ -1281,9 +1287,12 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.                   
+            # Only weapon collection names(is equal weapon folder names) are needed and deactivated.
+            # TODO: Armor collection check is also needed!
+            weaponFoldernames = set(typeParameters.animationWeaponFolderNames.values())
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
+                if (collection.name in weaponFoldernames):
+                    collection.exclude = True           
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1391,9 +1400,12 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.                   
+            # Only weapon collection names(is equal weapon folder names) are needed and deactivated.
+            # TODO: Armor collection check is also needed!
+            weaponFoldernames = set(typeParameters.animationWeaponFolderNames.values())
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
+                if (collection.name in weaponFoldernames):
+                    collection.exclude = True  
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1501,9 +1513,12 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.                   
+            # Only weapon collection names(is equal weapon folder names) are needed and deactivated.
+            # TODO: Armor collection check is also needed!
+            weaponFoldernames = set(typeParameters.animationWeaponFolderNames.values())
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
+                if (collection.name in weaponFoldernames):
+                    collection.exclude = True              
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1654,9 +1669,11 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.                   
+            # Only weapon collection names(is equal weapon folder names) are needed and deactivated.
+            weaponFoldernames = set(typeParameters.animationWeaponFolderNames.values())
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
+                if (collection.name in weaponFoldernames):
+                    collection.exclude = True            
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1687,7 +1704,8 @@ class IEAS_AnimationTypes():
             print("type7000: Executing 'exclude' logic for type7000 monster sp0 type.")
             # Stores the initial 'holdout' state of the creature collection before modification.
             # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
-            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            holdout             = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            weaponFoldernames   = set(typeParameters.animationWeaponFolderNames.values())
             
             # ----- Debugging
             # TODO: Delete print
@@ -1702,53 +1720,60 @@ class IEAS_AnimationTypes():
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collectionName  = collection.name
-                # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
+                 # Finds the corresponding weapon key for the collection name.     
                 # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
-                wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
-                
-                # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
-                if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
-                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
-                    # All other weapon collections remain excluded (invisible) by default.
-                    collection.exclude=False
-                    
-                    # Constructs the base output folder path for the current weapon.
-                    weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
-                    weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
-                    
-                    # Creates a subfolder for the specific weapon and camera angle.
-                    weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
-                    if not os.path.exists(weapon_position_folder):
-                        os.makedirs(weapon_position_folder)
-                    
-                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                    # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                        
-                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
-                    bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
-                    # This is the actual rendering process.
-                    # `animation=False` renders a single still image.
-                    # `write_still=True` saves the rendered image to the specified `filepath`.
-                    # The first `False` argument disables undo support for the operation.
-                    renderFrame = bpy.ops.render.render
-                    renderFrame(  False,
-                                  animation     =False,
-                                  write_still   =True)
-
+                wovlCheck   = [key for key, value in typeParameters.animationWeaponFolderNames.items() if value == collectionName]
+                # "next" is used for a single, fast lookup with built-in error handling.
+                wovl        = next((key for key in wovlCheck if typeParameters.animationWeaponToggles.get(key, False) == True), None)
+                # Prevents altering collections which are not part of the weapon and creature collection.
+                if ( (collectionName in weaponFoldernames) or (collectionName == typeParameters.CreatureCollectionName) ):
                     # ----- Debugging
                     # TODO: Delete print
-                    #print("position_folder:",position_folder)
-                    # TODO: Delete print
-                    print("fileName:",fileName)
-                    # TODO: Delete print
-                    print("weapon_folder:",weapon_folder)
-                    # TODO: Delete print
-                    print("weapon_position_folder:",weapon_position_folder)
-                       
-                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
-                    # This ensures only one weapon collection is active at any given time for subsequent renders.
-                    collection.exclude = True
+                    print("collectionName:",collectionName)
+                    print("wovl:",wovl)
+                    # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                    if (wovl != None):
+                        # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                        # All other weapon collections remain excluded (invisible) by default.
+                        collection.exclude=False
+                        
+                        # Constructs the base output folder path for the current weapon.
+                        weapon_folder           = os.path.join(typeParameters.pathSaveAt, collectionName)
+                        weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
+                        
+                        # Creates a subfolder for the specific weapon and camera angle.
+                        weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
+                        if not os.path.exists(weapon_position_folder):
+                            os.makedirs(weapon_position_folder)
+                        
+                        # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                        # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                            
+                        # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                        bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
+                        # This is the actual rendering process.
+                        # `animation=False` renders a single still image.
+                        # `write_still=True` saves the rendered image to the specified `filepath`.
+                        # The first `False` argument disables undo support for the operation.
+                        renderFrame = bpy.ops.render.render
+                        renderFrame(  False,
+                                      animation     =False,
+                                      write_still   =True)
+
+                        # ----- Debugging
+                        # TODO: Delete print
+                        #print("position_folder:",position_folder)
+                        # TODO: Delete print
+                        print("fileName:",fileName)
+                        # TODO: Delete print
+                        print("weapon_folder:",weapon_folder)
+                        # TODO: Delete print
+                        print("weapon_position_folder:",weapon_position_folder)
+                           
+                        # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                        # This ensures only one weapon collection is active at any given time for subsequent renders.
+                        collection.exclude = True
  
                 # ----- Debugging
                 # TODO: Delete print
@@ -1771,9 +1796,11 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.
+            # Only weapon collection names(is equal weapon folder names) are needed and deactivated.
+            weaponFoldernames = set(typeParameters.animationWeaponFolderNames.values())
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True
+                if (collection.name in weaponFoldernames):
+                    collection.exclude = True
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1801,7 +1828,8 @@ class IEAS_AnimationTypes():
             print("type7000: Executing 'exclude' logic for type7000 monster sp1 type.")
             # Stores the initial 'holdout' state of the creature collection before modification.
             # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer.
-            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            holdout             = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            weaponFoldernames   = set(typeParameters.animationWeaponFolderNames.values())
             
             # ----- Debugging
             # TODO: Delete print
@@ -1816,53 +1844,57 @@ class IEAS_AnimationTypes():
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collectionName  = collection.name
-                # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
+                # Finds the corresponding weapon key for the collection name.     
                 # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
-                wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
+                wovlCheck   = [key for key, value in typeParameters.animationWeaponFolderNames.items() if value == collectionName]
+                # "next" is used for a single, fast lookup with built-in error handling.
+                wovl        = next((key for key in wovlCheck if typeParameters.animationWeaponToggles.get(key, False) == True), None)
                 
-                # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
-                if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
-                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
-                    # All other weapon collections remain excluded (invisible) by default.
-                    collection.exclude=False
-                    
-                    # Constructs the base output folder path for the current weapon.
-                    weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
-                    weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
-                    
-                    # Creates a subfolder for the specific weapon and camera angle.
-                    weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
-                    if not os.path.exists(weapon_position_folder):
-                        os.makedirs(weapon_position_folder)                  
-                    
-                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                    # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                # Prevents altering collections which are not part of the weapon and creature collection.
+                if ( (collectionName in weaponFoldernames) or (collectionName == typeParameters.CreatureCollectionName) ):               
+                    # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                    if(wovl != None):
+                        # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                        # All other weapon collections remain excluded (invisible) by default.
+                        collection.exclude=False
                         
-                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
-                    bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
-                    # This is the actual rendering process.
-                    # `animation=False` renders a single still image.
-                    # `write_still=True` saves the rendered image to the specified `filepath`.
-                    # The first `False` argument disables undo support for the operation.
-                    renderFrame = bpy.ops.render.render
-                    renderFrame(  False,
-                                  animation     =False,
-                                  write_still   =True)
+                        # Constructs the base output folder path for the current weapon.
+                        weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
+                        weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
+                        
+                        # Creates a subfolder for the specific weapon and camera angle.
+                        weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
+                        if not os.path.exists(weapon_position_folder):
+                            os.makedirs(weapon_position_folder)                  
+                        
+                        # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                        # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}{wovl}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                            
+                        # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                        bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
+                        # This is the actual rendering process.
+                        # `animation=False` renders a single still image.
+                        # `write_still=True` saves the rendered image to the specified `filepath`.
+                        # The first `False` argument disables undo support for the operation.
+                        renderFrame = bpy.ops.render.render
+                        renderFrame(  False,
+                                      animation     =False,
+                                      write_still   =True)
 
-                    # ----- Debugging
-                    # TODO: Delete print
-                    #print("position_folder:",position_folder)
-                    # TODO: Delete print
-                    print("fileName:",fileName)
-                    # TODO: Delete print
-                    print("weapon_folder:",weapon_folder)
-                    # TODO: Delete print
-                    print("weapon_position_folder:",weapon_position_folder)
-                       
-                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
-                    # This ensures only one weapon collection is active at any given time for subsequent renders.
-                    collection.exclude = True
+                        # ----- Debugging
+                        # TODO: Delete print
+                        #print("position_folder:",position_folder)
+                        # TODO: Delete print
+                        print("fileName:",fileName)
+                        # TODO: Delete print
+                        print("weapon_folder:",weapon_folder)
+                        # TODO: Delete print
+                        print("weapon_position_folder:",weapon_position_folder)
+                           
+                        # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                        # This ensures only one weapon collection is active at any given time for subsequent renders.
+                        collection.exclude = True
  
                 # ----- Debugging
                 # TODO: Delete print
@@ -1909,9 +1941,11 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.                   
+            # Only weapon collection names(is equal weapon folder names) are needed and deactivated.
+            weaponFoldernames = set(typeParameters.animationWeaponFolderNames.values())
             for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
+                if (collection.name in weaponFoldernames):
+                    collection.exclude = True            
             # Activates only creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
@@ -1946,7 +1980,8 @@ class IEAS_AnimationTypes():
             print("type8000: Executing complex logic for 8000 type.")
             # Stores the initial 'holdout' state of the creature collection before modification.
             # 'holdout' makes objects within the collection invisible during rendering without excluding them from the view layer. 
-            holdout = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            holdout             = bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].holdout
+            weaponFoldernames   = set(typeParameters.animationWeaponFolderNames.values())
             
             # ----- Debugging
             # TODO: Delete print
@@ -1961,57 +1996,60 @@ class IEAS_AnimationTypes():
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collectionName  = collection.name
-                # Finds the corresponding weapon key for the collection name.
-                # "next" is used for a single, fast lookup with built-in error handling.
+                # Finds the corresponding weapon key for the collection name.     
                 # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
-                wovl = next((key for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
+                wovlCheck   = [key for key, value in typeParameters.animationWeaponFolderNames.items() if value == collectionName]
+                # "next" is used for a single, fast lookup with built-in error handling.
+                wovl        = next((key for key in wovlCheck if typeParameters.animationWeaponToggles.get(key, False) == True), None)
                 
-                # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
-                if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
-                    # Deactivates exclusion for the current weapon collection, making it visible for rendering.
-                    # All other weapon collections remain excluded (invisible) by default.
-                    collection.exclude=False
-                    
-                    # Constructs the base output folder path for the current weapon.
-                    weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
-                    weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
-                    
-                    # Creates a subfolder for the specific weapon and camera angle.
-                    weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
-                    if not os.path.exists(weapon_position_folder):
-                        os.makedirs(weapon_position_folder)
-                    
-                    # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
-                    # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
-                    if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                    else:
-                        fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
-                    
-                    # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
-                    bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
-                    # This is the actual rendering process.
-                    # `animation=False` renders a single still image.
-                    # `write_still=True` saves the rendered image to the specified `filepath`.
-                    # The first `False` argument disables undo support for the operation.
-                    renderFrame = bpy.ops.render.render
-                    renderFrame(  False,
-                                  animation     =False,
-                                  write_still   =True)
+                # Prevents altering collections which are not part of the weapon and creature collection.
+                if ( (collectionName in weaponFoldernames) or (collectionName == typeParameters.CreatureCollectionName) ):
+                    # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
+                    if (wovl != None):
+                        # Deactivates exclusion for the current weapon collection, making it visible for rendering.
+                        # All other weapon collections remain excluded (invisible) by default.
+                        collection.exclude=False
+                        
+                        # Constructs the base output folder path for the current weapon.
+                        weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
+                        weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
+                        
+                        # Creates a subfolder for the specific weapon and camera angle.
+                        weapon_position_folder = os.path.join(weapon_animation_folder, typeParameters.positionKey)                  
+                        if not os.path.exists(weapon_position_folder):
+                            os.makedirs(weapon_position_folder)
+                        
+                        # Constructs the full filename for the current sprite, incorporating prefix, weapon identifier (wovl),
+                        # animation key, camera position, and zero-padded frame number. East-facing sprites get an 'E' suffix.
+                        if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
+                            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        else:
+                            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{wovl}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                        
+                        # Sets Blender's render output filepath for the current image. This is where the next rendered image will be saved.
+                        bpy.context.scene.render.filepath = os.path.join(weapon_position_folder, fileName)                
+                        # This is the actual rendering process.
+                        # `animation=False` renders a single still image.
+                        # `write_still=True` saves the rendered image to the specified `filepath`.
+                        # The first `False` argument disables undo support for the operation.
+                        renderFrame = bpy.ops.render.render
+                        renderFrame(  False,
+                                      animation     =False,
+                                      write_still   =True)
 
-                    # ----- Debugging
-                    # TODO: Delete print
-                    #print("position_folder:",position_folder)
-                    # TODO: Delete print
-                    print("fileName:",fileName)
-                    # TODO: Delete print
-                    print("weapon_folder:",weapon_folder)
-                    # TODO: Delete print
-                    print("weapon_position_folder:",weapon_position_folder)
-                       
-                    # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
-                    # This ensures only one weapon collection is active at any given time for subsequent renders.
-                    collection.exclude = True
+                        # ----- Debugging
+                        # TODO: Delete print
+                        #print("position_folder:",position_folder)
+                        # TODO: Delete print
+                        print("fileName:",fileName)
+                        # TODO: Delete print
+                        print("weapon_folder:",weapon_folder)
+                        # TODO: Delete print
+                        print("weapon_position_folder:",weapon_position_folder)
+                           
+                        # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
+                        # This ensures only one weapon collection is active at any given time for subsequent renders.
+                        collection.exclude = True
  
                 # ----- Debugging
                 # TODO: Delete print
@@ -2029,8 +2067,8 @@ class IEAS_AnimationTypes():
         """Method for handling 9000 type logic."""
         if (typeParameters.exclude == False):
             # Used to identify which sprite file is defined for which sequence
-            sequences = IEAS_Data.retrieveSequencesType9000()
-            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            sequences           = IEAS_Data.retrieveSequencesType9000()
+            animationSequence   = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
@@ -2053,8 +2091,8 @@ class IEAS_AnimationTypes():
         """Method for handling A000 type logic."""
         if (typeParameters.exclude == False):
              # Used to identify which sprite file is defined for which sequence
-            sequences = IEAS_Data.retrieveSequencesTypeA000()
-            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            sequences           = IEAS_Data.retrieveSequencesTypeA000()
+            animationSequence   = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
@@ -2077,8 +2115,8 @@ class IEAS_AnimationTypes():
         """Method for handling B000 type logic."""
         if (typeParameters.exclude == False):
             # Used to identify which sprite file is defined for which sequence
-            sequences = IEAS_Data.retrieveSequencesTypeB000()
-            animationSequence = sequences[typeParameters.animationKey]
+            sequences           = IEAS_Data.retrieveSequencesTypeB000()
+            animationSequence   = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -2100,8 +2138,8 @@ class IEAS_AnimationTypes():
         """Method for handling C000 type logic."""
         if (typeParameters.exclude == False):
             # Used to identify which sprite file is defined for which sequence
-            sequences = IEAS_Data.retrieveSequencesTypeC000()
-            animationSequence = sequences[typeParameters.animationKey]
+            sequences           = IEAS_Data.retrieveSequencesTypeC000()
+            animationSequence   = sequences[typeParameters.animationKey]
             # Constructs the filename for the current sprite, including prefix, resref, animation, position, and padded frame number.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
                 fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
@@ -2191,10 +2229,11 @@ class IEAS_AnimationTypes():
             # Iterates through all top-level collections in the current view layer to manage their visibility.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collectionName  = collection.name
-                # Finds the corresponding weapon key (e.g., 'A', 'B', 'C') for the collection name.
+                # Finds the corresponding weapon key for the collection name.     
                 # This key is also used as the <wovl> (weapon overlay) identifier in the filename.
-                # Also, key[0] is used for E000 specifically as only the first letter of the key is needed.
-                wovl = next((key[0] for key,value in typeParameters.animationWeaponFolderNames.items() if value == collectionName), None)
+                wovlCheck   = [key for key, value in typeParameters.animationWeaponFolderNames.items() if value == collectionName]
+                # "next" is used for a single, fast lookup with built-in error handling.
+                wovl        = next((key[0] for key in wovlCheck if typeParameters.animationWeaponToggles.get(key, False) == True), None)
                 
                 # Prevents altering collections which are not part of the weapon and creature collection.
                 if ( (collectionName in weaponFoldernames) or (collectionName == typeParameters.CreatureCollectionName) ):
@@ -2203,13 +2242,13 @@ class IEAS_AnimationTypes():
                     print("collectionName:",collectionName)
                     print("wovl:",wovl)
                     # Checks if the collection corresponds to a recognized weapon animation and if that weapon is enabled for rendering.
-                    if ( (wovl != None) and (typeParameters.animationWeaponToggles[wovl] == True) ):
+                    if (wovl != None):
                         # Deactivates exclusion for the current weapon collection, making it visible for rendering.
                         # All other weapon collections remain excluded (invisible) by default.
                         collection.exclude=False
                         
                         # Constructs the base output folder path for the current weapon.
-                        weapon_folder = os.path.join(typeParameters.pathSaveAt, collectionName)
+                        weapon_folder           = os.path.join(typeParameters.pathSaveAt, collectionName)
                         weapon_animation_folder = os.path.join(weapon_folder, typeParameters.animation)
                         
                         # Creates a subfolder for the specific weapon and camera angle.
@@ -2244,6 +2283,8 @@ class IEAS_AnimationTypes():
                         print("weapon_folder:",weapon_folder)
                         # TODO: Delete print
                         print("weapon_position_folder:",weapon_position_folder)
+                        # TODO: Delete print
+                        print("wovlCheck:",wovlCheck)
                            
                         # After rendering the current weapon's sprite for this frame/angle, its collection is excluded again.
                         # This ensures only one weapon collection is active at any given time for subsequent renders.
@@ -3074,7 +3115,7 @@ class IEAS_OT_IniFiles(Operator):
                                 else:
                                     if (weapon != ""):
                                         if(selectedType == "E000"):
-                                            pngFile         = f"{filenamePrefix}{sequenceKey}{weaponKey}_{orientation}_{str(frame).zfill(5)}.png"
+                                            pngFile         = f"{filenamePrefix}{weaponKey}{sequenceKey}_{orientation}_{str(frame).zfill(5)}.png"
                                             fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
                                         else:
                                             pngFile         = f"{filenamePrefix}{sequenceKey}{weaponKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
@@ -3096,14 +3137,14 @@ class IEAS_OT_IniFiles(Operator):
                                 if(orientation in orientationsEast):                             
                                     if (weapon != ""):
                                         if(selectedType == "E000"):
-                                            pngFile         = f"{filenamePrefix}{weaponKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
+                                            pngFile         = f"{filenamePrefix}{weaponKey}{sequenceKey}E_{orientation}_{str(frame).zfill(5)}.png"
                                             fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
                                         else:
                                             pngFile         = f"{filenamePrefix}{sequenceKey}{weaponKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
                                             fullFramePath   = os.path.join(pathSaveAt,weapon,animation,orientationFolder,pngFile)
                                     else:
                                         if(selectedType == "E000"):
-                                            pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
+                                            pngFile         = f"{filenamePrefix}{sequenceKey}E_{orientation}_{str(frame).zfill(5)}.png"
                                             fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
                                         else:
                                             pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
@@ -3309,7 +3350,6 @@ class IEAS_OT_IniFiles(Operator):
         animationToggles                = IEAS_Data.retrieveAnimationToggles(context)
         cameraPosToggles                = IEAS_Data.retrieveCameraPosToggles(context)      
         animationFolderNames            = IEAS_Data.retrieveAnimationFolderNames(context)
-        animationE000WeaponFolderNames  = IEAS_Data.retrieveE000AnimationWeaponFolderNames(context)
         animationWeaponFolderNames      = IEAS_Data.retrieveAnimationWeaponFolderNames(context)
         cameraPosFolderNames            = IEAS_Data.retrieveCameraPosFolderNames(context)
         animationWeaponToggles          = IEAS_Data.retrieveAnimationWeaponToggles(context)
@@ -3433,16 +3473,19 @@ class IEAS_OT_IniFiles(Operator):
                sequences       = IEAS_Data.retrieveSequencesType2000()
                animationOrder  = { 'G1':["WK","SD","SC","GH","DE","TW",],
                                    'G2':["A1","A2","A3"]}
+               excludeSequence = set()
             elif(selectedType == '8000'):
                 sequences       = IEAS_Data.retrieveSequencesType8000()
                 animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
                                     'G2':["A1","A2","A3"]}
+                excludeSequence = set()
             elif(selectedType == 'E000'):
                 # Not stored in IEAS_Data as it is needed only once.
-                sequences        = {'A1': "A1", 'A2': "A2", 'A3': "A3", 'A4': "A4", 'CA': "CA", 'DE': "DE", 'GH': "GH",
-                                    'GU': "GU", 'SC': "SC", 'SD': "SD", 'SL': "SL", 'SP': "SP", 'TW': "TW", 'WK': "WK",}
-                animationOrder   = {'A1': ["A1"], 'A2': ["A2"], 'A3': ["A3"], 'A4': ["A4"], 'CA': ["CA"], 'DE': ["DE"], 'GH': ["GH"],
-                                    'GU': ["GU"], 'SC': ["SC"], 'SD': ["SD"], 'SL': ["SL"], 'SP': ["SP"], 'TW': ["TW"], 'WK': ["WK"],}
+                sequences           = { 'A1': "A1", 'A2': "A2", 'A3': "A3", 'A4': "A4", 'CA': "CA", 'DE': "DE", 'GH': "GH",
+                                        'GU': "GU", 'SC': "SC", 'SD': "SD", 'SL': "SL", 'SP': "SP", 'TW': "TW", 'WK': "WK",}
+                animationOrder      = { 'A1': ["A1"], 'A2': ["A2"], 'A3': ["A3"], 'A4': ["A4"], 'CA': ["CA"], 'DE': ["DE"], 'GH': ["GH"],
+                                        'GU': ["GU"], 'SC': ["SC"], 'SD': ["SD"], 'SL': ["SL"], 'SP': ["SP"], 'TW': ["TW"], 'WK': ["WK"],}
+                excludeSequence     = { 'DE', 'TW'}
 
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
@@ -3474,15 +3517,11 @@ class IEAS_OT_IniFiles(Operator):
                                                                                                     animation, filenamePrefix, selectedType, currentPosition = position)
                     # Weapon overlay ini files
                     for weaponKey, weaponAnimation in animationWeaponToggles.items():             
-                        if(weaponAnimation == True):                            
+                        if( (weaponAnimation == True) and (sequence not in excludeSequence)):                            
                             filename        = filenamePrefix + weaponKey + sequence
                             fullPathWest    = os.path.join(pathSaveAt, filename + ".INI")
                             fullPathEast    = os.path.join(pathSaveAt, filename + "E" + ".INI")
-                            
-                            if(selectedType == 'E000'):
-                                weapon = animationE000WeaponFolderNames[weaponKey]
-                            else:
-                                weapon = animationWeaponFolderNames[weaponKey]
+                            weapon          = animationWeaponFolderNames[weaponKey]
                                 
                             if(sequence not in foundSequences):
                                 allFilenames[sequence]['Westside'].append(fullPathWest)     
