@@ -3089,13 +3089,17 @@ class IEAS_OT_IniFiles(Operator):
     @classmethod
     def writeFrames_withWeaponEastSequences(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                            orientations,orientationsEast, cycles, sequence, sequenceKey, 
+                                            orientations, orientationsEast, cycles, sequence, sequenceKey, 
                                             animation, filenamePrefix, selectedType, currentPosition, weapon="", weaponKey=None):
         """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
         fullPath        = {'Westside': fullPathWest, 'Eastside': fullPathEast}
         positionWest    = currentPosition['Westside']
         positionEast    = currentPosition['Eastside']
+
+        # Creates and writes into files
         for pathKey, path in fullPath.items():
+            if (path is None):
+                continue
             with open(path, mode) as file:
                 # Content when INI is first time generated.
                 if (mode == 'w'):
@@ -3134,7 +3138,7 @@ class IEAS_OT_IniFiles(Operator):
                                     positionWest += 1
                                     
                             if(pathKey=="Eastside"):
-                                if(orientation in orientationsEast):                             
+                                if(orientation in orientationsEast):                                    
                                     if (weapon != ""):
                                         if(selectedType == "E000"):
                                             pngFile         = f"{filenamePrefix}{weaponKey}{sequenceKey}E_{orientation}_{str(frame).zfill(5)}.png"
@@ -3162,13 +3166,16 @@ class IEAS_OT_IniFiles(Operator):
         return (position, cycles)
     
     @classmethod
-    def writeCycles_withWeaponEastSequences(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
-        """Writes the cycles section of the INI file with fixed animation order."""
+    def writeCycles_withWeaponEastSequences(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                                                              
+        """Writes the cycles section of the INI file with fixed animation order."""       
         # allFilenames{sequence:{orientationKey:[filepaths]}}
         for sequence, orientationKeys in allFilenames.items():
             currentOrder = animationOrder[sequence]
             for orientationKey, fullPaths in orientationKeys.items():
                 for fullPath in fullPaths:
+                    if (fullPath is None):
+                        continue
+                    # Starts writing into file.    
                     cyclePosition = 0
                     with open(fullPath, 'a') as file:
                         file.write("\n[Cycles]\n")
@@ -3204,6 +3211,9 @@ class IEAS_OT_IniFiles(Operator):
         positionWest    = currentPosition['Westside']
         positionEast    = currentPosition['Eastside']
         for pathKey, path in fullPath.items():
+            if (path is None):
+                continue
+            # Start of writing into file.    
             with open(path, mode) as file:
                 # Content when INI is first time generated.
                 if (mode == 'w'):
@@ -3248,7 +3258,10 @@ class IEAS_OT_IniFiles(Operator):
         for sequence, fullPaths in allFilenames.items():
             currentOrder = animationOrder[sequence]
             for fullPathKey, fullPath in fullPaths.items():
+                if (fullPath is None):
+                    continue
                 cyclePosition = 0
+                # Start of writing into file.
                 with open(fullPath, 'a') as file:
                     file.write("\n[Cycles]\n")
                     for animationType in currentOrder:
@@ -3340,6 +3353,8 @@ class IEAS_OT_IniFiles(Operator):
         """Writes the filters section of the INI file."""
         for sequence,fullPaths in allFilenames.items():
             for fullPath in fullPaths:
+                if(fullPath is None):
+                    continue
                 with open(fullPath,'a') as file:
                     file.write(NIfilters)
     
@@ -3467,7 +3482,18 @@ class IEAS_OT_IniFiles(Operator):
         # ------------------------------------------------------
         if (selectedType == '2000' or selectedType == '8000' or selectedType == 'E000'):
             orientations    = orientations8D
-            orientationsEast= ['north_east', 'east', 'south_east']
+            orientationsEast= ['north_east', 'east', 'south_east']           
+            createWest      = []
+            createEast      = []
+            fullPathWest    = None
+            fullPathEast    = None       
+            # Checks if one of the orientations has only false values.
+            for orientation in orientations:
+                if(cameraPosToggles[orientation]):
+                    if(orientation in orientationsEast):
+                        createEast.append(cameraPosToggles[orientation])
+                    else:
+                        createWest.append(cameraPosToggles[orientation])
             
             if(selectedType == '2000'):
                sequences       = IEAS_Data.retrieveSequencesType2000()
@@ -3490,9 +3516,13 @@ class IEAS_OT_IniFiles(Operator):
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
-                    filenameSequence                = filenamePrefix + sequence
-                    fullPathWest                    = os.path.join(pathSaveAt, filenameSequence + ".INI")
-                    fullPathEast                    = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")
+                    filenameSequence = filenamePrefix + sequence
+                    # Creates the path if at least one orientation exists.
+                    if(createWest):
+                        fullPathWest = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                    if(createEast):
+                        fullPathEast = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")
+                        
                     animation                       = animationFolderNames[sequenceKey]
                     frameStart                      = int(bpy.data.actions.get(animation).frame_range[0])
                     frameEnd                        = int(bpy.data.actions.get(animation).frame_range[1])
@@ -3513,15 +3543,19 @@ class IEAS_OT_IniFiles(Operator):
                     # No weapon overlay INI files.    
                     positionTracker[sequence], cycles  = self.writeFrames_withWeaponEastSequences(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
                                                                                                     globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                                    orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                                    orientations, orientationsEast, cycles, sequence, sequenceKey,
                                                                                                     animation, filenamePrefix, selectedType, currentPosition = position)
                     # Weapon overlay ini files
                     for weaponKey, weaponAnimation in animationWeaponToggles.items():             
                         if( (weaponAnimation == True) and (sequence not in excludeSequence)):                            
                             filename        = filenamePrefix + weaponKey + sequence
-                            fullPathWest    = os.path.join(pathSaveAt, filename + ".INI")
-                            fullPathEast    = os.path.join(pathSaveAt, filename + "E" + ".INI")
-                            weapon          = animationWeaponFolderNames[weaponKey]
+                            # Creates the path if at least one orientation exists.
+                            if(createWest):
+                                fullPathWest    = os.path.join(pathSaveAt, filename + ".INI")
+                            if(createEast):
+                                fullPathEast    = os.path.join(pathSaveAt, filename + "E" + ".INI")
+                                
+                            weapon = animationWeaponFolderNames[weaponKey]
                                 
                             if(sequence not in foundSequences):
                                 allFilenames[sequence]['Westside'].append(fullPathWest)     
@@ -3529,9 +3563,9 @@ class IEAS_OT_IniFiles(Operator):
                                 
                             positionTracker[sequence], cycles  = self.writeFrames_withWeaponEastSequences(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
                                                                                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                                            orientations, orientationsEast, cycles, sequence, sequenceKey, 
-                                                                                                            animation, filenamePrefix, selectedType, currentPosition = position,
-                                                                                                            weapon=weapon, weaponKey=weaponKey)
+                                                                                                            orientations, orientationsEast, cycles, sequence, sequenceKey,
+                                                                                                            animation, filenamePrefix, selectedType,
+                                                                                                            currentPosition = position, weapon=weapon, weaponKey=weaponKey)
                     # E.g. animation in sequence G1 is used.
                     if(sequence not in foundSequences):
                         foundSequences.add(sequence)
@@ -3539,7 +3573,8 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCycles_withWeaponEastSequences(allFilenames, cycles, orientations, orientationsEast, animationOrder)
             # ----- [FILTERS]
             # Restructures for compatibility reasons.
-            restructeredFilenames = {seq: [path for paths in sides.values() for path in paths] for seq, sides in allFilenames.items()}
+            restructeredFilenames       = {seq: [path for paths in sides.values() for path in paths] for seq, sides in allFilenames.items()}
+            removedDublicatedFilenames  = {key: list(set(val)) for key, val in restructeredFilenames.items()}
             self.writeFilters(restructeredFilenames, NIfilters)
 
         # ------------------------
@@ -3592,6 +3627,10 @@ class IEAS_OT_IniFiles(Operator):
                 
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
+            createWest      = []
+            createEast      = []
+            fullPathWest    = None
+            fullPathEast    = None
             
             if(selectedType == '7000 monster old'):            
                 sequences       = IEAS_Data.retrieveSequencesType7000_monster_old()
@@ -3614,7 +3653,14 @@ class IEAS_OT_IniFiles(Operator):
                 animationOrder  = { 'G1':["SC","SD","GH","DE","TW"]}
             elif(selectedType == 'C000'):
                 sequences       = IEAS_Data.retrieveSequencesTypeC000()
-                animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW"]}
+                animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW"]}               
+            # Checks if one of the orientations has only false values.
+            for orientation in orientations:
+                if(cameraPosToggles[orientation]):
+                    if(orientation in orientationsEast):
+                        createEast.append(cameraPosToggles[orientation])
+                    else:
+                        createWest.append(cameraPosToggles[orientation])
             # TODO: Delete prints    
             print(f"sequences:{sequences}")
             print(f"animationOrder:{animationOrder}")
@@ -3633,9 +3679,16 @@ class IEAS_OT_IniFiles(Operator):
                     cycles.setdefault(sequence,{})
                     cycles[sequence].setdefault(sequenceKey,{})
                     
+                    # TODO: Delete prints    
+                    print(f"filenameSequence:{filenameSequence}")
+                    
                     if(sequence not in foundSequences):
-                        fullPathWest                    = os.path.join(pathSaveAt, filenameSequence + ".INI")
-                        fullPathEast                    = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")
+                        # Creates the path if at least one orientation exists.
+                        if(createWest):
+                            fullPathWest = os.path.join(pathSaveAt, filenameSequence + ".INI")
+                        if(createEast):
+                            fullPathEast = os.path.join(pathSaveAt, filenameSequence + "E" + ".INI")
+                        
                         allFilenames[sequence]          = {'Westside':fullPathWest, 'Eastside':fullPathEast}
                         positionTracker[sequence]       = {'Westside': 0, 'Eastside': 0}
                         position                        = positionTracker[sequence]
@@ -3646,7 +3699,7 @@ class IEAS_OT_IniFiles(Operator):
                         position                        = positionTracker[sequence]
                         mode                            = 'a'
                         
-                    # First INI files.    
+                    # First INI files.
                     positionTracker[sequence], cycles  = self.writeFrames_withEastSequences( mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
                                                                                             globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                                                             orientations, orientationsEast, cycles, sequence, sequenceKey, 
@@ -3656,6 +3709,8 @@ class IEAS_OT_IniFiles(Operator):
             # ----- [FILTERS]
             # Restructures for compatibility reasons.
             restructeredFilenames = {seq: list(sides.values()) for seq, sides in allFilenames.items()}
+            # TODO: Delete prints    
+            print(f"restructeredFilenames:{restructeredFilenames}")
             self.writeFilters(restructeredFilenames, NIfilters)
         # -------------------------
         # 7000 monster split bams 0
