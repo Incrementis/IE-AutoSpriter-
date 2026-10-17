@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 21),
+    "version": (0, 38, 22),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2369,9 +2369,13 @@ class IEAS_OT_Rotation(Operator):
         # Checks if the rotation is clockwise or counter-clockwise.
         if context.scene.IEAS_properties.Direction == 'CCW':
             rotationDegree = -rotationDegree
+        # Checks if 'Object List' is selected with an object(armature/rig)
+        if (context.scene.IEAS_properties.Object_List is None):
+            self.report({'ERROR'}, f"ERROR: Value in 'Object List' in step 1 is '{context.scene.IEAS_properties.Object_List}'! Perhaps no object is selected?")
+            return {'CANCELLED'}
         # Gets the Object List value from step 1 and rotates on the z-axis in degrees.
-        context.scene.IEAS_properties.Object_List.rotation_euler.z += rotationDegree*math.pi/180   
-            
+        context.scene.IEAS_properties.Object_List.rotation_euler.z += rotationDegree*math.pi/180
+
         return {'FINISHED'}
 
 # --------
