@@ -88,3 +88,6 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * [Blender 4.0 RIGIFY ＃6-1: Custom Rigs (theory)](https://youtu.be/Cq2Vw6EFXy0?list=PLdcL5aF8ZcJuG3kKcVgQQz36E3JXzijEH) by CGDive (Blender Rigging Tuts)
 * [Color difference](https://en.wikipedia.org/wiki/Color_difference#CIEDE2000) by Wikipedia
 * [How to Make Animated PIXEL ART Characters Sprites with Blender 2.9 | Quick and Easy TUTORIAL](https://www.youtube.com/watch?v=eSqb6II3WMM) by Soyaa
+* [Blender Skull - Part 1,2,3 - Main Head Shape, Top Teeth, Jaw | Basic Modeling Course (No Sculpt!)](https://www.youtube.com/watch?v=Yjvq7QTJtPs&list=PLH3QvbpQe8WRjEbi5CbqTwcauq_HBRI0T&index=1) by Blender Frenzy
+* [Blender 2.9 | How to make a Halloween Ghost Cloth Simulation + Easy Procedural Textures | TUTORIAL](https://www.youtube.com/watch?v=VsK_8JeWRyw) by Aria Faith Jones
+* [Damped Track Constraint | Blender Rigging Tutorial](https://www.youtube.com/watch?v=7glB4GTVTnM)
