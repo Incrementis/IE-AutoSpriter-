@@ -31,6 +31,7 @@
 /demos/blender4.5.5 LTS/8000 Hobgoblin
 /demos/blender4.5.5 LTS/9000 Ogre
 /demos/blender4.5.5 LTS/A000 Tunnel Worm
+/demos/blender4.5.5 LTS/E000 Ghost
 /demos/blender4.0(legacy)/*.blend1
 *.blend1
 *.png
