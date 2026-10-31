@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 22),
+    "version": (0, 38, 26),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -306,6 +306,16 @@ class IEAS_Data:
             'A1':'G2', 'A2':'G2', 'A3':'G2',
         }
         return sequencesType2000
+        
+    @staticmethod
+    def retrieveSequencesType3000_mirror0():
+        """Dictionary wrapper animation type 3000 mirror 0 - returns the sequence with respect to the animation(e.g. SD for idle)."""
+        sequencesType3000_mirror0 =  {
+            'DE':'G1', 'TW':'G1',       'SD':'G1',
+            'SC':'G2', 'EMERGE':'G2',   'HIDE':'G2',
+            'A1':'G3', 'CA':'G3',
+        }
+        return sequencesType3000_mirror0
         
     @staticmethod
     def retrieveSequencesType7000_monster_old():
@@ -1104,26 +1114,20 @@ class IEAS_AnimationTypes():
             # Checks the collection name in the scene collection  
             if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
                 # This is needed for the self.report error message in exception handling
-                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
-            
-            # Deactivates every collection found.                   
-            for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
-            # Activates only creature collection.
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")   
+            # Deactivates only lower creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = True
+            # Activates only main creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
-            # TODO:Delete!
+            #TODO:Delete!
             print("type3000M0: Executing 'exclude' logic for 3000M0 type.")
             print("typeParameters.CreatureCollectionName:",typeParameters.CreatureCollectionName)
         else:
             # TODO:Delete!
             print("type3000M0: Executing complex logic for 3000M0 type.") 
              # Used to identify which sprite file is defined for which sequence.
-            sequences = {
-                'DE':'G1', 'TW':'G1',       'SD':'G1',
-                'SC':'G2', 'EMERGE':'G2',   'HIDE':'G2',
-                'A1':'G3', 'CA':'G3',
-            }
-            animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
+            sequences           = IEAS_Data.retrieveSequencesType3000_mirror0()
+            animationSequence   = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Makes the main/upper creature collection visible for rendering.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].collection.hide_render  = False
@@ -1165,9 +1169,9 @@ class IEAS_AnimationTypes():
             # Constructs the full filename for the current sprite (for the lower part), using the 'D' prefix.
             # East-facing sprites get an 'E' suffix.
             if any(typeParameters.positionKey == position for position in typeParameters.cameraEasternPositions):                     
-                fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}D{animationSequence}E_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             else:
-                fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+                fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}D{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
                 
              # Sets Blender's render output filepath for the current lower-part image.
             bpy.context.scene.render.filepath = os.path.join(lowerpart_position_folder, fileName)
@@ -1192,10 +1196,9 @@ class IEAS_AnimationTypes():
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
             
-            # Deactivates every collection found.                   
-            for collection in bpy.context.view_layer.layer_collection.children:
-                collection.exclude = True            
-            # Activates only creature collection.
+            # Deactivates only lower creature collection.
+            bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = True
+            # Activates only main creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionName].exclude = False
             # TODO:Delete!
             print("type3000M1: Executing 'exclude' logic for 3000M1 type.")
@@ -3622,12 +3625,12 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCycles_withNoSequences(fullPath, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
-        # ----------------------------------------
-        # 7000 monster old, 9000, A000, B000, C000  
-        # ----------------------------------------
+        # -------------------------------------------------------
+        # 3000 mirror 0, 7000 monster old, 9000, A000, B000, C000  
+        # -------------------------------------------------------
         if (selectedType == '7000 monster old'  or selectedType == '9000' or
             selectedType == 'B000'              or selectedType == 'A000' or 
-            selectedType == 'C000'):
+            selectedType == 'C000'              or selectedType == '3000 mirror 0'):
                 
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
@@ -3636,7 +3639,12 @@ class IEAS_OT_IniFiles(Operator):
             fullPathWest    = None
             fullPathEast    = None
             
-            if(selectedType == '7000 monster old'):            
+            if(selectedType == '3000 mirror 0'):
+                sequences       = IEAS_Data.retrieveSequencesType3000_mirror0()
+                animationOrder  = { 'G1':["DE","TW","SD"],
+                                    'G2':["SC","EMERGE","HIDE"],
+                                    'G3':["A1","CA"]}
+            elif(selectedType == '7000 monster old'):
                 sequences       = IEAS_Data.retrieveSequencesType7000_monster_old()
                 animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
                                     'G2':["A1","A3","CA"]}
