@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 26),
+    "version": (0, 38, 29),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -311,9 +311,9 @@ class IEAS_Data:
     def retrieveSequencesType3000_mirror0():
         """Dictionary wrapper animation type 3000 mirror 0 - returns the sequence with respect to the animation(e.g. SD for idle)."""
         sequencesType3000_mirror0 =  {
-            'DE':'G1', 'TW':'G1',       'SD':'G1',
-            'SC':'G2', 'EMERGE':'G2',   'HIDE':'G2',
-            'A1':'G3', 'CA':'G3',
+            'WK':'G1','DE':'G1', 'TW':'G1', 'SC':'G1',
+            'SD':'G2', 'EMERGE':'G2', 'HIDE':'G2',
+            'A1':'G3', 'A3':'G3',
         }
         return sequencesType3000_mirror0
         
@@ -3045,6 +3045,105 @@ class IEAS_OT_IniFiles(Operator):
                             cyclePosition += 1
 
     @classmethod
+    def writeFramesType3000(cls, mode, allFrames, fullPathWest, fullPathEast, pathSaveAt, 
+                            globalContent, cameraPosToggles, cameraPosFolderNames, 
+                            orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                            animation, lowerPartFolder, filenamePrefix, currentPosition, lower=False):
+        """Writes the frame section of the INI file and returns cycles and the last position of the last registered frame."""      
+        fullPath        = {'Westside': fullPathWest, 'Eastside': fullPathEast}
+        positionWest    = currentPosition['Westside']
+        positionEast    = currentPosition['Eastside']
+        for pathKey, path in fullPath.items():
+            if (path is None):
+                continue
+            # Start of writing into file.    
+            with open(path, mode) as file:
+                # Content when INI is first time generated.
+                if (mode == 'w'):
+                    file.write(globalContent+"\n")
+                    file.write("[Frames]\n")
+                # Like south, north, etc.
+                for orientation in orientations:
+                    if(lower==False):
+                        cycles[sequence][sequenceKey].setdefault(orientation,[])
+                    # Writes to the file only if the model orientation is checked by the user.
+                    if(cameraPosToggles[orientation]):
+                        orientationFolder = cameraPosFolderNames[orientation]                                                   
+                        # Writes all selected frames to the INI file.
+                        for frame in allFrames:
+                            if(pathKey=="Westside"):
+                                if( (orientation in orientationsEast) and (lower==False)):
+                                    cycles[sequence][sequenceKey][orientation].append('')
+                                else:                                    
+                                    if(lower==False):
+                                        cycles[sequence][sequenceKey][orientation].append(str(positionWest))
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                                        file.write(f"{positionWest}={fullFramePath}:0\n")
+                                        positionWest += 1
+                                    elif(orientation not in orientationsEast):
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}D{sequence}_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,lowerPartFolder,animation,orientationFolder,pngFile)
+                                        file.write(f"{positionWest}={fullFramePath}:0\n")
+                                        positionWest += 1
+                                        
+                            if(pathKey=="Eastside"):
+                                if(orientation in orientationsEast):                                    
+                                    if(lower==False):
+                                        cycles[sequence][sequenceKey][orientation].append(str(positionEast))
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,"00-"+animation,orientationFolder,pngFile)
+                                    else:
+                                        pngFile         = f"{filenamePrefix}{sequenceKey}D{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
+                                        fullFramePath   = os.path.join(pathSaveAt,lowerPartFolder,animation,orientationFolder,pngFile)
+                                        
+                                    file.write(f"{positionEast}={fullFramePath}:0\n")
+                                    positionEast += 1
+                    elif(lower==False):
+                        # This is necessary if no frame exists for a cycle, but the cycle still needs to be written to the INI file.
+                        cycles[sequence][sequenceKey][orientation] = []
+                        
+        position = {'Westside': positionWest, 'Eastside': positionEast}
+        return (position, cycles)
+    
+    @classmethod
+    def writeCyclesType3000(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
+        """Writes the cycles section of the INI file with fixed animation order."""
+        # {Sequence:{Animation:{Orientation:[Positions of frames]}}}
+        for sequence, fullPaths in allFilenames.items():
+            currentOrder = animationOrder[sequence]
+            for fullPathKey, fullPath in fullPaths.items():
+                if (fullPath is None):
+                    continue
+                cyclePosition = 0
+                # Start of writing into file.
+                with open(fullPath, 'a') as file:
+                    file.write("\n[Cycles]\n")
+                    for animationType in currentOrder:
+                        for orientation in orientations:
+                            # Asks predefined conditions to prevent to many cascading if statements. 
+                            IsWestside = ((fullPathKey == 'Westside') and (orientation not in orientationsEast) and cycles[sequence].get(animationType))
+                            IsEastside = ((fullPathKey == 'Eastside') and (orientation in orientationsEast)     and cycles[sequence].get(animationType))
+                            # TODO: Delete Print
+                            print("cycles[sequence][animationType][orientation]:",cycles[sequence][animationType][orientation])
+                            if(IsWestside):
+                                if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                    frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                    file.write(f"{cyclePosition}={frames}\n")
+                                else:
+                                    file.write(f"{cyclePosition}=\n")                                 
+                            elif(IsEastside):
+                                if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
+                                    frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
+                                    file.write(f"{cyclePosition}={frames}\n")
+                                else:
+                                    file.write(f"{cyclePosition}=\n")           
+                            else:
+                                file.write(f"{cyclePosition}=\n")
+                                
+                            cyclePosition += 1
+
+    @classmethod
     def writeFrames_withNoSequences(cls, mode, allFrames,fullPath, pathSaveAt, 
                                     globalContent, cameraPosToggles, cameraPosFolderNames, 
                                     orientations, cycles, animationKey, animationFolder, filenamePrefix, currentPosition):
@@ -3583,7 +3682,91 @@ class IEAS_OT_IniFiles(Operator):
             restructeredFilenames       = {seq: [path for paths in sides.values() for path in paths] for seq, sides in allFilenames.items()}
             removedDublicatedFilenames  = {key: list(set(val)) for key, val in restructeredFilenames.items()}
             self.writeFilters(restructeredFilenames, NIfilters)
-
+        # -------------
+        # 3000 mirror 0
+        # -------------
+        if (selectedType == '3000 mirror 0'):             
+            orientations        = orientations8D
+            orientationsEast    = ['north_east', 'east', 'south_east']
+            createWest          = []
+            createEast          = []
+            fullPathWest        = None
+            fullPathEast        = None
+            allFilenamesLower   = {}
+            
+            if(selectedType == '3000 mirror 0'):
+                sequences       = IEAS_Data.retrieveSequencesType3000_mirror0()
+                animationOrder  = { 'G1':["WK","DE","TW","SC"],
+                                    'G2':["SD","EMERGE","HIDE"],
+                                    'G3':["A3","A1"]}
+            # Checks if one of the orientations has only false values.
+            for orientation in orientations:
+                if(cameraPosToggles[orientation]):
+                    if(orientation in orientationsEast):
+                        createEast.append(cameraPosToggles[orientation])
+                    else:
+                        createWest.append(cameraPosToggles[orientation])
+            # ----- [FRAMES]
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    filenameSequenceMain    = filenamePrefix + sequence
+                    filenameSequenceLower   = filenamePrefix + "D" + sequence
+                    animation               = animationFolderNames[sequenceKey]
+                    lowerPartFolder         = context.scene.IEAS_properties.Creature_Lower
+                    frameStart              = int(bpy.data.actions.get(animation).frame_range[0])
+                    frameEnd                = int(bpy.data.actions.get(animation).frame_range[1])
+                    # Calculates neccessary frame numbers.
+                    allFrames               = list(range(frameStart, frameEnd + 1, Every_X_Frame))
+                    # Prevents the need of if statments.
+                    cycles.setdefault(sequence,{})
+                    cycles[sequence].setdefault(sequenceKey,{})
+                    
+                    # TODO: Delete prints    
+                    print(f"filenameSequenceMain:{filenameSequenceMain}")
+                    
+                    if(sequence not in foundSequences):
+                        # Creates the path if at least one orientation exists.
+                        if(createWest):
+                            fullPathWest        = os.path.join(pathSaveAt, filenameSequenceMain + ".INI")
+                            fullPathWestLower   = os.path.join(pathSaveAt, filenameSequenceLower + ".INI")
+                        if(createEast):
+                            fullPathEast        = os.path.join(pathSaveAt, filenameSequenceMain + "E" + ".INI")
+                            fullPathEastLower   = os.path.join(pathSaveAt, filenameSequenceLower + "E" + ".INI")
+                        
+                        allFilenames[sequence]          = {'Westside':fullPathWest, 'Eastside':fullPathEast}
+                        allFilenamesLower[sequence]     = {'Westside':fullPathWestLower, 'Eastside':fullPathEastLower}
+                        positionTracker[sequence]       = {'Westside': 0, 'Eastside': 0}
+                        position                        = positionTracker[sequence]
+                        mode                            = 'w'
+                        # E.g. animation in sequence G1 is used.
+                        foundSequences.add(sequence) 
+                    else:
+                        position                        = positionTracker[sequence]
+                        mode                            = 'a'
+                        
+                    # Main creature INI files.
+                    positionTracker[sequence], cycles  = self.writeFramesType3000( mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
+                                                                                   globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                   orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                   animation,lowerPartFolder, filenamePrefix, currentPosition = position)
+                   # Lower part INI files.
+                    self.writeFramesType3000(   mode, allFrames, fullPathWestLower,fullPathEastLower, pathSaveAt, 
+                                                globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                animation, lowerPartFolder, filenamePrefix, currentPosition = position, lower=True)
+            # ----- [CYCLES]
+            # TODOD: Delete print
+            print("allFilenames:",allFilenames)
+            self.writeCyclesType3000(allFilenames, cycles, orientations, orientationsEast, animationOrder)
+            self.writeCyclesType3000(allFilenamesLower, cycles, orientations, orientationsEast, animationOrder)
+            # ----- [FILTERS]
+            # Restructures for compatibility reasons.
+            restructeredFilenames       = {seq: list(sides.values()) for seq, sides in allFilenames.items()}
+            restructeredFilenamesLower  = {seq: list(sides.values()) for seq, sides in allFilenamesLower.items()}
+            # TODO: Delete prints    
+            print(f"restructeredFilenames:{restructeredFilenames}")
+            self.writeFilters(restructeredFilenames, NIfilters)
+            self.writeFilters(restructeredFilenamesLower, NIfilters)
         # ------------------------
         # 4000 effect, D000 flying
         # ------------------------
@@ -3625,12 +3808,12 @@ class IEAS_OT_IniFiles(Operator):
             self.writeCycles_withNoSequences(fullPath, cycles, orientations, animationOrder)          
             # ----- [FILTERS]
             self.writeFilters(allFilenames, NIfilters)
-        # -------------------------------------------------------
-        # 3000 mirror 0, 7000 monster old, 9000, A000, B000, C000  
-        # -------------------------------------------------------
+        # ----------------------------------------
+        # 7000 monster old, 9000, A000, B000, C000  
+        # ----------------------------------------
         if (selectedType == '7000 monster old'  or selectedType == '9000' or
             selectedType == 'B000'              or selectedType == 'A000' or 
-            selectedType == 'C000'              or selectedType == '3000 mirror 0'):
+            selectedType == 'C000'):
                 
             orientations    = orientations8D
             orientationsEast= ['north_east', 'east', 'south_east']
@@ -3639,12 +3822,7 @@ class IEAS_OT_IniFiles(Operator):
             fullPathWest    = None
             fullPathEast    = None
             
-            if(selectedType == '3000 mirror 0'):
-                sequences       = IEAS_Data.retrieveSequencesType3000_mirror0()
-                animationOrder  = { 'G1':["DE","TW","SD"],
-                                    'G2':["SC","EMERGE","HIDE"],
-                                    'G3':["A1","CA"]}
-            elif(selectedType == '7000 monster old'):
+            if(selectedType == '7000 monster old'):
                 sequences       = IEAS_Data.retrieveSequencesType7000_monster_old()
                 animationOrder  = { 'G1':["WK","SC","SD","GH","DE","TW",],
                                     'G2':["A1","A3","CA"]}
@@ -5040,14 +5218,16 @@ class IEAS_PT_Animation(Panel):
         Toggles3000_mirror0 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1,       'Death':    context.scene.IEAS_properties.Use_DE,
             'Ready':    context.scene.IEAS_properties.Use_SC,       'Idle':     context.scene.IEAS_properties.Use_SD, 
-            'Dead':     context.scene.IEAS_properties.Use_TW,       'Cast':     context.scene.IEAS_properties.Use_CA,
+            'Dead':     context.scene.IEAS_properties.Use_TW,       'Attack3':  context.scene.IEAS_properties.Use_A3,
             'Emerge':   context.scene.IEAS_properties.Use_Emerge,   'Hide':     context.scene.IEAS_properties.Use_Hide,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles3000_mirror1 = {
             'Attack1':  context.scene.IEAS_properties.Use_A1,       'Death':    context.scene.IEAS_properties.Use_DE,
             'Ready':    context.scene.IEAS_properties.Use_SC,       'Idle':     context.scene.IEAS_properties.Use_SD, 
-            'Dead':     context.scene.IEAS_properties.Use_TW,       'Cast':     context.scene.IEAS_properties.Use_CA,
+            'Dead':     context.scene.IEAS_properties.Use_TW,       'Attack3':  context.scene.IEAS_properties.Use_A3,
             'Emerge':   context.scene.IEAS_properties.Use_Emerge,   'Hide':     context.scene.IEAS_properties.Use_Hide,
+            'Walk':     context.scene.IEAS_properties.Use_WK,
         }
         Toggles4000 = {
             'Death':    context.scene.IEAS_properties.Use_DE, 'Get_Hit':  context.scene.IEAS_properties.Use_GH,
