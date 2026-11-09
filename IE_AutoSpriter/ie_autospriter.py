@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 36),
+    "version": (0, 38, 37),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -3542,6 +3542,7 @@ class IEAS_OT_IniFiles(Operator):
             self.report({'ERROR'}, f"ERROR: No animation selected in 'Step 4: Animation'. At least one must be selected.")
             return {'CANCELLED'}
         
+        
         # -----------
         # 0000 effect
         # -----------
@@ -3626,7 +3627,14 @@ class IEAS_OT_IniFiles(Operator):
                 animationOrder      = { 'A1': ["A1"], 'A2': ["A2"], 'A3': ["A3"], 'A4': ["A4"], 'CA': ["CA"], 'DE': ["DE"], 'GH': ["GH"],
                                         'GU': ["GU"], 'SC': ["SC"], 'SD': ["SD"], 'SL': ["SL"], 'SP': ["SP"], 'TW': ["TW"], 'WK': ["WK"],}
                 excludeSequence     = { 'DE', 'TW'}
-
+            
+            # Checks if the animation/action in blender file exists.
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    if(bpy.data.actions.get(animationFolderNames[sequenceKey]) is None):
+                        self.report({'ERROR'}, f"ERROR: Couldn't find frames for '{animationFolderNames[sequenceKey]}'. Maybe the name for the animation/action in step 4 is incorrect?")
+                        return {'CANCELLED'}
+            
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -3720,6 +3728,13 @@ class IEAS_OT_IniFiles(Operator):
                         createEast.append(cameraPosToggles[orientation])
                     else:
                         createWest.append(cameraPosToggles[orientation])
+            # Checks if the animation/action in blender file exists.
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    if(bpy.data.actions.get(animationFolderNames[sequenceKey]) is None):
+                        self.report({'ERROR'}, f"ERROR: Couldn't find frames for '{animationFolderNames[sequenceKey]}'. Maybe the name for the animation/action in step 4 is incorrect?")
+                        return {'CANCELLED'}
+                    
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
                 if(animationToggles[sequenceKey] == True):
@@ -3865,7 +3880,13 @@ class IEAS_OT_IniFiles(Operator):
                     if(orientation in orientationsEast):
                         createEast.append(cameraPosToggles[orientation])
                     else:
-                        createWest.append(cameraPosToggles[orientation])
+                        createWest.append(cameraPosToggles[orientation])                       
+            # Checks if the animation/action in blender file exists.
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    if(bpy.data.actions.get(animationFolderNames[sequenceKey]) is None):
+                        self.report({'ERROR'}, f"ERROR: Couldn't find frames for '{animationFolderNames[sequenceKey]}'. Maybe the name for the animation/action in step 4 is incorrect?")
+                        return {'CANCELLED'}
             # TODO: Delete prints    
             print(f"sequences:{sequences}")
             print(f"animationOrder:{animationOrder}")
@@ -3922,7 +3943,13 @@ class IEAS_OT_IniFiles(Operator):
         # -------------------------
         if (selectedType == '7000 monster split bams 0'):
             sequences       = IEAS_Data.retrieveSequencesType7000_monster_sp0()
-            orientations    = orientations9D
+            orientations    = orientations9D           
+            # Checks if the animation/action in blender file exists.
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    if(bpy.data.actions.get(animationFolderNames[sequenceKey]) is None):
+                        self.report({'ERROR'}, f"ERROR: Couldn't find frames for '{animationFolderNames[sequenceKey]}'. Maybe the name for the animation/action in step 4 is incorrect?")
+                        return {'CANCELLED'}
             
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
@@ -4006,7 +4033,13 @@ class IEAS_OT_IniFiles(Operator):
             weaponPositionTracker['G2'] = 0
             weaponFilenames             = {}
             weaponFilenames['G1']       = []
-            weaponFilenames['G2']       = []
+            weaponFilenames['G2']       = []           
+            # Checks if the animation/action in blender file exists.
+            for sequenceKey, sequence in sequences.items():
+                if(animationToggles[sequenceKey] == True):
+                    if(bpy.data.actions.get(animationFolderNames[sequenceKey]) is None):
+                        self.report({'ERROR'}, f"ERROR: Couldn't find frames for '{animationFolderNames[sequenceKey]}'. Maybe the name for the animation/action in step 4 is incorrect?")
+                        return {'CANCELLED'}
             
             # ----- [FRAMES]
             for sequenceKey, sequence in sequences.items():
