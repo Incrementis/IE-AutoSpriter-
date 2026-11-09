@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 34),
+    "version": (0, 38, 36),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -438,10 +438,14 @@ class IEAS_AnimationTypes():
         # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
             # Checks the collection name in the scene collection  
-            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+            if ( not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName) ):
                 # This is needed for the self.report error message in exception handling
                 raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
-            
+            # Check if the collection for the lower part of the creature exists.
+            if( not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionNameLP) ) and (not typeParameters.CreatureCollectionNameLP == ''):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionNameLP}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+                
             # Deactivates every collection found.                   
             for collection in bpy.context.view_layer.layer_collection.children:
                 collection.exclude = True            
@@ -1112,9 +1116,14 @@ class IEAS_AnimationTypes():
          # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
             # Checks the collection name in the scene collection  
-            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+            if ( not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName) ):
                 # This is needed for the self.report error message in exception handling
-                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")   
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found in step 4! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")   
+            # Check if the collection for the lower part of the creature exists.
+            if( not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionNameLP) ):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionNameLP}' not found in step 4! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+                
             # Deactivates only lower creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = True
             # Activates only main creature collection.
@@ -1191,11 +1200,15 @@ class IEAS_AnimationTypes():
         """Handles the logic for rendering and processing type 3000(mirror = 1)."""    
         # ----- Controls the 'exclude' and 'hide_render' visibility of collections -----
         if (typeParameters.exclude == True):
-            # Checks the collection name in the scene collection  
-            if not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName):
+             # Checks the collection name in the scene collection  
+            if ( not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionName) ):
                 # This is needed for the self.report error message in exception handling
-                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
-            
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionName}' not found in step 4! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")   
+            # Check if the collection for the lower part of the creature exists.
+            if( not bpy.context.view_layer.layer_collection.children.get(typeParameters.CreatureCollectionNameLP) ):
+                # This is needed for the self.report error message in exception handling
+                raise ValueError(f"Collection '{typeParameters.CreatureCollectionNameLP}' not found in step 4! Check if the name is spelled correctly, exists in the file, or is placed in the correct hierarchy.")
+                
             # Deactivates only lower creature collection.
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = True
             # Activates only main creature collection.
@@ -4553,7 +4566,7 @@ class IEAS_OT_Final(Operator):
             return {'CANCELLED'}
         # Checks if 'Object List' is selected with an object(armature/rig).
         if (prefixResref == ''):
-            self.report({'WARNING'}, f"WARNING: Prefix AND Resref are empty in step 1!")
+            self.report({'WARNING'}, f"WARNING: Prefix AND Resref are empty in step 1!")        
         
         # Selects the specific object by setting its selection state to True.
         bpy.context.scene.objects[objectName].select_set(True)
