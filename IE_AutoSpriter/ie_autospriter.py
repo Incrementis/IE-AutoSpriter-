@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 30),
+    "version": (0, 38, 34),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -308,14 +308,14 @@ class IEAS_Data:
         return sequencesType2000
         
     @staticmethod
-    def retrieveSequencesType3000_mirror0():
+    def retrieveSequencesType3000():
         """Dictionary wrapper animation type 3000 mirror 0 - returns the sequence with respect to the animation(e.g. SD for idle)."""
-        sequencesType3000_mirror0 =  {
+        sequencesType3000 =  {
             'WK':'G1','DE':'G1', 'TW':'G1', 'SC':'G1',
             'SD':'G2', 'EMERGE':'G2', 'HIDE':'G2',
             'A1':'G3', 'A3':'G3',
         }
-        return sequencesType3000_mirror0
+        return sequencesType3000
         
     @staticmethod
     def retrieveSequencesType7000_monster_old():
@@ -1126,7 +1126,7 @@ class IEAS_AnimationTypes():
             # TODO:Delete!
             print("type3000M0: Executing complex logic for 3000M0 type.") 
              # Used to identify which sprite file is defined for which sequence.
-            sequences           = IEAS_Data.retrieveSequencesType3000_mirror0()
+            sequences           = IEAS_Data.retrieveSequencesType3000()
             animationSequence   = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Makes the main/upper creature collection visible for rendering.
@@ -1208,11 +1208,7 @@ class IEAS_AnimationTypes():
             print("type3000M1: Executing complex logic for 3000M1 type.")
             
             # Used to identify which sprite file is defined for which sequence.
-            sequences = {
-                'DE':'G1', 'TW':'G1',       'SD':'G1',
-                'SC':'G2', 'EMERGE':'G2',   'HIDE':'G2',
-                'A1':'G3', 'CA':'G3',
-            }
+            sequences = IEAS_Data.retrieveSequencesType3000()
             animationSequence = sequences[typeParameters.animationKey] # Gets e.g. G1.
             
             # Makes the main/upper creature collection visible for rendering.
@@ -1249,7 +1245,7 @@ class IEAS_AnimationTypes():
             bpy.context.view_layer.layer_collection.children[typeParameters.CreatureCollectionNameLP].exclude = False
             
             # Constructs the full filename for the current sprite (for the lower part), using the 'D' prefix.
-            fileName = f"{typeParameters.prefixResref}D{typeParameters.animationKey}{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
+            fileName = f"{typeParameters.prefixResref}{typeParameters.animationKey}D{animationSequence}_{typeParameters.positionKey}_{str(typeParameters.frame).zfill(5)}.png"
             
             # Sets Blender's render output filepath for the current lower-part image.
             bpy.context.scene.render.filepath = os.path.join(lowerpart_position_folder, fileName)
@@ -3074,7 +3070,7 @@ class IEAS_OT_IniFiles(Operator):
                             if(pathKey=="Westside"):
                                 if( (orientation in orientationsEast) and (lower==False)):
                                     cycles[sequence][sequenceKey][orientation].append('')
-                                else:                                    
+                                else:
                                     if(lower==False):
                                         cycles[sequence][sequenceKey][orientation].append(str(positionWest))
                                         pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}_{orientation}_{str(frame).zfill(5)}.png"
@@ -3088,7 +3084,7 @@ class IEAS_OT_IniFiles(Operator):
                                         positionWest += 1
                                         
                             if(pathKey=="Eastside"):
-                                if(orientation in orientationsEast):                                    
+                                if(orientation in orientationsEast):
                                     if(lower==False):
                                         cycles[sequence][sequenceKey][orientation].append(str(positionEast))
                                         pngFile         = f"{filenamePrefix}{sequenceKey}{sequence}E_{orientation}_{str(frame).zfill(5)}.png"
@@ -3105,7 +3101,7 @@ class IEAS_OT_IniFiles(Operator):
                         
         position = {'Westside': positionWest, 'Eastside': positionEast}
         return (position, cycles)
-    
+        
     @classmethod
     def writeCyclesType3000(cls, allFilenames, cycles, orientations, orientationsEast, animationOrder):                  
         """Writes the cycles section of the INI file with fixed animation order."""
@@ -3124,8 +3120,7 @@ class IEAS_OT_IniFiles(Operator):
                             # Asks predefined conditions to prevent to many cascading if statements. 
                             IsWestside = ((fullPathKey == 'Westside') and (orientation not in orientationsEast) and cycles[sequence].get(animationType))
                             IsEastside = ((fullPathKey == 'Eastside') and (orientation in orientationsEast)     and cycles[sequence].get(animationType))
-                            # TODO: Delete Print
-                            print("cycles[sequence][animationType][orientation]:",cycles[sequence][animationType][orientation])
+                            
                             if(IsWestside):
                                 if ((orientation in cycles[sequence][animationType]) and (cycles[sequence][animationType][orientation])):
                                     frames = ",".join(framePosition for framePosition in cycles[sequence][animationType][orientation] if framePosition!="")
@@ -3682,23 +3677,29 @@ class IEAS_OT_IniFiles(Operator):
             restructeredFilenames       = {seq: [path for paths in sides.values() for path in paths] for seq, sides in allFilenames.items()}
             removedDublicatedFilenames  = {key: list(set(val)) for key, val in restructeredFilenames.items()}
             self.writeFilters(restructeredFilenames, NIfilters)
-        # -------------
-        # 3000 mirror 0
-        # -------------
-        if (selectedType == '3000 mirror 0'):             
-            orientations        = orientations8D
-            orientationsEast    = ['north_east', 'east', 'south_east']
+        # ----------------------------
+        # 3000 mirror 0, 3000 mirror 1
+        # ----------------------------
+        if (selectedType == '3000 mirror 0' or selectedType == '3000 mirror 1'):
+            if(selectedType == '3000 mirror 0'):
+                orientations        = orientations8D
+                orientationsEast    = ['north_east', 'east', 'south_east']
+            if(selectedType == '3000 mirror 1'):
+                orientations        = orientations9D
+                orientationsEast    = ['']
+                
             createWest          = []
             createEast          = []
             fullPathWest        = None
             fullPathEast        = None
+            fullPathWestLower   = None
+            fullPathEastLower   = None
             allFilenamesLower   = {}
             
-            if(selectedType == '3000 mirror 0'):
-                sequences       = IEAS_Data.retrieveSequencesType3000_mirror0()
-                animationOrder  = { 'G1':["WK","DE","TW","SC"],
-                                    'G2':["SD","EMERGE","HIDE"],
-                                    'G3':["A3","A1"]}
+            sequences       = IEAS_Data.retrieveSequencesType3000()
+            animationOrder  = { 'G1':["WK","DE","TW","SC"],
+                                'G2':["SD","EMERGE","HIDE"],
+                                'G3':["A3","A1"]}
             # Checks if one of the orientations has only false values.
             for orientation in orientations:
                 if(cameraPosToggles[orientation]):
@@ -3729,7 +3730,7 @@ class IEAS_OT_IniFiles(Operator):
                         if(createWest):
                             fullPathWest        = os.path.join(pathSaveAt, filenameSequenceMain + ".INI")
                             fullPathWestLower   = os.path.join(pathSaveAt, filenameSequenceLower + ".INI")
-                        if(createEast):
+                        if(createEast and selectedType == '3000 mirror 0'):
                             fullPathEast        = os.path.join(pathSaveAt, filenameSequenceMain + "E" + ".INI")
                             fullPathEastLower   = os.path.join(pathSaveAt, filenameSequenceLower + "E" + ".INI")
                         
@@ -3743,17 +3744,18 @@ class IEAS_OT_IniFiles(Operator):
                     else:
                         position                        = positionTracker[sequence]
                         mode                            = 'a'
-                        
+                    
                     # Main creature INI files.
-                    positionTracker[sequence], cycles  = self.writeFramesType3000( mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
-                                                                                   globalContent, cameraPosToggles, cameraPosFolderNames, 
-                                                                                   orientations, orientationsEast, cycles, sequence, sequenceKey, 
-                                                                                   animation,lowerPartFolder, filenamePrefix, currentPosition = position)
-                   # Lower part INI files.
+                    positionTracker[sequence], cycles  = self.writeFramesType3000(  mode, allFrames, fullPathWest,fullPathEast, pathSaveAt, 
+                                                                                    globalContent, cameraPosToggles, cameraPosFolderNames, 
+                                                                                    orientations, orientationsEast, cycles, sequence, sequenceKey, 
+                                                                                    animation,lowerPartFolder, filenamePrefix, currentPosition = position)
+                    # Lower part INI files.
                     self.writeFramesType3000(   mode, allFrames, fullPathWestLower,fullPathEastLower, pathSaveAt, 
                                                 globalContent, cameraPosToggles, cameraPosFolderNames, 
                                                 orientations, orientationsEast, cycles, sequence, sequenceKey, 
                                                 animation, lowerPartFolder, filenamePrefix, currentPosition = position, lower=True)
+                    
             # ----- [CYCLES]
             # TODOD: Delete print
             print("allFilenames:",allFilenames)
