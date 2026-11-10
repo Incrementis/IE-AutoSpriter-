@@ -38,7 +38,7 @@ import numpy as np
 bl_info = {
     "name": "IE AutoSpriter",
     "author": "Incrementis",
-    "version": (0, 38, 37),
+    "version": (0, 38, 38),
     "blender": (4, 5, 5),
     "location": "Render > IE AutoSpriter",
     "category": "Render",
@@ -2387,6 +2387,28 @@ class IEAS_OT_Rotation(Operator):
             return {'CANCELLED'}
         # Gets the Object List value from step 1 and rotates on the z-axis in degrees.
         context.scene.IEAS_properties.Object_List.rotation_euler.z += rotationDegree*math.pi/180
+
+        return {'FINISHED'}
+               
+# --------
+# Purpose:
+# --------
+# Operator to reset an object rotation to 0°.
+# -------------------------------------------
+class IEAS_OT_ResetRotation(Operator):
+    """This resets an object to 0°(z-axis). See manual for more detailed information."""
+    bl_idname = "ieas.reset_rotation" # Unique identifier for the operator. Naming convention(??): <lower_case>.<lower_case>[_<lower_case>]
+    bl_label = "RESET"
+    
+    # Blender specific function which is executed in this case when a specific rotation radio button is pressed.
+    def execute(self, context):
+        rotationDegree = 0
+        # Checks if 'Object List' is selected with an object(armature/rig)
+        if (context.scene.IEAS_properties.Object_List is None):
+            self.report({'ERROR'}, f"ERROR: Value in 'Object List' in step 1 is '{context.scene.IEAS_properties.Object_List}'! Perhaps no object is selected?")
+            return {'CANCELLED'}
+        # Gets the Object List value from step 1 and rotates on the z-axis in degrees.
+        context.scene.IEAS_properties.Object_List.rotation_euler.z = rotationDegree
 
         return {'FINISHED'}
 
@@ -5052,7 +5074,6 @@ class IEAS_PT_Camera(Panel):
             'D000':                                 False,
             'E000':                                 False,
             'F000':                                 False,
-            'unique identifier':                    False,# TODO: Delete unique identifier!
         }
         Toggles1 = {'South': context.scene.IEAS_properties.Use_SO}
         Toggles8 = {
@@ -5097,11 +5118,12 @@ class IEAS_PT_Camera(Panel):
         # Set active type to true
         animationTypesActive[activeType] = True
         
-        # --- Creates buttons for rotation 
+        # --- Creates buttons for rotation.
         row = self.layout.row(align=True)
         row.prop(context.scene.IEAS_properties, 'Angles', expand=True)
         row.prop(context.scene.IEAS_properties, 'Direction', expand=True)
         row = self.layout.row(align=True)
+        row.operator("ieas.reset_rotation") # selfdefined button functionality
         row.operator("ieas.rotation") # selfdefined button functionality
         
         # --- Creates rows for each direction, displaying the subfolder name input and a toggle.
@@ -5999,6 +6021,7 @@ class IEAS_PT_Final(Panel):
 def register():
     bpy.utils.register_class(IEAS_OT_Manual)
     bpy.utils.register_class(IEAS_OT_Iesdp)
+    bpy.utils.register_class(IEAS_OT_ResetRotation)
     bpy.utils.register_class(IEAS_OT_Rotation)
     bpy.utils.register_class(IEAS_OT_ShadingNodes)
     bpy.utils.register_class(IEAS_OT_IniFiles)
@@ -6029,6 +6052,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(IEAS_OT_Manual)
     bpy.utils.unregister_class(IEAS_OT_Iesdp)
+    bpy.utils.unregister_class(IEAS_OT_ResetRotation)
     bpy.utils.unregister_class(IEAS_OT_Rotation)
     bpy.utils.unregister_class(IEAS_OT_ShadingNodes)
     bpy.utils.unregister_class(IEAS_OT_IniFiles)
