@@ -57,7 +57,7 @@ The functions are explained in detail in the manual.
 * English
 
 ## Special Thanks
-Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server users, SHS discord server users and Infinity Engine discord server users who helped me with hints and information:
+Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server users, SHS discord server users, Infinity Engine discord server users and Mystara discord server users who helped me with hints and information:
 * The Artisan
 * CamDawg
 * Argent77
@@ -67,27 +67,38 @@ Thanks to "The Gibberlings 3" forum users, "Artisan's Corner" discord server use
 * lynx
 * skellytz
 * FallDamage312
+* Serpens
+* Sam.
 
 ## Sources and Learning Materials
-* [INI file format: Creature Animations](https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm)
-* [Avatar Naming Schemes](https://gibberlings3.github.io/iesdp/appendices/avatarnaming.htm)
-* [IE-Animations](https://github.com/ArtemiusI/IE-Animations) by Artemiusl
-* [education/175-Blender-Properties](https://github.com/pagekey/education/tree/main/175-Blender-Properties) by PageKey
-* [Your Own Operator | Scripting for Artists [8]](https://www.youtube.com/watch?v=xscQ9tcN4GI&list=LL) by Blender
-* [Render 8 Direction Animated Sprites in Blender with Python](https://www.youtube.com/watch?v=l1Io7fLYV4o) by FozleCC
-* [Blender documentations](https://docs.blender.org) by Blender
-* [Blender Rendering Optimization Tips](https://whoisryosuke.com/blog/2024/blender-rendering-optimization-tips) by Ryo
-* [Expressions in Blender 3D](https://www.youtube.com/watch?v=5IMFSC5h0a4) by ukramedia
-* [Creating radio buttons in the Blender add-ons interface](https://b3d.interplanety.org/en/creating-radio-buttons-in-the-blender-add-ons-interface/) by Nikita
-* [Add a Predefined Meta-Rig](https://docs.blender.org/manual/en/2.81/addons/rigging/rigify.html?highlight=horse) by blender
-* [Make Animals In Blender 3 - The Easy Way](https://www.youtube.com/watch?v=tEZOXuDhTJ0) by Grant Abbitt (Gabbitt)
-* [Make a Detailed Sword in Blender :Topology Tips & Hard Surface Techniques](https://www.youtube.com/watch?v=f320TtEpGYQ) by Grant Abbitt(Gabbitt)
-* [Create Low Poly Characters in Blender (Beginner Tutorial)](https://www.youtube.com/watch?v=BL6fyBeldHA&t=4341s) by Ryan King Art
-* [How to Grow Tendrils Over Any Object (Blender Tutorial)](https://www.youtube.com/watch?v=ufRygCrYsx4) by Pixel Me That
-* [A Different approach to making FIRE in Blender!](https://www.youtube.com/watch?v=cUfc4iWG9qI) by Kenan Proffitt
-* [Blender 4.0 RIGIFY ＃6-1: Custom Rigs (theory)](https://youtu.be/Cq2Vw6EFXy0?list=PLdcL5aF8ZcJuG3kKcVgQQz36E3JXzijEH) by CGDive (Blender Rigging Tuts)
-* [Color difference](https://en.wikipedia.org/wiki/Color_difference#CIEDE2000) by Wikipedia
-* [How to Make Animated PIXEL ART Characters Sprites with Blender 2.9 | Quick and Easy TUTORIAL](https://www.youtube.com/watch?v=eSqb6II3WMM) by Soyaa
-* [Blender Skull - Part 1,2,3 - Main Head Shape, Top Teeth, Jaw | Basic Modeling Course (No Sculpt!)](https://www.youtube.com/watch?v=Yjvq7QTJtPs&list=PLH3QvbpQe8WRjEbi5CbqTwcauq_HBRI0T&index=1) by Blender Frenzy
-* [Blender 2.9 | How to make a Halloween Ghost Cloth Simulation + Easy Procedural Textures | TUTORIAL](https://www.youtube.com/watch?v=VsK_8JeWRyw) by Aria Faith Jones
-* [Damped Track Constraint | Blender Rigging Tutorial](https://www.youtube.com/watch?v=7glB4GTVTnM)
+| Title | Author | Link |
+| :--- | :--- | :--- |
+| NearInfinity | Argent77 | https://github.com/Argent77/NearInfinity |
+| INI file format: Creature Animations | --- | https://gibberlings3.github.io/iesdp/file_formats/ie_formats/ini_anim.htm |
+| Avatar Naming Schemes | --- | https://gibberlings3.github.io/iesdp/appendices/avatarnaming.htm |
+| IE-Animations | Artemiusl | https://github.com/ArtemiusI/IE-Animations |
+| education/175-Blender-Properties | PageKey | https://github.com/pagekey/education/tree/main/175-Blender-Properties |
+| Your Own Operator \| Scripting for Artists [8] | Blender | https://www.youtube.com/watch?v=xscQ9tcN4GI&list=LL |
+| Render 8 Direction Animated Sprites in Blender with Python | FozleCC | https://www.youtube.com/watch?v=l1Io7fLYV4o |
+| Blender documentations | Blender | https://docs.blender.org |
+| Blender Rendering Optimization Tips | Ryo | https://whoisryosuke.com/blog/2024/blender-rendering-optimization-tips |
+| Expressions in Blender 3D | ukramedia | https://www.youtube.com/watch?v=5IMFSC5h0a4 |
+| Creating radio buttons in the Blender add-ons interface | Nikita | https://b3d.interplanety.org/en/creating-radio-buttons-in-the-blender-add-ons-interface/ |
+| Add a Predefined Meta-Rig | blender | https://docs.blender.org/manual/en/2.81/addons/rigging/rigify.html?highlight=horse |
+| Make Animals In Blender 3 - The Easy Way | Grant Abbitt (Gabbitt) | https://www.youtube.com/watch?v=tEZOXuDhTJ0 |
+| Make a Detailed Sword in Blender :Topology Tips & Hard Surface Techniques | Grant Abbitt(Gabbitt) | https://www.youtube.com/watch?v=f320TtEpGYQ |
+| Create Low Poly Characters in Blender (Beginner Tutorial) | Ryan King Art | https://www.youtube.com/watch?v=BL6fyBeldHA |
+| How to Grow Tendrils Over Any Object (Blender Tutorial) | Pixel Me That | https://www.youtube.com/watch?v=ufRygCrYsx4 |
+| A Different approach to making FIRE in Blender! | Kenan Proffitt | https://www.youtube.com/watch?v=cUfc4iWG9qI |
+| Blender 4.0 RIGIFY ＃6-1: Custom Rigs (theory) | CGDive (Blender Rigging Tuts) | https://youtu.be/Cq2Vw6EFXy0?list=PLdcL5aF8ZcJuG3kKcVgQQz36E3JXzijEH |
+| Color difference | Wikipedia | https://en.wikipedia.org/wiki/Color_difference#CIEDE2000 |
+| How to Make Animated PIXEL ART Characters Sprites with Blender 2.9 \| Quick and Easy TUTORIAL | Soyaa | https://www.youtube.com/watch?v=eSqb6II3WMM |
+| Blender Skull - Part 1,2,3 - Main Head Shape, Top Teeth, Jaw \| Basic Modeling Course (No Sculpt!) | Blender Frenzy | https://www.youtube.com/watch?v=Yjvq7QTJtPs&list=PLH3QvbpQe8WRjEbi5CbqTwcauq_HBRI0T&index=1 |
+| Blender 2.9 \| How to make a Halloween Ghost Cloth Simulation + Easy Procedural Textures \| TUTORIAL | Aria Faith Jones | https://www.youtube.com/watch?v=VsK_8JeWRyw |
+| Damped Track Constraint \| Blender Rigging Tutorial | --- | https://www.youtube.com/watch?v=7glB4GTVTnM |
+| Make The Dune Sandworm \| Blender Tutorial - Part 1 | PIXXO 3D | https://www.youtube.com/watch?v=0UC7XGMPC6g |
+| Make The Dune Sandworm \| Blender Tutorial - Part 2 | PIXXO 3D | https://www.youtube.com/watch?v=ZRPWcBfPYGs |
+| Make The Dune Sandworm \| Blender Tutorial - Part 3 | PIXXO 3D | https://www.youtube.com/watch?v=BxsLvWfamS8 |
+| Mongolian death worm | Wikipedia | https://en.wikipedia.org/wiki/Mongolian_death_worm |
+| How to Make a Three Point Lighting Setup in Blender  | Ryan King Art | https://www.youtube.com/watch?v=sN8hS2vLG4o |
+| Blender 3D: Noob to Pro/Modeling a volcano  | WIKIBOOKS | https://en.wikibooks.org/wiki/Blender_3D:_Noob_to_Pro/Modeling_a_volcano |
